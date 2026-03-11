@@ -1,0 +1,15 @@
+---
+title: "PMML Project: GLM vs GRU for Traffic Anomaly Detection"
+slug: "pmml-glm-vs-gru-anomaly-notes"
+date: "2025-12-05"
+excerpt: "My lessons from comparing Poisson GLM and GRU models, plus why KL-style divergence needs careful calibration in noisy traffic streams."
+tags: ["MLOps", "Research Notes", "Optimization"]
+status: "published"
+---
+In the PMML project, I compared a probabilistic GLM-style baseline with a GRU sequence model for traffic anomaly detection. What I liked about this setup is that it exposed a familiar tradeoff: interpretability and stability versus expressive temporal modeling.
+
+The GLM side gave me a cleaner picture of what the model believed normal traffic should look like. That made it easier to reason about spikes, count behavior, and feature influence. The GRU was better at absorbing temporal context, but it also made debugging harder because a strange anomaly score could come from a much deeper interaction of sequence dynamics.
+
+One of the most important caveats was anomaly scoring itself. Divergence-style scores can look mathematically appealing while still being operationally noisy. In traffic streams, daily rhythms, local disruptions, and sensor irregularities can all create distribution shifts that are not equally meaningful. If I did not calibrate the thresholding carefully, the system could produce many alerts that were technically explainable but not useful.
+
+This project reinforced a habit I want to keep: a stronger model is not automatically a better monitoring system. If an anomaly detector cannot be interpreted, calibrated, and trusted in context, it becomes hard to deploy responsibly. The useful evaluation question is not only "which model wins?" but also "which model produces signals someone could act on without constant manual cleanup?"

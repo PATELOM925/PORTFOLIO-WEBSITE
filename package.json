@@ -1,0 +1,43 @@
+{
+  "name": "om-portfolio-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "generate:content": "node scripts/generate-content.mjs",
+    "predev": "npm run generate:content",
+    "prebuild": "npm run generate:content",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy"
+  },
+  "dependencies": {
+    "@next/env": "^16.1.6",
+    "gray-matter": "^4.0.3",
+    "marked": "^17.0.3",
+    "next": "^15.0.0",
+    "next-mdx-remote": "^5.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remark-gfm": "^4.0.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@opennextjs/aws": "^3.9.16",
+    "@opennextjs/cloudflare": "^1.17.1",
+    "@types/estree": "^1.0.8",
+    "@types/json-schema": "^7.0.15",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.0.0",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.0.0"
+  }
+}

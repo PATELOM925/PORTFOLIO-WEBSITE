@@ -1,0 +1,15 @@
+---
+title: "ChatPDF RAG Notes: Retrieval Quality Beats Model Size"
+slug: "rag-evaluation-checklist"
+date: "2025-10-10"
+excerpt: "How I tuned my ChatPDF pipeline by focusing on retrieval diagnostics, grounding checks, and failure slices before model tweaks."
+tags: ["RAG", "NLP", "MLOps", "Research Notes"]
+status: "published"
+---
+One of the easiest mistakes in RAG systems is over-focusing on the generator. In my ChatPDF work, the faster gains came from retrieval quality, chunking discipline, and grounding checks rather than from changing the language model.
+
+When answers were weak, the first thing I needed to know was whether the right evidence had even been retrieved. If the top chunks were wrong or incomplete, no downstream prompt was going to fix that consistently. That pushed me to inspect retrieval recall, chunk boundaries, and failure slices before doing any model-level tuning.
+
+I also learned that answer quality should be judged against support, not style. A polished answer that cites the wrong context is worse than a simpler answer that stays faithful to the document. That is especially important for PDF QA, where users often trust confident wording too easily.
+
+My working rule now is straightforward: retrieval is the product backbone of a RAG system. If chunking, indexing, and evidence selection are weak, the rest of the stack becomes an expensive way to hide the real problem.

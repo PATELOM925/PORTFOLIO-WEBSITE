@@ -1,0 +1,21 @@
+---
+title: "GreenArm: Vision Guided Robotic Waste Sorting"
+slug: "greenarm-vision-guided-waste-sorting"
+date: "2025-12-01"
+preview: "ROS2 perception-to-manipulation pipeline using YOLOv8, OpenCV transforms, and ArUco calibration for precise robotic sorting."
+tags: ["Robotics", "Computer Vision", "ROS2", "YOLOv8", "OpenCV"]
+status: "published"
+featured: true
+isPrivateSource: true
+problem: "Build an end-to-end robotic workflow that can classify and pick waste objects reliably in a fixed workspace."
+approach: "I helped build a ROS2 architecture connecting detection, calibration, coordinate mapping, and arm control."
+result: "The system achieved repeatable placement precision once calibration and transform caching were handled carefully."
+---
+## Summary
+GreenArm was an integration-heavy robotics project rather than a single-model exercise.
+
+## What mattered
+- Stable calibration with ArUco markers.
+- Reliable pixel-to-robot coordinate conversion.
+- Better handling of detection-to-actuation latency.
+- Clear separation between perception logic and arm control.

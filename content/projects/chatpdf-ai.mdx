@@ -1,0 +1,21 @@
+---
+title: "ChatPDF AI"
+slug: "chatpdf-ai"
+date: "2024-09-20"
+preview: "Retrieval-grounded document QA system using LangChain and FAISS with agentic query workflows."
+tags: ["RAG", "LangChain", "FAISS", "Agents", "LLM"]
+status: "published"
+github: "https://github.com/PATELOM925/ChatPDF-AI"
+demoUrl: "https://om-m-patel.streamlit.app/"
+featured: true
+problem: "Users need grounded answers over long PDFs without the model inventing unsupported claims."
+approach: "I built a retrieval-first pipeline with chunking, vector indexing, and controlled context assembly before answer generation."
+result: "The system was most useful when retrieval quality was treated as the main product surface instead of an invisible backend detail."
+---
+## Core build
+This project combines document chunking, embedding-based retrieval, and answer generation into a practical PDF assistant.
+
+## What I learned
+- Chunking strategy affects answer quality more than people expect.
+- Retrieval diagnostics are essential; the model cannot recover from weak context.
+- Grounding checks are necessary if the app is meant to feel trustworthy.

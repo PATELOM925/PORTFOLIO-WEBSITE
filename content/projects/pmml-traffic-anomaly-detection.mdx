@@ -1,0 +1,23 @@
+---
+title: "PMML Project: Traffic Anomaly Detection in Toronto"
+slug: "pmml-traffic-anomaly-detection"
+date: "2025-12-05"
+preview: "Anomaly detection on urban traffic streams comparing probabilistic GLM and sequence-model (GRU) approaches."
+tags: ["Anomaly Detection", "PMML", "GLM", "GRU", "Time Series"]
+status: "published"
+github: "https://github.com/PATELOM925/PMML_Project"
+featured: true
+problem: "Traffic streams contain strong temporal patterns, noise, and event-driven spikes that make anomaly detection easy to overfit."
+approach: "I compared a probabilistic GLM baseline against a GRU sequence model, then analyzed how calibration and divergence-based scoring behaved under real traffic variation."
+result: "The work clarified when simpler probabilistic models remain competitive and where sequence models help once temporal context matters."
+---
+## Focus
+This project was less about chasing one model score and more about understanding what different anomaly detectors assume.
+
+## What I compared
+- Poisson/GLM-style probabilistic modeling for interpretable traffic count behavior.
+- GRU-based sequence modeling for temporal dependency capture.
+- Divergence-oriented anomaly scoring to inspect shifts in learned behavior.
+
+## Main lesson
+If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals. Evaluation had to stay tied to practical alert usefulness, not just loss curves.
