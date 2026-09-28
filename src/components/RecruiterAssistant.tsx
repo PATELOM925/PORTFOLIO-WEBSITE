@@ -3,13 +3,17 @@
 import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 
 const ROLE_OPTIONS = [
-  "AI/ML Engineer Intern",
-  "Data Scientist Intern",
-  "Data Engineer Intern",
-  "Data Analyst",
+  "Applied AI Engineer",
+  "AI/ML Engineer",
+  "Machine Learning Engineer",
   "NLP Engineer",
-  "MLOps Engineer"
+  "Data Engineer",
+  "Data Scientist",
+  "MLOps Engineer",
+  "AI Product Engineer"
 ] as const;
+
+const CUSTOM_ROLE = "__custom__";
 
 interface RecruiterResponse {
   verdict: string;
@@ -31,6 +35,7 @@ const EMPTY_RESPONSE: RecruiterResponse = {
 
 export function RecruiterAssistant() {
   const [role, setRole] = useState<string>(ROLE_OPTIONS[0]);
+  const [customRole, setCustomRole] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [question, setQuestion] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -38,6 +43,7 @@ export function RecruiterAssistant() {
   const [response, setResponse] = useState<RecruiterResponse | null>(null);
 
   const remaining = useMemo(() => 12000 - jobDescription.length, [jobDescription.length]);
+  const targetRole = role === CUSTOM_ROLE ? customRole.trim() : role;
 
   async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -56,7 +62,7 @@ export function RecruiterAssistant() {
       const res = await fetch("/api/recruiter-fit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, jobDescription, question })
+        body: JSON.stringify({ role: targetRole, jobDescription, question })
       });
 
       const data = await res.json();
@@ -74,6 +80,7 @@ export function RecruiterAssistant() {
 
   function onReset() {
     setRole(ROLE_OPTIONS[0]);
+    setCustomRole("");
     setJobDescription("");
     setQuestion("");
     setStatus("idle");
@@ -83,7 +90,7 @@ export function RecruiterAssistant() {
 
   return (
     <article className="assistant-card">
-      <p className="assistant-intro">Please share the role or job description to review how Om aligns with your requirements.</p>
+      <p className="assistant-intro">Om is available for full-time roles. Pick a role, or add your own, and paste the job description to see how Om aligns.</p>
 
       <form className="assistant-form" onSubmit={onSubmit}>
         <label>
@@ -94,8 +101,24 @@ export function RecruiterAssistant() {
                 {option}
               </option>
             ))}
+            <option value={CUSTOM_ROLE}>Custom role…</option>
           </select>
         </label>
+
+        {role === CUSTOM_ROLE ? (
+          <label>
+            Custom role title
+            <input
+              type="text"
+              value={customRole}
+              maxLength={80}
+              required
+              autoFocus
+              placeholder="Example: Forward Deployed Engineer, AI Solutions Engineer"
+              onChange={(event) => setCustomRole(event.target.value)}
+            />
+          </label>
+        ) : null}
 
         <label>
           Job description
@@ -114,7 +137,7 @@ export function RecruiterAssistant() {
           <textarea
             rows={3}
             value={question}
-            placeholder="Example: Is Om a fit for this internship, and what should I probe in interview?"
+            placeholder="Example: Is Om a fit for this role, and what should I probe in the interview?"
             onChange={(event) => setQuestion(event.target.value)}
           />
         </label>
@@ -126,8 +149,8 @@ export function RecruiterAssistant() {
         <p className="assistant-note">For PDF/DOC JDs, paste text directly. File upload currently supports text-based formats.</p>
 
         <div className="assistant-actions">
-          <button type="submit" disabled={status === "loading" || !jobDescription.trim()}>
-            {status === "loading" ? "Generating..." : "Generate Fit Brief"}
+          <button type="submit" disabled={status === "loading" || !jobDescription.trim() || !targetRole}>
+            {status === "loading" ? "Checking..." : "Check Role Fit"}
           </button>
           <button type="button" className="assistant-reset" onClick={onReset}>
             Reset

@@ -1,0 +1,38 @@
+---
+title: "TTC Interactive Dashboard"
+slug: "ttc-interactive-dashboard"
+date: "2026-04-30"
+preview: "End-to-end TTC reliability platform covering 1,004,682 delay events across bus, subway, GTFS, and live-alert data."
+tags: ["Data Engineering", "Streamlit", "DuckDB", "Parquet", "GTFS-RT"]
+status: "published"
+github: "https://github.com/PATELOM925/TTC-PULSE"
+featured: true
+problem: "TTC delay history, schedules, route metadata, and live alerts arrive in different formats, which makes reliable route and station analysis difficult."
+approach: "Our team built a reproducible DuckDB and Parquet pipeline, linked delay records to GTFS entities, and served the analytical marts through a multi-page Streamlit dashboard."
+result: "The platform turns 1,004,682 normalized delay events into route, station, time-pattern, cause, and live-alert views with explicit data-quality checks."
+category: "Data Engineering & Analytics"
+highlight: "1,004,682 delay events"
+pipeline: ["TTC delay data + GTFS + live alerts", "Normalize & join", "DuckDB / Parquet marts", "Route & station quality checks", "Streamlit views + ADK assistant"]
+---
+## Highlights
+- Co-developed a Python ingestion and normalization pipeline joining TTC delay data with static GTFS and live service alerts.
+- Processed over 1 million delay events into DuckDB and Parquet data marts, with checks for unmatched route and station mappings and reproducible Streamlit views.
+- Integrated Google ADK for in-app AI bot support to dive deeper into analysis for better UX.
+
+## Data workflow
+
+- Processed 1,004,682 bus and subway delay events into query-ready DuckDB and Parquet marts.
+- Linked historical records to static GTFS routes and stations, with QA for unmatched and ambiguous mappings.
+- Added GTFS-RT service-alert ingestion and validation alongside the historical data.
+- Structured the pipeline as raw, bronze, silver, and gold layers for repeatable rebuilds.
+
+## Dashboard focus
+
+- Ranked recurring route and station hotspots using frequency, severity, regularity, and cause mix.
+- Built views for monthly trends, weekday-hour patterns, cause signatures, and entity drill-downs.
+- Compared captured live alerts with historical reliability signals and surfaced coverage limits.
+- Kept metric definitions, lineage, and data-quality caveats visible in the interface.
+
+## Deployment status
+
+The source repository is public. No verified public Vercel deployment is currently available, so this portfolio links only to the confirmed repository.

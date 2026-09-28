@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Layout } from "@/components/Layout";
-import { MarkdownContent } from "@/components/MarkdownContent";
+import { RichContent } from "@/components/RichContent";
 import { TagBadge } from "@/components/TagBadge";
 import { formatDate } from "@/lib/date";
 import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/content";
@@ -41,7 +41,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           ))}
         </div>
         <article className="card markdown-shell">
-          <MarkdownContent content={post.content} />
+          <RichContent content={post.content} />
         </article>
         <Link href="/blog" className="text-link back-link">
           Back to blog

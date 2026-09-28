@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { ReactNode } from "react";
 import { FloatingAssistant } from "@/components/FloatingAssistant";
 import { PrimaryNav } from "@/components/PrimaryNav";
@@ -12,6 +14,10 @@ export function Layout({ children }: LayoutProps) {
     <div className="app-shell">
       <header className="site-header">
         <div className="container header-inner">
+          <Link href="/" className="brand" aria-label={`${siteConfig.name}, home`}>
+            <Image src={siteConfig.logoPath} alt="" width={34} height={34} />
+            <span>{siteConfig.name}</span>
+          </Link>
           <PrimaryNav items={navigation} />
         </div>
       </header>

@@ -8,6 +8,10 @@ status: "published"
 ---
 In the PMML project, I compared a probabilistic GLM-style baseline with a GRU sequence model for traffic anomaly detection. What I liked about this setup is that it exposed a familiar tradeoff: interpretability and stability versus expressive temporal modeling.
 
+```pipeline
+{"title": "Two scoring paths compared", "steps": ["Toronto traffic counts", "Poisson GLM baseline", "GRU sequence model", "Divergence-based anomaly score", "Calibration review"]}
+```
+
 The GLM side gave me a cleaner picture of what the model believed normal traffic should look like. That made it easier to reason about spikes, count behavior, and feature influence. The GRU was better at absorbing temporal context, but it also made debugging harder because a strange anomaly score could come from a much deeper interaction of sequence dynamics.
 
 One of the most important caveats was anomaly scoring itself. Divergence-style scores can look mathematically appealing while still being operationally noisy. In traffic streams, daily rhythms, local disruptions, and sensor irregularities can all create distribution shifts that are not equally meaningful. If I did not calibrate the thresholding carefully, the system could produce many alerts that were technically explainable but not useful.

@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<!--
+================================================================================
+DESIGN SPEC  |  Prototype 02  |  "Editorial Research Journal"
+================================================================================
+
+CONCEPT
+  The portfolio reads like an issue of a small research journal (Distill.pub,
+  Stripe Press, Tufte handouts). Om's work is presented as numbered figures,
+  research as explorable essays, experience as a CV entry list, and the blog as
+  a journal index. Marginal sidenotes carry the "footnote voice": caveats,
+  provenance and context that a careful researcher would add.
+
+TARGET IMPRESSION
+  "This person thinks carefully, writes clearly and checks their own claims."
+  Rigor over flash. Every number on the page is sourced from CONTENT_BRIEF.md;
+  illustrative material is explicitly labelled as illustrative.
+
+PALETTE
+  --paper      #FBF8F1  warm off-white page
+  --paper-2    #F4EEE1  inset panels, figure grounds
+  --card       #FFFDF8  diagram boxes, cards
+  --ink        #1F1B16  body text            (contrast on paper ~16:1)
+  --ink-2      #5C5448  secondary text       (~7:1)
+  --rule       #D9D0BF  hairlines, borders
+  --accent     #8C2F1B  oxblood: links, figure numbers, machine-conflict edges (~8:1)
+  --accent-2   #1F4E79  ink blue: precedence edges, secondary data (~8:1)
+  --highlight  #F3E7C9  marker highlight, active states
+  --ok         #3B6B3A  "matched" chips in fit brief
+
+TYPE SCALE (base 19px, ratio 1.25, system serif stack, no web fonts)
+  Serif  "Iowan Old Style", "Charter", "Bitstream Charter", "Sitka Text",
+         Cambria, Georgia, serif
+  Mono   ui-monospace, "SF Mono", Menlo, Consolas, monospace
+  --fs-0  0.8rem   sidenotes, captions, labels (all-small-caps for labels)
+  --fs-1  1rem     body (line-height 1.6, measure ~65ch)
+  --fs-2  1.25rem  h3, deck text
+  --fs-3  1.563rem h2 section titles
+  --fs-4  1.953rem abstract lead / large numerals
+  --fs-5  3.052rem masthead name (clamped on mobile)
+
+SECTION ORDER
+  0. Skip link, running head (journal masthead strip + contents)
+  1. Masthead hero: OP monogram, name, abstract, availability, links
+  2. Selected Work: Fig. 1-5 with problem / approach / result + "How it works"
+  3. Essay I: JSSP explorable (4-step stepper + disjunctive graph + chart)
+  4. Essay II: Gujarati sentiment error-analysis figure
+  5. Experience (CV style): 1Pour, Uarra x2
+  6. Education, publication, skills, awards
+  7. Journal (blog index) with Autograder article preview + video facade
+  8. Request a fit brief (recruiter form, mocked output)
+  9. Colophon
+
+INTERACTION CATALOGUE
+  a. Sidenotes: float in right margin >=1100px; below that they collapse to
+     numbered toggle buttons that expand the note inline (aria-expanded).
+  b. "How it works" <details> per figure revealing an inline SVG diagram.
+  c. JSSP stepper: 4 steps, prev/next + direct step buttons, arrow keys,
+     aria-live announcement; all steps visible when printing or without JS.
+  d. Disjunctive graph (JS-built SVG, 3 jobs x 3 machines): hover/focus a node
+     to isolate its edges; legend toggles highlight precedence vs
+     machine-conflict edges; per-machine buttons isolate each clique.
+  e. Scale chart: toggle Dataset (~130k -> 9,525) vs Runtime (70h -> 11.5h),
+     linear/log scale toggle, hover/focus readouts, animated bars (disabled
+     under prefers-reduced-motion).
+  f. Error-analysis figure: 4 aria-pressed toggles reveal illustrative
+     English-only example cards. No counts or percentages.
+  g. Click-to-load video facade: no third-party request until click, then
+     injects a youtube-nocookie iframe for the Autograder demo.
+  h. Fit brief form: role select (incl. "Custom role..." revealing a text
+     input), JD textarea, locally mocked brief labelled PROTOTYPE, built with
+     textContent only (no HTML injection).
+  i. Print: page prints as a 2-page CV (hides interactives, blog, form).
+
+PORTING NOTES (Next.js App Router)
+  - Tokens: move :root variables into app/globals.css (or Tailwind theme
+    extend). System font stack means no next/font needed.
+  - app/page.tsx stays a Server Component; sections become server components
+    (<Masthead/>, <SelectedWork/>, <Experience/>, <Credentials/>,
+    <JournalIndex/>, <Colophon/>) fed from a typed content file
+    (content/profile.ts) generated from CONTENT_BRIEF.md so facts live in one place.
+  - Client components ("use client"): <Sidenote/>, <JsspStepper/>,
+    <DisjunctiveGraph/>, <ScaleChart/>, <ErrorAnalysis/>, <VideoFacade/>,
+    <FitBriefForm/>. Each is self-contained and SSR-safe (render the
+    no-JS/print state on the server, enhance on mount).
+  - MDX (blog posts under app/blog/[slug]/page.mdx): register in
+    mdx-components.tsx -> Sidenote, Figure (numbered caption), HowItWorks,
+    VideoFacade (youtube-nocookie, id prop), Stepper/Step, DisjunctiveGraph,
+    ScaleChart, IllustrativeCard. The JSSP and Gujarati essays here are the
+    first two posts; the homepage embeds their interactive figures.
+  - /go/resume: keep as a redirect in next.config.js (or a route handler) to
+    the current PDF so the link never rots.
+  - Fit brief: replace the local mock with a Server Action / route handler
+    that calls an LLM with the brief as grounding context, strict rate
+    limiting, no JD persistence by default, and the same "prototype" label
+    until it is evaluated.
+  - Print CSS ports as-is into globals.css (@media print).
+  - CSP: frame-src https://www.youtube-nocookie.com only.
+================================================================================
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Om M. Patel | Applied AI Engineer, Toronto</title>
+<meta name="description" content="Om M. Patel, Applied AI Engineer in Toronto. Selected work, research on LLMs for job-shop scheduling and low-resource Gujarati sentiment analysis, and experience.">
+<style>
+:root{
+  --paper:#FBF8F1; --paper-2:#F4EEE1; --card:#FFFDF8;
+  --ink:#1F1B16; --ink-2:#5C5448; --rule:#D9D0BF;
+  --accent:#8C2F1B; --accent-2:#1F4E79; --highlight:#F3E7C9; --ok:#3B6B3A;
+  --serif:"Iowan Old Style","Charter","Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --fs-0:.8rem; --fs-1:1rem; --fs-2:1.25rem; --fs-3:1.563rem; --fs-4:1.953rem; --fs-5:3.052rem;
+  --col:40rem; --margin:17rem; --gutter:2rem;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:19px;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (max-width:600px){html{font-size:17px}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:var(--fs-1);line-height:1.6;
+  font-kerning:normal;font-variant-numeric:oldstyle-nums proportional-nums;text-rendering:optimizeLegibility}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:.18em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+h1,h2,h3,h4{font-weight:400;line-height:1.2;margin:0}
+h2{font-size:var(--fs-3);margin:0 0 .25rem}
+h3{font-size:var(--fs-2);font-style:italic;margin:1.6rem 0 .4rem}
+p{margin:0 0 1rem}
+small,.small{font-size:var(--fs-0)}
+.sc{font-variant-caps:all-small-caps;letter-spacing:.06em}
+.muted{color:var(--ink-2)}
+.num{font-variant-numeric:lining-nums tabular-nums}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:1rem;top:-3rem;background:var(--ink);color:var(--paper);padding:.4rem .8rem;z-index:10}
+.skip:focus{top:1rem}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:3rem 0}
+
+/* ---------- layout ---------- */
+.page{max-width:calc(var(--col) + var(--margin) + var(--gutter) + 6rem);margin:0 auto;padding:0 1.5rem}
+.col{max-width:var(--col);position:relative}
+@media (min-width:1100px){.col{margin-left:4rem}}
+section{padding:3.5rem 0 1rem;scroll-margin-top:1rem}
+.sec-head{display:flex;align-items:baseline;gap:.75rem;border-top:2px solid var(--ink);padding-top:.6rem;margin-bottom:1.5rem}
+.sec-no{color:var(--accent);font-size:var(--fs-0)}
+@media (min-width:1100px){.sec-no{position:absolute;left:-4rem;width:3.2rem;text-align:right}}
+.deck{font-size:var(--fs-2);color:var(--ink-2);font-style:italic;margin-bottom:1.5rem}
+
+/* ---------- sidenotes ---------- */
+.sn-ref{font:inherit;font-size:.7em;line-height:0;vertical-align:super;background:none;border:0;padding:0 .1em;color:var(--accent);cursor:pointer}
+.sidenote{font-size:var(--fs-0);line-height:1.45;color:var(--ink-2);display:none}
+.sidenote .n{color:var(--accent);margin-right:.3em}
+.no-js .sidenote,.sidenote.open{display:block;margin:.5rem 0 1rem;padding:.4rem 0 .4rem .8rem;border-left:2px solid var(--rule)}
+@media (min-width:1100px){
+  .sidenote,.sidenote.open,.no-js .sidenote{display:block;float:right;clear:right;width:var(--margin);margin:.2rem calc(-1 * (var(--margin) + var(--gutter))) 1rem 0;padding:0;border:0;position:relative}
+  .sn-ref{cursor:default}
+}
+
+/* ---------- running head ---------- */
+.running{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem 1.5rem;border-bottom:1px solid var(--rule);padding:.8rem 0;font-size:var(--fs-0);color:var(--ink-2)}
+.running nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem 1rem}
+.running a{color:var(--ink-2);text-decoration:none}
+.running a:hover{color:var(--accent);text-decoration:underline}
+
+/* ---------- masthead ---------- */
+.masthead{padding:3.5rem 0 1rem}
+.mast-top{display:flex;gap:1.5rem;align-items:center;margin-bottom:1.5rem}
+.monogram{flex:none;width:96px;height:96px;border-radius:50%;border:1px solid var(--ink);display:grid;place-items:center;background:var(--paper-2);
+  font-size:2rem;letter-spacing:.08em;color:var(--ink)}
+.kicker{font-size:var(--fs-0);color:var(--accent)}
+.masthead h1{font-size:clamp(2.2rem,6vw,var(--fs-5));letter-spacing:-.01em}
+.role{font-style:italic;color:var(--ink-2);font-size:var(--fs-2);margin-top:.2rem}
+.abstract{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:1.2rem 0;margin:1.5rem 0}
+.abstract h2{font-size:var(--fs-0);color:var(--ink-2);margin-bottom:.4rem}
+.abstract p{margin:0;text-align:justify;hyphens:auto}
+.keywords{font-size:var(--fs-0);color:var(--ink-2);margin-top:.8rem!important}
+.avail{display:inline-flex;align-items:center;gap:.5rem;background:var(--highlight);padding:.25rem .7rem;font-size:var(--fs-0);border-left:3px solid var(--accent)}
+.links{list-style:none;padding:0;margin:1.2rem 0 0;display:flex;flex-wrap:wrap;gap:.4rem 1.4rem}
+.links a{font-variant-caps:all-small-caps;letter-spacing:.06em;font-size:1.05rem}
+.links .primary{background:var(--ink);color:var(--paper);padding:.15rem .8rem;text-decoration:none}
+.links .primary:hover{background:var(--accent)}
+
+/* ---------- figures (selected work) ---------- */
+.fig{margin:0 0 3rem;padding-top:1rem;border-top:1px solid var(--rule)}
+.fig-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.fig-no{color:var(--accent);font-size:var(--fs-0)}
+.fig h3{margin:.2rem 0 .1rem;font-style:normal;font-size:var(--fs-2)}
+.fig .meta{font-size:var(--fs-0);color:var(--ink-2)}
+.pa{display:grid;grid-template-columns:6.5rem 1fr;gap:.35rem 1rem;margin:.9rem 0}
+.pa dt{font-size:var(--fs-0);color:var(--ink-2);font-variant-caps:all-small-caps;letter-spacing:.06em;padding-top:.15rem}
+.pa dd{margin:0}
+@media (max-width:520px){.pa{grid-template-columns:1fr}.pa dd{margin-bottom:.4rem}}
+details.how{border:1px solid var(--rule);background:var(--paper-2);margin-top:.6rem}
+details.how>summary{cursor:pointer;padding:.45rem .8rem;font-variant-caps:all-small-caps;letter-spacing:.06em;list-style:none;display:flex;justify-content:space-between}
+details.how>summary::-webkit-details-marker{display:none}
+details.how>summary::after{content:"+";color:var(--accent)}
+details.how[open]>summary::after{content:"\2212"}
+details.how .inner{padding:.2rem .8rem .8rem}
+figcaption,.caption{font-size:var(--fs-0);color:var(--ink-2);margin-top:.4rem}
+.fig-links{font-size:var(--fs-0);margin-top:.6rem;display:flex;gap:1rem;flex-wrap:wrap}
+.further{columns:2 16rem;column-gap:2rem;padding:0;list-style:none;font-size:.92rem}
+.further li{break-inside:avoid;margin-bottom:.7rem}
+
+/* ---------- diagram svg ---------- */
+svg.dg{width:100%;height:auto;display:block}
+.dg rect.b{fill:var(--card);stroke:var(--ink);stroke-width:1}
+.dg rect.b.acc{stroke:var(--accent);stroke-width:1.5}
+.dg rect.zone{fill:none;stroke:var(--ink-2);stroke-dasharray:4 4}
+.dg text{font-family:var(--serif);font-size:13px;fill:var(--ink)}
+.dg text.s{font-size:11px;fill:var(--ink-2);font-style:italic}
+.dg path.e,.dg line.e{fill:none;stroke:var(--ink);stroke-width:1.1;marker-end:url(#arw)}
+.dg path.e.d{stroke-dasharray:4 3;stroke:var(--ink-2)}
+
+/* ---------- controls ---------- */
+.btn{font:inherit;font-size:var(--fs-0);font-variant-caps:all-small-caps;letter-spacing:.06em;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:.3rem .75rem;cursor:pointer;border-radius:0}
+.btn:hover{background:var(--highlight)}
+.btn[aria-pressed="true"],.btn[aria-current="step"]{background:var(--ink);color:var(--paper)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-row{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+
+/* ---------- JSSP explorable ---------- */
+.explorable{background:var(--paper-2);border:1px solid var(--rule);padding:1rem 1.1rem 1.2rem;margin:1.5rem 0}
+.steps{list-style:none;padding:0;margin:0 0 1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem}
+.steps .btn{width:100%;text-align:left;padding:.4rem .5rem;line-height:1.2}
+.steps .btn span{display:block;font-variant-caps:normal;letter-spacing:0;font-size:.75rem;opacity:.75}
+@media (max-width:560px){.steps{grid-template-columns:repeat(2,1fr)}}
+.step h4{font-size:var(--fs-2);font-style:italic;margin-bottom:.4rem}
+.js .step[hidden]{display:none}
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;border-top:1px solid var(--rule);padding-top:.7rem;font-size:var(--fs-0)}
+table.inst{border-collapse:collapse;width:100%;font-size:.9rem;margin:.5rem 0 1rem;background:var(--card)}
+table.inst th,table.inst td{border-bottom:1px solid var(--rule);padding:.35rem .6rem;text-align:left}
+table.inst th{font-weight:400;font-variant-caps:all-small-caps;letter-spacing:.06em;color:var(--ink-2)}
+table.inst td{font-family:var(--mono);font-size:.82rem}
+pre.prompt{font-family:var(--mono);font-size:.78rem;line-height:1.5;background:var(--card);border:1px solid var(--rule);padding:.8rem 1rem;overflow-x:auto;white-space:pre-wrap;margin:.5rem 0 .6rem}
+pre.prompt .hl-p{color:var(--accent-2)}
+pre.prompt .hl-c{color:var(--accent)}
+/* disjunctive graph */
+#dgraph{background:var(--card);border:1px solid var(--rule)}
+#dgraph .edge{fill:none;stroke-width:1.6;transition:opacity .2s,stroke-width .2s}
+#dgraph .prec{stroke:var(--accent-2);marker-end:url(#arw-blue)}
+#dgraph .conf{stroke:var(--accent);stroke-dasharray:5 4}
+#dgraph .node circle{fill:var(--card);stroke:var(--ink);stroke-width:1.2;transition:fill .2s}
+#dgraph .node text{font-family:var(--serif);font-size:12px;fill:var(--ink);text-anchor:middle;pointer-events:none}
+#dgraph .node text.m{font-size:10px;fill:var(--ink-2);font-style:italic}
+#dgraph .node{cursor:pointer;outline:none}
+#dgraph .node:focus-visible circle,#dgraph .node.on circle{fill:var(--highlight);stroke:var(--accent);stroke-width:2}
+#dgraph.focus .edge{opacity:.12}
+#dgraph.focus .edge.on{opacity:1;stroke-width:2.6}
+#dgraph.focus .node{opacity:.45}
+#dgraph.focus .node.on,#dgraph.focus .node.adj{opacity:1}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:.6rem 0 .2rem}
+.legend .key{display:inline-block;width:1.6rem;height:0;border-top:2px solid;vertical-align:middle;margin-right:.35rem}
+.key.p{border-color:var(--accent-2)}
+.key.c{border-color:var(--accent);border-top-style:dashed}
+.readout{font-size:var(--fs-0);color:var(--ink-2);min-height:1.5em;margin:.2rem 0 0}
+/* chart */
+#scaleChart{background:var(--card);border:1px solid var(--rule)}
+#scaleChart .bar{transition:width .6s cubic-bezier(.2,.7,.2,1)}
+#scaleChart text{font-family:var(--serif);font-size:13px;fill:var(--ink)}
+#scaleChart text.v{font-variant-numeric:lining-nums tabular-nums}
+#scaleChart .grp{cursor:default;outline:none}
+#scaleChart .grp:focus-visible rect.bg,#scaleChart .grp:hover rect.bg{fill:var(--highlight)}
+.chart-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem;align-items:center}
+
+/* ---------- error analysis ---------- */
+.ea{border:1px solid var(--rule);padding:1rem 1.1rem;background:var(--paper-2);margin:1.5rem 0}
+.ea-label{display:inline-block;font-size:var(--fs-0);border:1px solid var(--accent);color:var(--accent);padding:0 .45rem;font-variant-caps:all-small-caps;letter-spacing:.06em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.7rem;margin-top:.8rem}
+.card{background:var(--card);border:1px solid var(--rule);border-top:3px solid var(--accent);padding:.7rem .85rem;font-size:.9rem}
+.card[hidden]{display:none}
+.card .cat{font-size:var(--fs-0);color:var(--accent);font-variant-caps:all-small-caps;letter-spacing:.06em}
+.card blockquote{margin:.35rem 0;font-style:italic}
+.card .lbls{font-size:var(--fs-0);display:flex;gap:.8rem;flex-wrap:wrap;color:var(--ink-2)}
+.card .lbls b{font-weight:400;color:var(--ink)}
+.card .why{font-size:var(--fs-0);color:var(--ink-2);margin:.35rem 0 0}
+.empty{font-size:var(--fs-0);color:var(--ink-2);font-style:italic}
+
+/* ---------- CV ---------- */
+.cv{list-style:none;padding:0;margin:0}
+.cv>li{display:grid;grid-template-columns:8.5rem 1fr;gap:0 1.2rem;padding:1rem 0;border-top:1px solid var(--rule);break-inside:avoid}
+.cv .when{font-size:var(--fs-0);color:var(--ink-2);padding-top:.25rem}
+.cv h3{margin:0;font-style:normal;font-size:1.05rem}
+.cv .org{font-style:italic;color:var(--ink-2)}
+.cv ul{margin:.4rem 0 0;padding-left:1.1rem}
+.cv ul li{margin-bottom:.25rem}
+.cv .note{font-size:var(--fs-0);color:var(--ink-2);margin-top:.3rem}
+@media (max-width:560px){.cv>li{grid-template-columns:1fr}}
+.skills{font-size:.92rem}
+.skills dt{font-variant-caps:all-small-caps;letter-spacing:.06em;color:var(--ink-2);font-size:var(--fs-0);margin-top:.5rem}
+.skills dd{margin:0}
+
+/* ---------- journal ---------- */
+.journal{list-style:none;padding:0;margin:0}
+.journal>li{border-top:1px solid var(--rule);padding:1.1rem 0}
+.journal .jmeta{font-size:var(--fs-0);color:var(--ink-2)}
+.journal h3{margin:.15rem 0 .3rem;font-style:normal}
+.journal h3 a{color:var(--ink);text-decoration:none}
+.journal h3 a:hover{color:var(--accent);text-decoration:underline}
+.journal .dek{font-style:italic;color:var(--ink-2);margin:0 0 .5rem}
+.facade{position:relative;display:block;width:100%;aspect-ratio:16/9;border:1px solid var(--ink);background:#221d17;color:var(--paper);cursor:pointer;padding:0;font:inherit;overflow:hidden}
+.facade svg{position:absolute;inset:0;width:100%;height:100%}
+.facade .ft{position:absolute;left:1rem;bottom:.8rem;right:1rem;text-align:left;font-size:var(--fs-0)}
+.facade:hover .play,.facade:focus-visible .play{fill:var(--accent)}
+.video-frame{width:100%;aspect-ratio:16/9;border:1px solid var(--ink);display:block}
+
+/* ---------- form ---------- */
+form.fit{display:grid;gap:1rem;margin-top:1rem}
+.field label{display:block;font-size:var(--fs-0);font-variant-caps:all-small-caps;letter-spacing:.06em;color:var(--ink-2);margin-bottom:.25rem}
+.field select,.field input,.field textarea{width:100%;font:inherit;font-size:.95rem;color:var(--ink);background:var(--card);border:1px solid var(--ink-2);padding:.5rem .6rem;border-radius:0}
+.field textarea{min-height:9rem;resize:vertical;line-height:1.45}
+.field .hint{font-size:var(--fs-0);color:var(--ink-2);margin-top:.2rem}
+.field[hidden]{display:none}
+.brief{margin-top:1.5rem;border:1px solid var(--ink);background:var(--card);padding:1rem 1.2rem;position:relative}
+.brief .stamp{position:absolute;top:-.7rem;right:1rem;background:var(--accent);color:var(--paper);font-size:var(--fs-0);padding:0 .5rem;font-variant-caps:all-small-caps;letter-spacing:.08em}
+.brief h4{font-size:var(--fs-2);margin:.2rem 0 .6rem}
+.brief h5{font-size:var(--fs-0);font-weight:400;font-variant-caps:all-small-caps;letter-spacing:.06em;color:var(--ink-2);margin:.9rem 0 .3rem}
+.brief ul{margin:0;padding-left:1.1rem}
+.chips{display:flex;flex-wrap:wrap;gap:.3rem;list-style:none;padding:0!important}
+.chip{font-size:var(--fs-0);border:1px solid var(--rule);padding:0 .45rem;background:var(--paper)}
+.chip.ok{border-color:var(--ok);color:var(--ok)}
+.chip.gap{border-style:dashed;color:var(--ink-2)}
+
+/* ---------- colophon ---------- */
+footer.colophon{margin-top:4rem;border-top:2px solid var(--ink);padding:1.2rem 0 3rem;font-size:var(--fs-0);color:var(--ink-2)}
+footer.colophon h2{font-size:var(--fs-0);font-variant-caps:all-small-caps;letter-spacing:.08em;color:var(--ink);margin-bottom:.4rem}
+footer.colophon p{max-width:var(--col)}
+
+/* ---------- print-only ---------- */
+.print-only{display:none}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+}
+
+/* ---------- print: the page prints like a CV ---------- */
+@media print{
+  @page{margin:14mm 16mm}
+  html{font-size:10pt}
+  body{background:#fff;color:#000;line-height:1.4}
+  .no-print,.running,.skip,.explorable,.ea .btn-row,.ea .cards,details.how,.fig-links,.journal-sec,.fit-sec,.sn-ref,svg.dg,#dgraph,#scaleChart{display:none!important}
+  .print-only{display:block}
+  .page{max-width:none;padding:0}
+  .col{max-width:none;margin:0}
+  section{padding:1rem 0 0}
+  .sec-head{border-top:1px solid #000;margin-bottom:.5rem;padding-top:.3rem}
+  .sec-no{position:static}
+  .sidenote,.sidenote.open{display:none!important}
+  .masthead{padding:0}
+  .monogram{display:none}
+  .abstract{padding:.5rem 0;margin:.6rem 0}
+  .fig{margin:0 0 .6rem;padding-top:.4rem;break-inside:avoid}
+  .pa{margin:.3rem 0;grid-template-columns:5.5rem 1fr}
+  .cv>li{padding:.4rem 0}
+  .deck{font-size:1rem;margin-bottom:.4rem}
+  a{color:#000;text-decoration:none}
+  .links a::after{content:" \2014 " attr(data-print)}
+  .links .primary{background:none;color:#000;padding:0}
+  .avail{background:none;border-left:2px solid #000}
+  footer.colophon{margin-top:1rem;padding:.4rem 0}
+  h2,h3{break-after:avoid}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1F1B16"/></marker>
+    <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1F4E79"/></marker>
+  </defs>
+</svg>
+
+<div class="page">
+  <header class="running" role="banner">
+    <span class="sc">The Working Papers of Om M. Patel &middot; Toronto &middot; 2026</span>
+    <nav aria-label="Contents">
+      <ul>
+        <li><a href="#work">&sect;1 Work</a></li>
+        <li><a href="#jssp">&sect;2 JSSP</a></li>
+        <li><a href="#gujarati">&sect;3 Gujarati</a></li>
+        <li><a href="#experience">&sect;4 Experience</a></li>
+        <li><a href="#credentials">&sect;5 Credentials</a></li>
+        <li><a href="#journal">&sect;6 Journal</a></li>
+        <li><a href="#fit">&sect;7 Fit brief</a></li>
+      </ul>
+    </nav>
+  </header>
+
+<main id="main">
+  <!-- ================= MASTHEAD ================= -->
+  <div class="col masthead">
+    <div class="mast-top">
+      <div class="monogram" role="img" aria-label="Photo placeholder: monogram OP"><span class="sc" aria-hidden="true">OP</span></div>
+      <div>
+        <p class="kicker sc" style="margin:0">Applied AI Engineer &middot; Toronto, Ontario, Canada</p>
+        <h1>Om M. Patel</h1>
+        <p class="role" style="margin:0">Language-model systems that people can check.</p>
+      </div>
+    </div>
+
+    <p class="avail"><span aria-hidden="true">&#9679;</span> Available for full-time roles in Canada: Applied AI, AI/ML, NLP, Data Engineering</p>
+
+    <div class="abstract">
+      <h2 class="sc">Abstract</h2>
+      <p>Om M. Patel is an Applied AI Engineer in Toronto who builds language-model systems with a human in the loop. As an Applied AI Engineer co-op at 1Pour, he integrated Gemini vision suggestions into a Next.js capture workflow in which people confirm uncertain results before they affect operational data. His research at York University spans LLMs for combinatorial optimization, where he serialized job-shop scheduling instances as disjunctive-graph constraints and cut fine-tuning time from 70 to 11.5 hours with 4-bit LoRA, and low-resource Gujarati sentiment analysis, where he compares TF-IDF baselines against MuRIL and studies how they fail.<button class="sn-ref" aria-expanded="false" aria-controls="sn1">1</button><span class="sidenote" id="sn1"><span class="n">1.</span>Research assistant with Prof. Uyen T. Nguyen, York University, March 2026 to present. Error categories: polarity shifts, negation errors, mistranslations, social-text noise.</span> He studied for an MSc in Computer Science (AI specialization) at York, is a Vector AI Scholar, and won the AgentShyft Hackathon with Synapse AI.</p>
+      <p class="keywords"><span class="sc">Keywords:</span> applied AI &middot; human-in-the-loop review &middot; LLM fine-tuning &middot; low-resource NLP &middot; data engineering</p>
+    </div>
+
+    <ul class="links" aria-label="Links">
+      <li><a class="primary" href="/go/resume" data-print="om patel resume">Resume</a></li>
+      <li><a href="mailto:iampatelom@gmail.com" data-print="iampatelom@gmail.com">Email</a></li>
+      <li><a href="https://github.com/PATELOM925" data-print="github.com/PATELOM925">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/om-m-patel" data-print="linkedin.com/in/om-m-patel">LinkedIn</a></li>
+      <li><a href="https://www.kaggle.com/iamommpatel" data-print="kaggle.com/iamommpatel">Kaggle</a></li>
+    </ul>
+    <p class="print-only small">+1 437-212-3702</p>
+  </div>
+
+  <!-- ================= SELECTED WORK ================= -->
+  <section id="work" aria-labelledby="work-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;1</span><h2 id="work-h">Selected Work</h2></div>
+      <p class="deck no-print">Five figures, each with the problem, the approach and what shipped. Open &ldquo;How it works&rdquo; for the system diagram.</p>
+
+      <!-- Fig 1 Synapse -->
+      <article class="fig" aria-labelledby="f1-h">
+        <div class="fig-head"><span class="fig-no sc">Fig. 1</span><span class="meta">May 2026 &middot; FastAPI, Next.js, ElevenLabs</span></div>
+        <h3 id="f1-h">Synapse AI</h3>
+        <dl class="pa">
+          <dt>Problem</dt><dd>Learning tools that generate study material rarely give teachers a view into, or control over, what the agents are doing.</dd>
+          <dt>Approach</dt><dd>An agent-led learning platform that turns uploaded material into notes, flashcards, quizzes and podcasts, with tutor streaming, classroom invites, diagnostics, and teacher oversight and analytics.</dd>
+          <dt>Result</dt><dd><strong>Winner, AgentShyft Hackathon</strong> (May 2026).</dd>
+        </dl>
+        <details class="how"><summary>How it works</summary><div class="inner">
+          <svg class="dg" viewBox="0 0 640 190" role="img" aria-labelledby="f1-svg">
+            <title id="f1-svg">Synapse AI: uploaded material flows through a FastAPI agent pipeline into notes, flashcards, quizzes and podcasts for the learner; the teacher oversees the pipeline and receives diagnostics.</title>
+            <rect class="b" x="8" y="40" width="120" height="48"/><text x="68" y="60" text-anchor="middle">Uploaded</text><text x="68" y="77" text-anchor="middle">material</text>
+            <rect class="b acc" x="160" y="40" width="130" height="48"/><text x="225" y="60" text-anchor="middle">Agent pipeline</text><text class="s" x="225" y="77" text-anchor="middle">FastAPI</text>
+            <rect class="b" x="322" y="40" width="150" height="48"/><text x="397" y="60" text-anchor="middle">Notes &#183; flashcards</text><text x="397" y="77" text-anchor="middle">quizzes &#183; podcasts</text>
+            <rect class="b" x="504" y="40" width="128" height="48"/><text x="568" y="60" text-anchor="middle">Learner</text><text class="s" x="568" y="77" text-anchor="middle">Next.js, tutor stream</text>
+            <rect class="b" x="160" y="132" width="472" height="44"/><text x="396" y="159" text-anchor="middle">Teacher: oversight &#183; diagnostics &#183; classroom invites &#183; analytics</text>
+            <path class="e" d="M128,64 H158"/><path class="e" d="M290,64 H320"/><path class="e" d="M472,64 H502"/>
+            <path class="e d" d="M225,132 V90"/><text class="s" x="232" y="116">oversees</text>
+            <path class="e d" d="M568,88 V130"/><text class="s" x="575" y="116">diagnostics</text>
+            <text class="s" x="397" y="104" text-anchor="middle">podcasts voiced with ElevenLabs</text>
+          </svg>
+          <p class="caption">Figure 1. Teacher oversight sits beside the generation pipeline rather than after it.</p>
+        </div></details>
+        <p class="fig-links"><a href="https://github.com/PATELOM925/Synapse_AgentShfyt_Hackathon">Source on GitHub</a></p>
+      </article>
+
+      <!-- Fig 2 Interview Lens -->
+      <article class="fig" aria-labelledby="f2-h">
+        <div class="fig-head"><span class="fig-no sc">Fig. 2</span><span class="meta">Jun 2026 &middot; Next.js, OpenAI, PostgreSQL</span></div>
+        <h3 id="f2-h">Interview Lens</h3>
+        <dl class="pa">
+          <dt>Problem</dt><dd>Take-home projects are rich evidence, but turning one into a fair, role-specific interview takes time, and the submission itself is untrusted input to any LLM.</dd>
+          <dt>Approach</dt><dd>Turns a candidate&rsquo;s take-home into a structured, role-specific interview brief, with role-based pipelines, guarded handling of untrusted content, and tenant isolation.</dd>
+          <dt>Result</dt><dd>A working product with live notes and scoring during the interview.<button class="sn-ref" aria-expanded="false" aria-controls="sn2">2</button><span class="sidenote" id="sn2"><span class="n">2.</span>No public repository. Architecture can be walked through on request.</span></dd>
+        </dl>
+        <details class="how"><summary>How it works</summary><div class="inner">
+          <svg class="dg" viewBox="0 0 640 170" role="img" aria-labelledby="f2-svg">
+            <title id="f2-svg">Interview Lens: a take-home project passes through an untrusted-content guard, a role-based pipeline, becomes a structured brief, then supports live notes and scoring, all inside a tenant boundary.</title>
+            <rect class="zone" x="126" y="18" width="510" height="130"/><text class="s" x="630" y="140" text-anchor="end">tenant boundary &#183; PostgreSQL</text>
+            <rect class="b" x="4" y="50" width="108" height="56"/><text x="58" y="74" text-anchor="middle">Take-home</text><text class="s" x="58" y="92" text-anchor="middle">untrusted input</text>
+            <rect class="b acc" x="136" y="50" width="112" height="56"/><text x="192" y="74" text-anchor="middle">Content guard</text><text class="s" x="192" y="92" text-anchor="middle">data, not orders</text>
+            <rect class="b" x="268" y="50" width="112" height="56"/><text x="324" y="74" text-anchor="middle">Role pipeline</text><text class="s" x="324" y="92" text-anchor="middle">OpenAI</text>
+            <rect class="b" x="400" y="50" width="104" height="56"/><text x="452" y="74" text-anchor="middle">Interview</text><text x="452" y="91" text-anchor="middle">brief</text>
+            <rect class="b" x="522" y="50" width="104" height="56"/><text x="574" y="74" text-anchor="middle">Live notes</text><text x="574" y="91" text-anchor="middle">&amp; scoring</text>
+            <path class="e" d="M112,78 H134"/><path class="e" d="M248,78 H266"/><path class="e" d="M380,78 H398"/><path class="e" d="M504,78 H520"/>
+          </svg>
+          <p class="caption">Figure 2. The guard runs before any model sees the submission.</p>
+        </div></details>
+      </article>
+
+      <!-- Fig 3 ClawCompass -->
+      <article class="fig" aria-labelledby="f3-h">
+        <div class="fig-head"><span class="fig-no sc">Fig. 3</span><span class="meta">May 2026 &middot; TypeScript</span></div>
+        <h3 id="f3-h">ClawCompass</h3>
+        <dl class="pa">
+          <dt>Problem</dt><dd>Agents that call paid tools need to pick the right tool, avoid leaking sensitive context, and not spend money they shouldn&rsquo;t.</dd>
+          <dt>Approach</dt><dd>A capability broker that routes agent tasks to the right tool, redacts sensitive context, and gates paid execution on x402 payment-state checks.</dd>
+          <dt>Result</dt><dd>Working buyer and seller flows with reputation tracking.</dd>
+        </dl>
+        <details class="how"><summary>How it works</summary><div class="inner">
+          <svg class="dg" viewBox="0 0 640 180" role="img" aria-labelledby="f3-svg">
+            <title id="f3-svg">ClawCompass: an agent task goes to the capability broker, then redaction, then an x402 payment-state check, then the seller's tool; outcomes feed reputation tracking back to the broker.</title>
+            <rect class="b" x="4" y="36" width="104" height="52"/><text x="56" y="58" text-anchor="middle">Agent task</text><text class="s" x="56" y="75" text-anchor="middle">buyer</text>
+            <rect class="b acc" x="132" y="36" width="112" height="52"/><text x="188" y="58" text-anchor="middle">Capability</text><text x="188" y="75" text-anchor="middle">broker</text>
+            <rect class="b" x="268" y="36" width="104" height="52"/><text x="320" y="58" text-anchor="middle">Redact</text><text class="s" x="320" y="75" text-anchor="middle">sensitive context</text>
+            <rect class="b" x="396" y="36" width="104" height="52"/><text x="448" y="58" text-anchor="middle">x402 check</text><text class="s" x="448" y="75" text-anchor="middle">payment state</text>
+            <rect class="b" x="524" y="36" width="112" height="52"/><text x="580" y="58" text-anchor="middle">Tool</text><text class="s" x="580" y="75" text-anchor="middle">seller</text>
+            <rect class="b" x="268" y="126" width="232" height="40"/><text x="384" y="151" text-anchor="middle">Reputation tracking</text>
+            <path class="e" d="M108,62 H130"/><path class="e" d="M244,62 H266"/><path class="e" d="M372,62 H394"/><path class="e" d="M500,62 H522"/>
+            <path class="e d" d="M580,88 V146 H502"/><path class="e d" d="M268,146 H188 V90"/>
+            <text class="s" x="448" y="110" text-anchor="middle">unpaid &#8594; blocked</text>
+          </svg>
+          <p class="caption">Figure 3. Execution is gated, not merely logged.</p>
+        </div></details>
+        <p class="fig-links"><a href="https://github.com/PATELOM925/openclaw-hack-ttw26">Source on GitHub</a></p>
+      </article>
+
+      <!-- Fig 4 TTC -->
+      <article class="fig" aria-labelledby="f4-h">
+        <div class="fig-head"><span class="fig-no sc">Fig. 4</span><span class="meta">Jan&ndash;Apr 2026 &middot; DuckDB, Parquet, Streamlit, Google ADK</span></div>
+        <h3 id="f4-h">TTC Interactive Dashboard (TTC Pulse)</h3>
+        <dl class="pa">
+          <dt>Problem</dt><dd>Toronto transit delay records, static schedules and live alerts live in separate formats that don&rsquo;t join cleanly.</dd>
+          <dt>Approach</dt><dd>Normalized delay events, joined them with static GTFS and live alerts, built DuckDB/Parquet marts, and added route and station mapping checks.</dd>
+          <dt>Result</dt><dd><span class="num">1,004,682</span> normalized delay events served through a Streamlit dashboard with a Google ADK assistant.</dd>
+        </dl>
+        <details class="how"><summary>How it works</summary><div class="inner">
+          <svg class="dg" viewBox="0 0 640 190" role="img" aria-labelledby="f4-svg">
+            <title id="f4-svg">TTC Pulse: delay events, static GTFS and live alerts pass through route and station mapping checks into DuckDB and Parquet marts, which feed a Streamlit dashboard and a Google ADK assistant.</title>
+            <rect class="b" x="4" y="10" width="140" height="44"/><text x="74" y="30" text-anchor="middle">TTC delay events</text><text class="s" x="74" y="46" text-anchor="middle">1,004,682 normalized</text>
+            <rect class="b" x="4" y="72" width="140" height="44"/><text x="74" y="99" text-anchor="middle">Static GTFS</text>
+            <rect class="b" x="4" y="134" width="140" height="44"/><text x="74" y="161" text-anchor="middle">Live alerts</text>
+            <rect class="b acc" x="184" y="66" width="128" height="56"/><text x="248" y="90" text-anchor="middle">Route/station</text><text x="248" y="107" text-anchor="middle">mapping checks</text>
+            <rect class="b" x="344" y="66" width="120" height="56"/><text x="404" y="90" text-anchor="middle">DuckDB</text><text class="s" x="404" y="107" text-anchor="middle">Parquet marts</text>
+            <rect class="b" x="500" y="36" width="136" height="44"/><text x="568" y="63" text-anchor="middle">Streamlit dashboard</text>
+            <rect class="b" x="500" y="108" width="136" height="44"/><text x="568" y="135" text-anchor="middle">Google ADK assistant</text>
+            <path class="e" d="M144,32 L182,82"/><path class="e" d="M144,94 H182"/><path class="e" d="M144,156 L182,106"/>
+            <path class="e" d="M312,94 H342"/><path class="e" d="M464,86 L498,62"/><path class="e" d="M464,102 L498,126"/>
+          </svg>
+          <p class="caption">Figure 4. Mapping checks sit before the marts so bad joins fail early.</p>
+        </div></details>
+        <p class="fig-links"><a href="https://github.com/PATELOM925/TTC-PULSE">Source on GitHub</a></p>
+      </article>
+
+      <!-- Fig 5 GreenArm -->
+      <article class="fig" aria-labelledby="f5-h">
+        <div class="fig-head"><span class="fig-no sc">Fig. 5</span><span class="meta">Dec 2025 &middot; ROS2, YOLOv8, OpenCV</span></div>
+        <h3 id="f5-h">GreenArm</h3>
+        <dl class="pa">
+          <dt>Problem</dt><dd>A detector finds objects in pixels; a robot arm needs coordinates in its own frame.</dd>
+          <dt>Approach</dt><dd>A ROS2 perception-to-manipulation pipeline: YOLOv8 and OpenCV detection, ArUco calibration, and pixel-to-robot transforms driving a Kinova arm.</dd>
+          <dt>Result</dt><dd>An end-to-end perception-to-grasp pipeline with a public demo.</dd>
+        </dl>
+        <details class="how"><summary>How it works</summary><div class="inner">
+          <svg class="dg" viewBox="0 0 640 130" role="img" aria-labelledby="f5-svg">
+            <title id="f5-svg">GreenArm: camera frames go to YOLOv8 and OpenCV detection, ArUco calibration maps pixels to robot coordinates, and ROS2 commands the Kinova arm.</title>
+            <rect class="b" x="4" y="34" width="100" height="52"/><text x="54" y="65" text-anchor="middle">Camera</text>
+            <rect class="b" x="128" y="34" width="120" height="52"/><text x="188" y="56" text-anchor="middle">Detection</text><text class="s" x="188" y="73" text-anchor="middle">YOLOv8 + OpenCV</text>
+            <rect class="b acc" x="272" y="34" width="132" height="52"/><text x="338" y="56" text-anchor="middle">Pixel &#8594; robot</text><text class="s" x="338" y="73" text-anchor="middle">ArUco calibration</text>
+            <rect class="b" x="428" y="34" width="92" height="52"/><text x="474" y="65" text-anchor="middle">ROS2</text>
+            <rect class="b" x="544" y="34" width="92" height="52"/><text x="590" y="56" text-anchor="middle">Kinova</text><text class="s" x="590" y="73" text-anchor="middle">arm</text>
+            <path class="e" d="M104,60 H126"/><path class="e" d="M248,60 H270"/><path class="e" d="M404,60 H426"/><path class="e" d="M520,60 H542"/>
+            <text class="s" x="338" y="112" text-anchor="middle">the transform is the part most worth getting right</text>
+          </svg>
+          <p class="caption">Figure 5. Calibration bridges image space and robot space.</p>
+        </div></details>
+        <p class="fig-links"><a href="https://green-arm.vercel.app">Live demo</a></p>
+      </article>
+
+      <h3>Further work</h3>
+      <ul class="further">
+        <li><strong>PMML Traffic Anomaly Detection</strong> <span class="muted">(Dec 2025)</span>. Poisson GLM vs GRU on Toronto traffic, with divergence-based anomaly scoring.</li>
+        <li><strong>Legal Clarity</strong> <span class="muted">(Nov 2024)</span>. Fine-tuned Pegasus, T5 and IndicBART for multilingual legal summarization and translation, served with Flask.</li>
+        <li><strong>ChatPDF AI</strong> <span class="muted">(Sep 2024)</span>. LangChain chunking, Google GenAI embeddings, FAISS, Gemini and Streamlit.</li>
+        <li><strong>Autograder</strong> <span class="muted">(2023&ndash;24)</span>. Led a 6-person team: BERT similarity, OCR with PyTesseract, React/Flask. <a href="#journal">Demo in the Journal</a>.</li>
+        <li><strong>Uber NYC Driver Pay Prediction</strong>, <strong>SQL-AI</strong> (natural language to SQL), and <strong>Indian Weather Predictor</strong> (Kaggle ML Olympiad, top 10).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= JSSP EXPLORABLE ================= -->
+  <section id="jssp" aria-labelledby="jssp-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;2</span><h2 id="jssp-h">Essay I. Teaching a language model to read a schedule</h2></div>
+      <p class="deck">LLMs for Optimization: job-shop scheduling (JSSP). York University, Sep&ndash;Dec 2025.</p>
+      <p>A job-shop scheduling problem gives you jobs, each a fixed sequence of operations, and machines that can process one operation at a time. The goal is a schedule that finishes everything as early as possible. Solvers are good at this. The research question was whether a language model can learn to reason about it when the problem is written out as text.<button class="sn-ref" aria-expanded="false" aria-controls="sn3">3</button><span class="sidenote" id="sn3"><span class="n">3.</span>Code: <a href="https://github.com/PATELOM925/LLMs-for-Optimization-Problems">github.com/PATELOM925/LLMs-for-Optimization-Problems</a>. The 3&times;3 instance below is a toy example for exposition, not from the dataset.</span></p>
+      <p class="print-only">Pipeline: JSSP instances were converted to disjunctive graphs (PyTorch Geometric), then serialized as constraints in prompts. About 130k raw instances were filtered to 9,525 usable ones. Fine-tuning runtime fell from 70h to 11.5h with 4-bit LoRA (Unsloth) on an RTX A6000.</p>
+
+      <div class="explorable" id="stepper" aria-label="Interactive walkthrough of the JSSP pipeline">
+        <ol class="steps" role="list">
+          <li><button class="btn" type="button" data-step="0" aria-current="step">1 &middot; Instance<span>raw jobs &amp; machines</span></button></li>
+          <li><button class="btn" type="button" data-step="1">2 &middot; Graph<span>disjunctive graph</span></button></li>
+          <li><button class="btn" type="button" data-step="2">3 &middot; Prompt<span>serialized text</span></button></li>
+          <li><button class="btn" type="button" data-step="3">4 &middot; Fine-tune<span>LoRA &amp; scale</span></button></li>
+        </ol>
+        <p class="sr-only" aria-live="polite" id="stepLive"></p>
+
+        <div class="step" data-panel="0">
+          <h4>Step 1. A raw instance</h4>
+          <p>Each job lists its operations in order, as <em>(machine, processing time)</em>. Order within a job is fixed; which job goes first on a shared machine is the decision.</p>
+          <table class="inst">
+            <caption class="sr-only">Toy 3 jobs by 3 machines instance</caption>
+            <thead><tr><th scope="col">Job</th><th scope="col">Op 1</th><th scope="col">Op 2</th><th scope="col">Op 3</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">J1</th><td>M1 &middot; 3</td><td>M2 &middot; 2</td><td>M3 &middot; 2</td></tr>
+              <tr><th scope="row">J2</th><td>M1 &middot; 2</td><td>M3 &middot; 1</td><td>M2 &middot; 4</td></tr>
+              <tr><th scope="row">J3</th><td>M2 &middot; 4</td><td>M3 &middot; 3</td><td>M1 &middot; 1</td></tr>
+            </tbody>
+          </table>
+          <p class="caption">Toy instance for exposition. Real instances were larger and came from a raw pool of roughly 130k.</p>
+        </div>
+
+        <div class="step" data-panel="1">
+          <h4>Step 2. The disjunctive graph</h4>
+          <p>Each operation becomes a node. <span style="color:var(--accent-2)">Precedence edges</span> (directed) encode order within a job. <span style="color:var(--accent)">Machine-conflict edges</span> (undirected, dashed) join operations that compete for the same machine; scheduling means choosing a direction for every one of them. In the project these graphs were built with PyTorch Geometric.</p>
+          <div class="legend" role="group" aria-label="Highlight edges">
+            <button class="btn" type="button" aria-pressed="false" data-hl="prec"><span class="key p" aria-hidden="true"></span>Precedence</button>
+            <button class="btn" type="button" aria-pressed="false" data-hl="conf"><span class="key c" aria-hidden="true"></span>Machine conflict</button>
+            <button class="btn" type="button" aria-pressed="false" data-hl="M1">M1</button>
+            <button class="btn" type="button" aria-pressed="false" data-hl="M2">M2</button>
+            <button class="btn" type="button" aria-pressed="false" data-hl="M3">M3</button>
+          </div>
+          <svg id="dgraph" class="graph" viewBox="0 0 600 290" role="group" aria-label="Disjunctive graph for the toy 3 by 3 instance. Focus a node to highlight its edges."></svg>
+          <p class="readout" id="graphReadout" aria-live="polite">Hover or focus a node (Tab) to see its precedence and machine-conflict edges.</p>
+        </div>
+
+        <div class="step" data-panel="2">
+          <h4>Step 3. Serialized into a prompt</h4>
+          <p>The graph is written out as text: <span style="color:var(--accent-2)">precedence</span> as ordered chains and <span style="color:var(--accent)">machine conflicts</span> as groups that must not overlap. The model is asked for start times.</p>
+<pre class="prompt" aria-label="Illustrative serialized prompt">Problem: job-shop scheduling, 3 jobs x 3 machines.
+Minimize makespan. Each machine runs one operation at a time.
+
+<span class="hl-p">Precedence (per job, in order):
+  J1: O(1,1)[M1,3] -> O(1,2)[M2,2] -> O(1,3)[M3,2]
+  J2: O(2,1)[M1,2] -> O(2,2)[M3,1] -> O(2,3)[M2,4]
+  J3: O(3,1)[M2,4] -> O(3,2)[M3,3] -> O(3,3)[M1,1]</span>
+
+<span class="hl-c">Machine conflicts (no overlap):
+  M1: {O(1,1), O(2,1), O(3,3)}
+  M2: {O(1,2), O(2,3), O(3,1)}
+  M3: {O(1,3), O(2,2), O(3,2)}</span>
+
+Answer: a start time for every operation.</pre>
+          <p class="caption">Illustrative format written for this page. The exact serialization is in the repository.</p>
+        </div>
+
+        <div class="step" data-panel="3">
+          <h4>Step 4. Fine-tuning with 4-bit LoRA</h4>
+          <p>The base model&rsquo;s weights stay frozen and quantized to 4 bits; only a small low-rank update is trained. With Unsloth on a single RTX A6000, this made fine-tuning practical to iterate on.</p>
+          <svg class="dg" viewBox="0 0 600 120" role="img" aria-labelledby="lora-svg" style="max-width:520px">
+            <title id="lora-svg">LoRA: the output is the frozen 4-bit weight W applied to x, plus a trainable low-rank product B times A applied to x.</title>
+            <text x="20" y="66">x</text><path class="e" d="M34,62 H80"/><path class="e" d="M34,62 C60,62 60,100 80,100"/>
+            <rect class="b" x="82" y="20" width="180" height="60"/><text x="172" y="46" text-anchor="middle">W (frozen)</text><text class="s" x="172" y="64" text-anchor="middle">4-bit quantized base</text>
+            <rect class="b acc" x="82" y="88" width="80" height="26"/><text x="122" y="106" text-anchor="middle">A (r&#215;d)</text>
+            <rect class="b acc" x="182" y="88" width="80" height="26"/><text x="222" y="106" text-anchor="middle">B (d&#215;r)</text>
+            <path class="e" d="M162,101 H180"/>
+            <circle cx="320" cy="62" r="14" fill="none" stroke="#1F1B16"/><text x="320" y="67" text-anchor="middle">+</text>
+            <path class="e" d="M262,50 L306,58"/><path class="e" d="M262,101 L308,70"/>
+            <path class="e" d="M334,62 H380"/><text x="388" y="66">h = Wx + BAx</text>
+            <text class="s" x="388" y="92">only A and B are trained</text>
+          </svg>
+
+          <h4 style="margin-top:1.2rem">Figure 6. What the pipeline changed</h4>
+          <div class="btn-row" role="group" aria-label="Chart view">
+            <button class="btn" type="button" data-view="dataset" aria-pressed="true">Dataset</button>
+            <button class="btn" type="button" data-view="runtime" aria-pressed="false">Runtime</button>
+            <span style="flex:1"></span>
+            <button class="btn" type="button" id="logToggle" aria-pressed="false">Log scale</button>
+          </div>
+          <svg id="scaleChart" viewBox="0 0 600 200" role="group" aria-labelledby="chartTitle"><title id="chartTitle">Bar chart</title></svg>
+          <div class="chart-foot">
+            <p class="readout" id="chartReadout" aria-live="polite"></p>
+          </div>
+          <p class="caption" id="chartCaption"></p>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn" type="button" id="prevStep">&larr; Previous</button>
+          <span id="stepCount" class="num">Step 1 of 4</span>
+          <button class="btn" type="button" id="nextStep">Next &rarr;</button>
+        </div>
+      </div>
+
+      <p>The larger lesson was about data rather than models: most of the raw pool was not usable, and the filtering step shaped what the model could learn more than any hyperparameter did.<button class="sn-ref" aria-expanded="false" aria-controls="sn4">4</button><span class="sidenote" id="sn4"><span class="n">4.</span>The ratio is derived from the two published numbers: 9,525 usable out of roughly 130k raw, about 7%.</span></p>
+    </div>
+  </section>
+
+  <!-- ================= GUJARATI ================= -->
+  <section id="gujarati" aria-labelledby="guj-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;3</span><h2 id="guj-h">Essay II. Where a Gujarati sentiment model goes wrong</h2></div>
+      <p class="deck">Low-resource Gujarati sentiment analysis. Research assistant with Prof. Uyen T. Nguyen, York University, Mar 2026 to present.</p>
+      <p>Gujarati has little labelled sentiment data. The project combines SST-2 translated into Gujarati with GSAC, a native Gujarati dataset, and compares TF-IDF baselines against MuRIL, a multilingual model for Indian languages. The aggregate score is only the start; the interesting part is the error analysis.<button class="sn-ref" aria-expanded="false" aria-controls="sn5">5</button><span class="sidenote" id="sn5"><span class="n">5.</span>This work is ongoing, so no results are reported here. The figure shows <em>kinds</em> of error, not their frequency.</span></p>
+
+      <svg class="dg" viewBox="0 0 640 150" role="img" aria-labelledby="guj-svg">
+        <title id="guj-svg">Pipeline: SST-2 in English is translated to Gujarati; together with native GSAC it feeds TF-IDF baselines and MuRIL, whose predictions go to error analysis.</title>
+        <rect class="b" x="4" y="14" width="112" height="44"/><text x="60" y="34" text-anchor="middle">SST-2</text><text class="s" x="60" y="50" text-anchor="middle">English</text>
+        <rect class="b" x="148" y="14" width="120" height="44"/><text x="208" y="34" text-anchor="middle">Translate</text><text class="s" x="208" y="50" text-anchor="middle">to Gujarati</text>
+        <rect class="b" x="148" y="88" width="120" height="44"/><text x="208" y="108" text-anchor="middle">GSAC</text><text class="s" x="208" y="124" text-anchor="middle">native Gujarati</text>
+        <rect class="b" x="306" y="14" width="130" height="44"/><text x="371" y="41" text-anchor="middle">TF-IDF baselines</text>
+        <rect class="b" x="306" y="88" width="130" height="44"/><text x="371" y="115" text-anchor="middle">MuRIL</text>
+        <rect class="b acc" x="478" y="50" width="156" height="48"/><text x="556" y="72" text-anchor="middle">Error analysis</text><text class="s" x="556" y="88" text-anchor="middle">4 categories</text>
+        <path class="e" d="M116,36 H146"/><path class="e" d="M268,36 H304"/><path class="e" d="M268,40 L304,104"/><path class="e" d="M268,110 H304"/><path class="e" d="M268,106 L304,44"/>
+        <path class="e" d="M436,36 L476,66"/><path class="e" d="M436,110 L476,84"/>
+      </svg>
+
+      <figure class="ea" aria-labelledby="ea-cap">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;align-items:baseline">
+          <span class="fig-no sc">Figure 7</span>
+          <span class="ea-label">Illustrative examples</span>
+        </div>
+        <p style="margin:.4rem 0 0">Toggle a category to see what that kind of error looks like.</p>
+        <div class="btn-row" role="group" aria-label="Error categories">
+          <button class="btn" type="button" data-cat="negation" aria-pressed="true">Negation errors</button>
+          <button class="btn" type="button" data-cat="mistranslation" aria-pressed="false">Mistranslation</button>
+          <button class="btn" type="button" data-cat="polarity" aria-pressed="false">Polarity shift</button>
+          <button class="btn" type="button" data-cat="noise" aria-pressed="false">Social-text noise</button>
+        </div>
+        <div class="cards" id="eaCards" aria-live="polite">
+          <article class="card" data-cat="negation">
+            <div class="cat">Negation error</div>
+            <blockquote>&ldquo;The film was not bad at all.&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>positive</b></span><span>Predicted <b>negative</b></span></div>
+            <p class="why">A bag-of-words model sees &ldquo;bad&rdquo; and misses the scope of &ldquo;not&rdquo;.</p>
+          </article>
+          <article class="card" data-cat="negation">
+            <div class="cat">Negation error</div>
+            <blockquote>&ldquo;I can&rsquo;t say I enjoyed a single scene.&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>negative</b></span><span>Predicted <b>positive</b></span></div>
+            <p class="why">Negation sits far from the sentiment word it flips.</p>
+          </article>
+          <article class="card" data-cat="mistranslation" hidden>
+            <div class="cat">Mistranslation</div>
+            <blockquote>&ldquo;The plot drags, but the ending lands.&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>positive</b></span><span>Predicted <b>negative</b></span></div>
+            <p class="why">If translation drops the contrast (&ldquo;but&rdquo;), the label no longer matches the text.</p>
+          </article>
+          <article class="card" data-cat="mistranslation" hidden>
+            <div class="cat">Mistranslation</div>
+            <blockquote>&ldquo;A killer soundtrack.&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>positive</b></span><span>Predicted <b>negative</b></span></div>
+            <p class="why">An idiom translated literally carries the wrong sentiment.</p>
+          </article>
+          <article class="card" data-cat="polarity" hidden>
+            <div class="cat">Polarity shift</div>
+            <blockquote>&ldquo;I expected to hate it, and instead I loved it.&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>positive</b></span><span>Predicted <b>negative</b></span></div>
+            <p class="why">Sentiment reverses mid-sentence; the final clause decides.</p>
+          </article>
+          <article class="card" data-cat="polarity" hidden>
+            <div class="cat">Polarity shift</div>
+            <blockquote>&ldquo;Great, another two hours I will never get back.&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>negative</b></span><span>Predicted <b>positive</b></span></div>
+            <p class="why">Sarcasm: a positive word used to express the opposite.</p>
+          </article>
+          <article class="card" data-cat="noise" hidden>
+            <div class="cat">Social-text noise</div>
+            <blockquote>&ldquo;sooo gud yaar!!! must watch&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>positive</b></span><span>Predicted <b>neutral / negative</b></span></div>
+            <p class="why">Elongation, slang and non-standard spelling fall outside the vocabulary.</p>
+          </article>
+          <article class="card" data-cat="noise" hidden>
+            <div class="cat">Social-text noise</div>
+            <blockquote>&ldquo;worst. movie. ever. #nottoday&rdquo;</blockquote>
+            <div class="lbls"><span>Gold <b>negative</b></span><span>Predicted <b>uncertain</b></span></div>
+            <p class="why">Hashtags and punctuation carry sentiment that the tokenizer splits apart.</p>
+          </article>
+        </div>
+        <p class="empty" id="eaEmpty" hidden>Select a category above to show examples.</p>
+        <figcaption id="ea-cap">Figure 7. Illustrative examples only: English placeholder sentences written for this page to show each category. They are not taken from SST-2 or GSAC, and the figure shows no counts or rates.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIENCE ================= -->
+  <section id="experience" aria-labelledby="exp-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;4</span><h2 id="exp-h">Experience</h2></div>
+      <ol class="cv" reversed>
+        <li>
+          <div class="when num">Jun 2026 &ndash; Aug 2026<br>Toronto</div>
+          <div>
+            <h3>Applied AI Engineer (Co-op)</h3>
+            <div class="org">1Pour (formerly BarLens)</div>
+            <ul>
+              <li>Integrated Gemini vision suggestions into a Next.js capture workflow; people confirm uncertain results before they affect operational data (human-in-the-loop).</li>
+              <li>Built Supabase-backed, location-scoped data flows with private media retention and auditable records for reporting.</li>
+              <li>Tested changes in sandboxes and reviewed automated checks before production releases.</li>
+            </ul>
+            <p class="note">Private codebase.</p>
+          </div>
+        </li>
+        <li>
+          <div class="when num">Dec 2024 &ndash; Aug 2025<br>Remote (Nigeria)</div>
+          <div>
+            <h3>Data Engineering Intern</h3>
+            <div class="org">Uarra (formerly Sharperly)</div>
+            <ul>
+              <li>Built Python/Flask geospatial APIs for address, Plus Code and route data, with MongoDB-backed records.</li>
+              <li>Dockerized the API with authentication, rate limiting, logging and health checks.</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <div class="when num">Mar 2024 &ndash; Jul 2024<br>Remote</div>
+          <div>
+            <h3>Data Science Intern</h3>
+            <div class="org">Uarra</div>
+            <ul>
+              <li>Built Flask and GeoPandas geocoding APIs that cut Google Maps API cost by up to 45%.</li>
+              <li>Scraped 20k+ addresses into versioned datasets.</li>
+              <li>Ran RNN, autoencoder and K-Means experiments.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= CREDENTIALS ================= -->
+  <section id="credentials" aria-labelledby="cred-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;5</span><h2 id="cred-h">Education, publication &amp; skills</h2></div>
+      <ol class="cv">
+        <li>
+          <div class="when num">Sep 2025 &ndash; Aug 2026</div>
+          <div><h3>MSc Computer Science, AI Specialization</h3><div class="org">York University, Toronto &middot; GPA 3.77/4</div></div>
+        </li>
+        <li>
+          <div class="when num">Nov 2021 &ndash; May 2025</div>
+          <div><h3>BTech Computer Engineering</h3><div class="org">Pandit Deendayal Energy University, India &middot; GPA 3.47/4</div></div>
+        </li>
+        <li>
+          <div class="when num">2024</div>
+          <div><h3>Automated Sleep Stage Classification: a survey</h3><div class="org">Co-author, ADCIS 2024 (Springer)</div>
+            <p class="note">Covers 90+ studies and proposes a taxonomy across EEG, ECG, EOG and EMG signals.</p></div>
+        </li>
+        <li>
+          <div class="when">Awards</div>
+          <div><ul style="margin:0">
+            <li>Winner, AgentShyft Hackathon (May 2026)</li>
+            <li>Vector AI Scholar, York University (May 2025)</li>
+            <li>Top 10, Kaggle ML Olympiad (2024)</li>
+            <li>Mentored 10+ students</li>
+          </ul></div>
+        </li>
+        <li>
+          <div class="when">Skills</div>
+          <dl class="skills" style="margin:0">
+            <dt>Languages</dt><dd>Python, TypeScript, SQL, Java</dd>
+            <dt>ML &amp; LLMs</dt><dd>PyTorch, Hugging Face, LangChain, LlamaIndex, FAISS, LoRA/QLoRA, OpenAI API, Gemini, Google ADK, agent workflows, HITL review</dd>
+            <dt>Data &amp; backend</dt><dd>FastAPI, Flask, Airflow, PostgreSQL, Supabase, MongoDB, DuckDB</dd>
+            <dt>Web &amp; ops</dt><dd>Next.js, React, Docker, CI/CD, Vercel</dd>
+            <dt>Robotics &amp; vision</dt><dd>ROS2, OpenCV, YOLOv8</dd>
+          </dl>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= JOURNAL ================= -->
+  <section id="journal" class="journal-sec" aria-labelledby="journal-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;6</span><h2 id="journal-h">Journal</h2></div>
+      <p class="deck">Working notes, written up. Entries marked <em>in preparation</em> are placeholders in this prototype.</p>
+      <ol class="journal">
+        <li>
+          <p class="jmeta sc">Retrospective &middot; Autograder &middot; 2023&ndash;24</p>
+          <h3><a href="#journal">Revisiting Autograder: similarity scoring, OCR and a six-person team</a></h3>
+          <p class="dek">What it took to grade handwritten answers with BERT similarity, PyTesseract OCR and a React/Flask stack, and what leading the team taught me.</p>
+          <button class="facade" type="button" id="videoFacade" aria-label="Play Autograder demo video. Loads YouTube (privacy-enhanced mode).">
+            <svg viewBox="0 0 160 90" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="ruled" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 7.5H8" stroke="#3a322a" stroke-width=".5"/></pattern></defs>
+              <rect width="160" height="90" fill="#221d17"/><rect width="160" height="90" fill="url(#ruled)"/>
+              <circle class="play-bg" cx="80" cy="42" r="14" fill="none" stroke="#FBF8F1" stroke-width="1"/>
+              <path class="play" d="M75,34 L89,42 L75,50 z" fill="#FBF8F1"/>
+            </svg>
+            <span class="ft"><span class="sc">Video &middot; Autograder demo</span><br>Click to load. Nothing is fetched from YouTube until you do.</span>
+          </button>
+          <p class="caption">Plays from youtube-nocookie.com. Or <a href="https://youtu.be/oRnjj6-C8ZM">watch on YouTube</a>.</p>
+        </li>
+        <li>
+          <p class="jmeta sc">Essay &middot; Optimization &middot; in preparation</p>
+          <h3><a href="#jssp">Teaching a language model to read a disjunctive graph</a></h3>
+          <p class="dek">Serializing job-shop constraints for an LLM, and why filtering about 130k instances down to 9,525 mattered more than the model.</p>
+        </li>
+        <li>
+          <p class="jmeta sc">Notes &middot; NLP &middot; in preparation</p>
+          <h3><a href="#gujarati">Four ways a Gujarati sentiment classifier fails</a></h3>
+          <p class="dek">Negation, mistranslation, polarity shift and social-text noise, seen through TF-IDF and MuRIL.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= FIT BRIEF ================= -->
+  <section id="fit" class="fit-sec" aria-labelledby="fit-h">
+    <div class="col">
+      <div class="sec-head"><span class="sec-no sc">&sect;7</span><h2 id="fit-h">Request a fit brief</h2></div>
+      <p>For recruiters and hiring managers: pick a role, paste a job description, and get a one-page summary of the relevant evidence on this page, including gaps worth asking about.<button class="sn-ref" aria-expanded="false" aria-controls="sn6">6</button><span class="sidenote" id="sn6"><span class="n">6.</span>Prototype. The brief is assembled in your browser from the facts on this page by keyword matching. No model is called and nothing is sent anywhere.</span></p>
+      <form class="fit" id="fitForm" novalidate>
+        <div class="field">
+          <label for="role">Role</label>
+          <select id="role" name="role" required>
+            <option value="Applied AI Engineer">Applied AI Engineer</option>
+            <option value="AI/ML Engineer">AI/ML Engineer</option>
+            <option value="NLP Engineer">NLP Engineer</option>
+            <option value="Data Engineer">Data Engineer</option>
+            <option value="Data Scientist">Data Scientist</option>
+            <option value="MLOps Engineer">MLOps Engineer</option>
+            <option value="custom">Custom role&hellip;</option>
+          </select>
+        </div>
+        <div class="field" id="customField" hidden>
+          <label for="customRole">Custom role title</label>
+          <input id="customRole" name="customRole" type="text" autocomplete="off" placeholder="e.g. Machine Learning Engineer, Search">
+        </div>
+        <div class="field">
+          <label for="jd">Job description</label>
+          <textarea id="jd" name="jd" placeholder="Paste the job description here." aria-describedby="jdHint"></textarea>
+          <p class="hint" id="jdHint">Optional, but it makes the brief specific. Stays in your browser.</p>
+        </div>
+        <div><button class="btn" type="submit" style="font-size:.9rem;padding:.45rem 1rem">Generate fit brief</button></div>
+      </form>
+      <div id="briefOut" aria-live="polite"></div>
+    </div>
+  </section>
+</main>
+
+  <footer class="colophon" role="contentinfo">
+    <div class="col">
+      <h2>Colophon</h2>
+      <p>Set in the reader&rsquo;s own system serif (Iowan Old Style, Charter or Georgia, depending on the device), with old-style figures in running text and lining figures in tables. The layout borrows the margin-note tradition of Edward Tufte and Distill. Built as a single HTML file with hand-written SVG and no libraries, trackers or web fonts, so it works offline. Video loads only on request. Printing this page produces a CV.</p>
+      <p>Every figure on the page comes from Om&rsquo;s own record. Illustrative material is labelled as such. Prototype 02, September 2026.</p>
+      <p>Om M. Patel &middot; Toronto &middot; <a href="mailto:iampatelom@gmail.com">iampatelom@gmail.com</a> &middot; <a href="/go/resume">Resume</a></p>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var root = document.documentElement;
+  root.classList.remove("no-js"); root.classList.add("js");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent){
+    var n = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function h(tag, cls, text){
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  /* ---------- sidenotes ---------- */
+  document.querySelectorAll(".sn-ref").forEach(function(b){
+    b.setAttribute("aria-label", "Note " + b.textContent);
+    b.addEventListener("click", function(){
+      var n = document.getElementById(b.getAttribute("aria-controls"));
+      var open = !n.classList.contains("open");
+      n.classList.toggle("open", open);
+      b.setAttribute("aria-expanded", String(open));
+    });
+  });
+
+  /* ---------- print: open details ---------- */
+  var reopened = [];
+  window.addEventListener("beforeprint", function(){
+    document.querySelectorAll("details:not([open])").forEach(function(d){ d.open = true; reopened.push(d); });
+  });
+  window.addEventListener("afterprint", function(){ reopened.forEach(function(d){ d.open = false; }); reopened = []; });
+
+  /* ---------- JSSP stepper ---------- */
+  var stepBtns = document.querySelectorAll("#stepper .steps .btn");
+  var panels = document.querySelectorAll("#stepper .step");
+  var names = ["Raw instance", "Disjunctive graph", "Serialized prompt", "LoRA fine-tune"];
+  var cur = 0;
+  var prev = document.getElementById("prevStep"), next = document.getElementById("nextStep");
+  function go(i, announce){
+    cur = Math.max(0, Math.min(panels.length - 1, i));
+    panels.forEach(function(p, k){ p.hidden = k !== cur; });
+    stepBtns.forEach(function(b, k){ if (k === cur) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); });
+    prev.disabled = cur === 0; next.disabled = cur === panels.length - 1;
+    document.getElementById("stepCount").textContent = "Step " + (cur + 1) + " of " + panels.length;
+    if (announce) document.getElementById("stepLive").textContent = "Step " + (cur + 1) + " of 4: " + names[cur];
+    if (cur === 3) drawChart(true);
+  }
+  stepBtns.forEach(function(b){ b.addEventListener("click", function(){ go(+b.dataset.step, true); }); });
+  prev.addEventListener("click", function(){ go(cur - 1, true); });
+  next.addEventListener("click", function(){ go(cur + 1, true); });
+  document.querySelector("#stepper .steps").addEventListener("keydown", function(e){
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft"){
+      e.preventDefault();
+      go(cur + (e.key === "ArrowRight" ? 1 : -1), true);
+      stepBtns[cur].focus();
+    }
+  });
+  window.addEventListener("beforeprint", function(){ panels.forEach(function(p){ p.hidden = false; }); });
+  window.addEventListener("afterprint", function(){ go(cur, false); });
+
+  /* ---------- Disjunctive graph ---------- */
+  var g = document.getElementById("dgraph");
+  var R = 20;
+  var jobs = [
+    [["M1",3],["M2",2],["M3",2]],
+    [["M1",2],["M3",1],["M2",4]],
+    [["M2",4],["M3",3],["M1",1]]
+  ];
+  var nodes = [];
+  jobs.forEach(function(ops, j){
+    ops.forEach(function(op, o){
+      nodes.push({id:"O"+(j+1)+(o+1), job:j+1, op:o+1, m:op[0], p:op[1], x:180 + o*120, y:60 + j*85});
+    });
+  });
+  var S = {id:"S", x:55, y:145}, T = {id:"T", x:545, y:145};
+  function byId(id){ return id === "S" ? S : id === "T" ? T : nodes.filter(function(n){ return n.id === id; })[0]; }
+  var edges = [];
+  for (var j = 1; j <= 3; j++){
+    edges.push({a:"S", b:"O"+j+"1", t:"prec"});
+    edges.push({a:"O"+j+"1", b:"O"+j+"2", t:"prec"});
+    edges.push({a:"O"+j+"2", b:"O"+j+"3", t:"prec"});
+    edges.push({a:"O"+j+"3", b:"T", t:"prec"});
+  }
+  ["M1","M2","M3"].forEach(function(m){
+    var on = nodes.filter(function(n){ return n.m === m; });
+    for (var i = 0; i < on.length; i++) for (var k = i + 1; k < on.length; k++)
+      edges.push({a:on[i].id, b:on[k].id, t:"conf", m:m});
+  });
+  function trim(a, b, ra, rb){
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.sqrt(dx*dx + dy*dy);
+    return {x1:a.x + dx/L*ra, y1:a.y + dy/L*ra, x2:b.x - dx/L*rb, y2:b.y - dy/L*rb, L:L, dx:dx/L, dy:dy/L};
+  }
+  var eLayer = el("g", {}, g), nLayer = el("g", {}, g);
+  edges.forEach(function(e){
+    var a = byId(e.a), b = byId(e.b);
+    var ra = e.a === "S" ? 16 : R + 1, rb = e.b === "T" ? 18 : R + 3;
+    var t = trim(a, b, ra, rb), d;
+    if (e.t === "conf"){
+      // bend each conflict edge slightly; the long diagonal bends further to clear the centre node
+      var off = (e.a === "O11" && e.b === "O33") ? 90 : 16;
+      var mx = (t.x1 + t.x2)/2 - t.dy*off, my = (t.y1 + t.y2)/2 + t.dx*off;
+      d = "M"+t.x1+","+t.y1+" Q"+mx+","+my+" "+t.x2+","+t.y2;
+    } else {
+      d = "M"+t.x1+","+t.y1+" L"+t.x2+","+t.y2;
+    }
+    e.path = el("path", {d:d, "class":"edge " + e.t + (e.m ? " " + e.m : "")}, eLayer);
+  });
+  [S, T].forEach(function(n){
+    var gg = el("g", {"class":"node term", "aria-hidden":"true"}, nLayer);
+    el("circle", {cx:n.x, cy:n.y, r:14}, gg);
+    var tx = el("text", {x:n.x, y:n.y + 4}, gg); tx.textContent = n.id === "S" ? "start" : "end";
+    tx.setAttribute("style", "font-size:9px;font-style:italic");
+  });
+  nodes.forEach(function(n){
+    var gg = el("g", {"class":"node", tabindex:"0", role:"img",
+      "aria-label":"Job " + n.job + ", operation " + n.op + ", on machine " + n.m + ", " + n.p + " time units"}, nLayer);
+    el("circle", {cx:n.x, cy:n.y, r:R}, gg);
+    var t1 = el("text", {x:n.x, y:n.y + 4}, gg); t1.textContent = n.job + "," + n.op;
+    var t2 = el("text", {x:n.x, y:n.y + R + 13, "class":"m"}, gg); t2.textContent = n.m + " · " + n.p;
+    n.g = gg;
+    function on(){ focusNode(n); }
+    gg.addEventListener("mouseenter", on); gg.addEventListener("focus", on);
+    gg.addEventListener("mouseleave", clearFocus); gg.addEventListener("blur", clearFocus);
+  });
+  var readout = document.getElementById("graphReadout");
+  var defaultMsg = readout.textContent;
+  var hlBtns = document.querySelectorAll(".legend .btn");
+  function reset(){
+    g.classList.remove("focus");
+    edges.forEach(function(e){ e.path.classList.remove("on"); });
+    nodes.forEach(function(n){ n.g.classList.remove("on", "adj"); });
+  }
+  function focusNode(n){
+    reset(); hlBtns.forEach(function(b){ b.setAttribute("aria-pressed", "false"); });
+    g.classList.add("focus"); n.g.classList.add("on");
+    var pre = [], conf = [];
+    edges.forEach(function(e){
+      if (e.a === n.id || e.b === n.id){
+        e.path.classList.add("on");
+        var other = e.a === n.id ? e.b : e.a, on = byId(other);
+        if (on.g) on.g.classList.add("adj");
+        (e.t === "prec" ? pre : conf).push(other === "S" ? "start" : other === "T" ? "end" : "(" + on.job + "," + on.op + ")");
+      }
+    });
+    readout.textContent = "Operation (" + n.job + "," + n.op + ") on " + n.m + ": precedence with " + pre.join(" and ") + "; competes on " + n.m + " with " + conf.join(" and ") + ".";
+  }
+  function clearFocus(){ reset(); readout.textContent = defaultMsg; }
+  hlBtns.forEach(function(b){
+    b.addEventListener("click", function(){
+      var was = b.getAttribute("aria-pressed") === "true";
+      reset(); hlBtns.forEach(function(x){ x.setAttribute("aria-pressed", "false"); });
+      if (was){ readout.textContent = defaultMsg; return; }
+      b.setAttribute("aria-pressed", "true");
+      var k = b.dataset.hl; g.classList.add("focus");
+      edges.forEach(function(e){ if (e.t === k || e.m === k) e.path.classList.add("on"); });
+      if (/^M/.test(k)) nodes.forEach(function(n){ if (n.m === k) n.g.classList.add("adj"); });
+      else nodes.forEach(function(n){ n.g.classList.add("adj"); });
+      readout.textContent = k === "prec" ? "Precedence edges: fixed order of operations within each job (9 edges plus start and end)."
+        : k === "conf" ? "Machine-conflict edges: 9 pairs of operations sharing a machine. A schedule orients each one."
+        : "Machine " + k + ": three operations that must be ordered on " + k + ".";
+    });
+  });
+
+  /* ---------- Scale chart ---------- */
+  var chart = document.getElementById("scaleChart");
+  var views = {
+    dataset: {
+      title: "Instances before and after filtering",
+      rows: [{l:"Raw instances", s:"approx.", v:130000, d:"~130k"}, {l:"Usable instances", s:"after filtering", v:9525, d:"9,525"}],
+      note: "About 7% of the raw pool survived filtering (9,525 of roughly 130k).",
+      cap: "Figure 6a. JSSP instances, raw vs usable. The raw count is approximate."
+    },
+    runtime: {
+      title: "Fine-tuning runtime, hours",
+      rows: [{l:"Before", s:"fine-tuning", v:70, d:"70 h"}, {l:"4-bit LoRA", s:"Unsloth, RTX A6000", v:11.5, d:"11.5 h"}],
+      note: "Roughly 6x faster: 70 hours down to 11.5.",
+      cap: "Figure 6b. Fine-tuning wall-clock time before and after moving to 4-bit LoRA with Unsloth on an RTX A6000."
+    }
+  };
+  var view = "dataset", logScale = false, chartDrawn = false;
+  var X0 = 170, W = 360;
+  function drawChart(animate){
+    var v = views[view];
+    while (chart.lastChild) chart.removeChild(chart.lastChild);
+    var tt = el("title", {id:"chartTitle"}, chart); tt.textContent = v.title + (logScale ? " (log scale)" : "");
+    var max = v.rows[0].v;
+    function scale(x){ return logScale ? W * Math.log10(x) / Math.log10(max) : W * x / max; }
+    el("line", {x1:X0, y1:20, x2:X0, y2:170, stroke:"#1F1B16", "stroke-width":1}, chart);
+    v.rows.forEach(function(r, i){
+      var y = 34 + i*72;
+      var grp = el("g", {"class":"grp", tabindex:"0", role:"img", "aria-label": r.l + " (" + r.s + "): " + r.d}, chart);
+      el("rect", {"class":"bg", x:0, y:y - 14, width:600, height:62, fill:"transparent"}, grp);
+      var a = el("text", {x:X0 - 12, y:y + 12, "text-anchor":"end"}, grp); a.textContent = r.l;
+      var b = el("text", {x:X0 - 12, y:y + 29, "text-anchor":"end", style:"font-size:11px;fill:#5C5448;font-style:italic"}, grp); b.textContent = r.s;
+      var bar = el("rect", {"class":"bar", x:X0, y:y, width:(animate && !reduce) ? 0 : scale(r.v), height:30, fill: i === 0 ? "#D9D0BF" : (view === "dataset" ? "#1F4E79" : "#8C2F1B")}, grp);
+      var val = el("text", {"class":"v", x:X0 + scale(r.v) + 8, y:y + 20}, grp); val.textContent = r.d;
+      if (animate && !reduce) requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.setAttribute("width", scale(r.v)); }); });
+      function show(){ document.getElementById("chartReadout").textContent = r.l + " (" + r.s + "): " + r.d + ". " + v.note; }
+      grp.addEventListener("mouseenter", show); grp.addEventListener("focus", show);
+    });
+    var ax = el("text", {x:X0, y:192, style:"font-size:11px;fill:#5C5448;font-style:italic"}, chart);
+    ax.textContent = logScale ? "log scale: equal steps are equal ratios" : "linear scale, from zero";
+    document.getElementById("chartReadout").textContent = v.note;
+    document.getElementById("chartCaption").textContent = v.cap;
+    chartDrawn = true;
+  }
+  document.querySelectorAll("[data-view]").forEach(function(b){
+    b.addEventListener("click", function(){
+      view = b.dataset.view;
+      document.querySelectorAll("[data-view]").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+      drawChart(true);
+    });
+  });
+  document.getElementById("logToggle").addEventListener("click", function(){
+    logScale = !logScale; this.setAttribute("aria-pressed", String(logScale)); drawChart(true);
+  });
+  drawChart(false);
+  go(0, false);
+
+  /* ---------- Error analysis ---------- */
+  var catBtns = document.querySelectorAll("[data-cat].btn");
+  var cards = document.querySelectorAll("#eaCards .card");
+  function syncCards(){
+    var active = {};
+    catBtns.forEach(function(b){ active[b.dataset.cat] = b.getAttribute("aria-pressed") === "true"; });
+    var any = false;
+    cards.forEach(function(c){ var s = !!active[c.dataset.cat]; c.hidden = !s; if (s) any = true; });
+    document.getElementById("eaEmpty").hidden = any;
+  }
+  catBtns.forEach(function(b){
+    b.addEventListener("click", function(){
+      b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
+      syncCards();
+    });
+  });
+  syncCards();
+
+  /* ---------- Video facade ---------- */
+  var facade = document.getElementById("videoFacade");
+  facade.addEventListener("click", function(){
+    var f = document.createElement("iframe");
+    f.className = "video-frame";
+    f.src = "https://www.youtube-nocookie.com/embed/oRnjj6-C8ZM?autoplay=1&rel=0";
+    f.title = "Autograder demo video";
+    f.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+    f.setAttribute("allowfullscreen", "");
+    f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    facade.replaceWith(f);
+    f.focus();
+  });
+
+  /* ---------- Fit brief (mocked locally) ---------- */
+  var roleSel = document.getElementById("role"), customField = document.getElementById("customField");
+  roleSel.addEventListener("change", function(){
+    var c = roleSel.value === "custom";
+    customField.hidden = !c;
+    if (c) document.getElementById("customRole").focus();
+  });
+  var EVID = {
+    oneP: "Applied AI Engineer (Co-op), 1Pour: integrated Gemini vision suggestions into a Next.js capture workflow with human-in-the-loop confirmation of uncertain results.",
+    onePdata: "1Pour: Supabase-backed, location-scoped data flows with private media retention and auditable records for reporting.",
+    onePops: "1Pour: tested changes in sandboxes and reviewed automated checks before production releases.",
+    synapse: "Synapse AI: agent-led learning platform (FastAPI, Next.js, ElevenLabs). Winner, AgentShyft Hackathon.",
+    lens: "Interview Lens: role-based LLM pipelines with guarded handling of untrusted content and tenant isolation (Next.js, OpenAI, PostgreSQL).",
+    claw: "ClawCompass: capability broker routing agent tasks, redacting sensitive context, gating paid execution with x402 checks.",
+    jssp: "JSSP research: disjunctive graphs (PyTorch Geometric) serialized into prompts; 4-bit LoRA (Unsloth) cut fine-tuning from 70h to 11.5h.",
+    jsspData: "JSSP research: filtered about 130k raw instances to 9,525 usable ones.",
+    guj: "Gujarati sentiment research: translated SST-2 and native GSAC; TF-IDF baselines vs MuRIL; structured error analysis.",
+    legal: "Legal Clarity: fine-tuned Pegasus, T5 and IndicBART for multilingual legal summarization and translation.",
+    chatpdf: "ChatPDF AI: retrieval with LangChain chunking, Google GenAI embeddings, FAISS and Gemini.",
+    autograder: "Autograder: led a 6-person team; BERT similarity plus PyTesseract OCR.",
+    uarraDE: "Data Engineering Intern, Uarra: Python/Flask geospatial APIs, MongoDB records, Dockerized with auth, rate limiting, logging and health checks.",
+    uarraDS: "Data Science Intern, Uarra: geocoding APIs that cut Google Maps API cost by up to 45%; 20k+ addresses scraped into versioned datasets.",
+    ttc: "TTC Pulse: 1,004,682 normalized delay events joined with GTFS and live alerts in DuckDB/Parquet marts.",
+    pmml: "PMML Traffic Anomaly Detection: Poisson GLM vs GRU with divergence-based scoring.",
+    green: "GreenArm: ROS2 perception-to-manipulation with YOLOv8, OpenCV and ArUco calibration.",
+    kaggle: "Top 10, Kaggle ML Olympiad (Indian Weather Predictor).",
+    msc: "MSc Computer Science (AI Specialization), York University, GPA 3.77/4; Vector AI Scholar."
+  };
+  var ROLE = {
+    "Applied AI Engineer": ["oneP","synapse","lens","claw","jssp","msc"],
+    "AI/ML Engineer": ["jssp","guj","oneP","pmml","green","msc"],
+    "NLP Engineer": ["guj","legal","jssp","chatpdf","autograder","msc"],
+    "Data Engineer": ["uarraDE","ttc","onePdata","jsspData","uarraDS"],
+    "Data Scientist": ["uarraDS","ttc","pmml","guj","kaggle","msc"],
+    "MLOps Engineer": ["onePops","uarraDE","jssp","onePdata","ttc"]
+  };
+  var HAVE = [
+    ["Python",/\bpython\b/i],["TypeScript",/\btypescript\b|\bts\b/i],["SQL",/\bsql\b/i],["Java",/\bjava\b(?!script)/i],
+    ["PyTorch",/pytorch|torch\b/i],["Hugging Face",/hugging\s?face|transformers/i],["LangChain",/langchain/i],["LlamaIndex",/llama\s?index/i],
+    ["FAISS / vector search",/faiss|vector (db|database|search|store)/i],["LoRA / QLoRA / fine-tuning",/\blora\b|qlora|fine[- ]?tun/i],
+    ["OpenAI API",/openai|gpt/i],["Gemini",/gemini/i],["Google ADK",/\badk\b|agent development kit/i],["Agents",/\bagent/i],
+    ["LLMs",/\bllms?\b|large language model/i],["RAG",/\brag\b|retrieval/i],["NLP",/\bnlp\b|natural language/i],
+    ["Human-in-the-loop",/human[- ]in[- ]the[- ]loop|\bhitl\b/i],["Evaluation / error analysis",/evaluat|error analysis/i],
+    ["FastAPI",/fastapi/i],["Flask",/flask/i],["Airflow",/airflow/i],["PostgreSQL",/postgres/i],["Supabase",/supabase/i],
+    ["MongoDB",/mongo/i],["DuckDB",/duckdb/i],["Parquet",/parquet/i],["ETL / pipelines",/\betl\b|elt\b|data pipeline/i],["Geospatial",/geospatial|gis\b|geopandas/i],
+    ["Next.js",/next\.?js/i],["React",/\breact\b/i],["Docker",/docker|container/i],["CI/CD",/ci\/cd|continuous integration|github actions/i],["Vercel",/vercel/i],
+    ["ROS2",/\bros2?\b/i],["OpenCV",/opencv/i],["Computer vision",/computer vision|\bcv\b|yolo/i],["Streamlit",/streamlit/i],
+    ["Time series",/time[- ]series|forecast/i],["Statistics",/statistic|glm|regression/i]
+  ];
+  var GAPS = [
+    ["Kubernetes",/kubernetes|\bk8s\b/i],["AWS",/\baws\b|amazon web services|sagemaker/i],["GCP",/\bgcp\b|google cloud|vertex/i],["Azure",/azure/i],
+    ["Spark",/\bspark\b|pyspark/i],["Kafka",/kafka/i],["Snowflake",/snowflake/i],["Databricks",/databricks/i],["dbt",/\bdbt\b/i],
+    ["Terraform",/terraform/i],["TensorFlow",/tensorflow|keras/i],["MLflow",/mlflow/i],["Scala",/\bscala\b/i],["Go",/\bgolang\b/i],
+    ["Rust",/\brust\b/i],["C++",/c\+\+/i]
+  ];
+  document.getElementById("fitForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var role = roleSel.value, title = role;
+    if (role === "custom"){
+      title = document.getElementById("customRole").value.trim();
+      if (!title){ document.getElementById("customRole").focus(); document.getElementById("customRole").setAttribute("aria-invalid","true"); return; }
+      document.getElementById("customRole").removeAttribute("aria-invalid");
+    }
+    var jd = document.getElementById("jd").value;
+    var matched = HAVE.filter(function(x){ return x[1].test(jd); }).map(function(x){ return x[0]; });
+    var gaps = GAPS.filter(function(x){ return x[1].test(jd); }).map(function(x){ return x[0]; });
+    var keys;
+    if (ROLE[role]) keys = ROLE[role];
+    else {
+      // custom role: rank evidence by keyword overlap with title + JD
+      var txt = title + " " + jd;
+      var score = {};
+      Object.keys(EVID).forEach(function(k){
+        score[k] = HAVE.filter(function(x){ return x[1].test(txt) && x[1].test(EVID[k]); }).length;
+      });
+      keys = Object.keys(EVID).sort(function(a, b){ return score[b] - score[a]; }).slice(0, 5);
+    }
+    var out = document.getElementById("briefOut");
+    out.textContent = "";
+    var box = h("div", "brief"); box.setAttribute("role", "region"); box.setAttribute("aria-label", "Fit brief (prototype)");
+    box.appendChild(h("span", "stamp", "Prototype · mocked output"));
+    box.appendChild(h("p", "small muted sc", "Fit brief"));
+    box.appendChild(h("h4", null, "Om M. Patel for " + title));
+    box.appendChild(h("p", null, "Applied AI Engineer in Toronto, available for full-time roles in Canada. The most relevant evidence on record:"));
+    box.appendChild(h("h5", null, "Relevant evidence"));
+    var ul = h("ul"); keys.forEach(function(k){ ul.appendChild(h("li", null, EVID[k])); }); box.appendChild(ul);
+    if (jd.trim()){
+      box.appendChild(h("h5", null, "Requirements in the JD with evidence"));
+      var c1 = h("ul", "chips");
+      if (matched.length) matched.forEach(function(m){ c1.appendChild(h("li", "chip ok", m)); });
+      else c1.appendChild(h("li", "chip", "No recognised skills found. Try pasting the full requirements list."));
+      box.appendChild(c1);
+      if (gaps.length){
+        box.appendChild(h("h5", null, "Mentioned in the JD, not evidenced here (worth asking about)"));
+        var c2 = h("ul", "chips"); gaps.forEach(function(m){ c2.appendChild(h("li", "chip gap", m)); }); box.appendChild(c2);
+      }
+    } else {
+      box.appendChild(h("p", "small muted", "Paste a job description to see which requirements are evidenced and which are not."));
+    }
+    box.appendChild(h("h5", null, "Next step"));
+    var p = h("p", "small"); p.appendChild(document.createTextNode("Resume at /go/resume · iampatelom@gmail.com")); box.appendChild(p);
+    box.appendChild(h("p", "small muted", "Generated in your browser by keyword matching against facts on this page. No model call, nothing stored or sent."));
+    out.appendChild(box);
+    box.setAttribute("tabindex", "-1"); box.focus({preventScroll:reduce});
+    if (!reduce) box.scrollIntoView({behavior:"smooth", block:"nearest"});
+  });
+})();
+</script>
+</body>
+</html>

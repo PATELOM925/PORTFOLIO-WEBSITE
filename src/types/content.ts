@@ -18,7 +18,20 @@ export interface ProjectFrontmatter {
   approach?: string;
   result?: string;
   thumbnail?: string;
+  category?: ProjectCategory;
+  highlight?: string;
+  pipeline?: string[];
 }
+
+export const PROJECT_CATEGORIES = [
+  "Applied AI & Agents",
+  "Data Engineering & Analytics",
+  "NLP & ML Research",
+  "Computer Vision & Robotics",
+  "Apps & Tools"
+] as const;
+
+export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 export interface BlogFrontmatter {
   title: string;

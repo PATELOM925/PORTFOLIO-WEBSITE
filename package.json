@@ -8,6 +8,7 @@
     "prebuild": "npm run generate:content",
     "dev": "next dev",
     "build": "next build",
+    "test:portfolio": "node --test scripts/portfolio-content.test.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

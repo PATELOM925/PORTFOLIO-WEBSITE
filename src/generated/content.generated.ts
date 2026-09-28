@@ -4,11 +4,12 @@ export const projectRecords = [
     "frontmatter": {
       "title": "Autograder: Precision in Every Grade",
       "slug": "autograder",
-      "date": "2024-08-01",
+      "date": "2023-11-30",
       "preview": "Semi-automated grading system with BERT-based NLP and OCR to evaluate typed and handwritten responses.",
       "tags": [
         "NLP",
         "BERT",
+        "spaCy",
         "OCR",
         "React",
         "Flask"
@@ -16,53 +17,105 @@ export const projectRecords = [
       "status": "published",
       "github": "https://github.com/PATELOM925/AutoGrader",
       "youtubeUrl": "https://youtu.be/oRnjj6-C8ZM?si=bJebTWnANw7fOfsn",
-      "featured": true,
+      "featured": false,
       "problem": "Manual grading is slow and inconsistent when submissions include both typed and handwritten responses.",
       "approach": "I combined semantic similarity, OCR extraction, and a grading workflow UI to support semi-automated evaluation.",
-      "result": "The project demonstrated how NLP and OCR can reduce repetitive grading effort while still keeping human review in the loop."
+      "result": "The project demonstrated how NLP and OCR can reduce repetitive grading effort while still keeping human review in the loop.",
+      "category": "NLP & ML Research",
+      "highlight": "Video demo",
+      "pipeline": [
+        "Typed or handwritten answer",
+        "OCR (PyTesseract)",
+        "BERT semantic similarity",
+        "Suggested score",
+        "Human review"
+      ]
     },
-    "content": "## Design\nThe main idea was not to remove human evaluation completely, but to shorten the repetitive parts of grading.\n\n## Stack choices\n- BERT-based semantic comparison for meaning-aware answer matching.\n- OCR for scanned or handwritten text extraction.\n- React + Flask for an end-to-end grading flow.\n\n## Practical constraint\nThe system worked best as a reviewer assistant, not as a fully autonomous grader."
+    "content": "## Highlights\n- Led a 6-person team to build an auto-grading pipeline (BERT-uncased, spaCy, PyTesseract) with a React front-end and Flask backend, enabling semi-automated grading for handwritten and typed responses.\n\n## Design\nThe main idea was not to remove human evaluation completely, but to shorten the repetitive parts of grading.\n\n## Stack choices\n- BERT-based semantic comparison for meaning-aware answer matching.\n- OCR for scanned or handwritten text extraction.\n- React + Flask for an end-to-end grading flow.\n\n## Practical constraint\nThe system worked best as a reviewer assistant, not as a fully autonomous grader."
   },
   {
     "frontmatter": {
       "title": "ChatPDF AI",
       "slug": "chatpdf-ai",
-      "date": "2024-09-20",
-      "preview": "Retrieval-grounded document QA system using LangChain and FAISS with agentic query workflows.",
+      "date": "2024-02-28",
+      "preview": "Retrieval-first document QA with LangChain + FAISS and OpenAI Agents SDK workflows, reaching 80% accuracy on a manual test set (N ≤ 50).",
       "tags": [
         "RAG",
         "LangChain",
         "FAISS",
-        "Agents",
-        "LLM"
+        "OpenAI Agents SDK",
+        "Streamlit"
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/ChatPDF-AI",
-      "demoUrl": "https://om-m-patel.streamlit.app/",
-      "featured": true,
+      "featured": false,
       "problem": "Users need grounded answers over long PDFs without the model inventing unsupported claims.",
-      "approach": "I built a retrieval-first pipeline with chunking, vector indexing, and controlled context assembly before answer generation.",
-      "result": "The system was most useful when retrieval quality was treated as the main product surface instead of an invisible backend detail."
+      "approach": "I built a retrieval-first pipeline with LangChain chunking and FAISS vector search, then added OpenAI Agents SDK workflows for document querying and response generation.",
+      "result": "The Streamlit app reached 80% accuracy on a manual test set (N ≤ 50) with answers grounded in source text.",
+      "category": "Applied AI & Agents",
+      "pipeline": [
+        "Upload PDF",
+        "LangChain chunking",
+        "Embeddings",
+        "FAISS index",
+        "Top-k retrieval",
+        "Agentic answer (OpenAI Agents SDK)",
+        "Streamlit UI"
+      ],
+      "highlight": "80% on manual test set"
     },
-    "content": "## Core build\nThis project combines document chunking, embedding-based retrieval, and answer generation into a practical PDF assistant.\n\n## What I learned\n- Chunking strategy affects answer quality more than people expect.\n- Retrieval diagnostics are essential; the model cannot recover from weak context.\n- Grounding checks are necessary if the app is meant to feel trustworthy."
+    "content": "## Highlights\n- Built a retrieval-first document QA system using LangChain + FAISS to ground answers in source text.\n- Integrated OpenAI Agents SDK for agentic workflows in document querying and response generation, resulting in 80% accuracy on a manual test set (N ≤ 50). Deployed on Streamlit.\n\n## Core build\nThis project combines LangChain document chunking, embedding-based FAISS vector search, and OpenAI Agents SDK workflows for querying and answer generation in a Streamlit app.\n\n## What I learned\n- Chunking strategy affects answer quality more than people expect.\n- Retrieval quality limits answer quality; the model cannot recover from weak context.\n- Retrieved passages should remain inspectable when assessing an answer."
+  },
+  {
+    "frontmatter": {
+      "title": "ClawCompass",
+      "slug": "clawcompass",
+      "date": "2026-05-26",
+      "preview": "Capability broker that routes agent tasks to the right tool, redacts sensitive context, and gates paid execution.",
+      "tags": [
+        "AI Agents",
+        "TypeScript",
+        "x402",
+        "Security",
+        "Marketplace"
+      ],
+      "status": "published",
+      "github": "https://github.com/PATELOM925/openclaw-hack-ttw26",
+      "featured": true,
+      "problem": "Agent builders lose time choosing, configuring, and trusting the growing mix of skills, plugins, MCP servers, and sub-agents.",
+      "approach": "Our team built a broker that analyzes a task, redacts sensitive context, ranks capabilities, creates payment-gated transactions, and pauses high-risk actions for approval.",
+      "result": "The local MVP delivers buyer and seller flows, x402 payment-state checks, capability execution, transaction history, and outcome reputation tracking.",
+      "category": "Applied AI & Agents",
+      "pipeline": [
+        "Agent task",
+        "Capability routing",
+        "Context redaction",
+        "x402 payment gate",
+        "Execution",
+        "Reputation update"
+      ]
+    },
+    "content": "## What I built\n\n- Routed agent requests to ranked capabilities based on task, context, budget, and constraints.\n- Redacted secret-like inputs before recommendation and execution.\n- Enforced payment and explicit-approval gates before protected actions.\n- Built buyer, seller, transaction, security, and reputation views for the demo workflow.\n\n## Hackathon context\n\nClawCompass was built for the OpenClaw / GOAT Toronto Tech Week hackathon. External wallet, x402, and mainnet registration steps stayed behind explicit approval gates."
   },
   {
     "frontmatter": {
       "title": "Uber NYC Driver Pay Prediction",
       "slug": "driver-pay-forecasting",
-      "date": "2024-06-20",
-      "preview": "Comparative ML and deep learning study for Uber NYC driver pay prediction with analysis dashboards.",
+      "date": "2024-05-31",
+      "preview": "Compared ML and deep learning models for Uber NYC driver pay, reaching almost 12% lower RMSE than baseline, with Tableau feature analysis.",
       "tags": [
         "Forecasting",
         "LSTM",
         "Random Forest",
-        "PowerBI"
+        "Tableau"
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/Uber_NYC_Driver_Pay_Prediction",
-      "featured": false
+      "featured": false,
+      "category": "Data Engineering & Analytics",
+      "highlight": "12% lower RMSE"
     },
-    "content": "## Summary\nComparative modeling project across ANN, Random Forest, LSTM, BiLSTM, and hybrid models for pay prediction.\n\n## Highlights\n- Benchmarked multiple model families instead of assuming one sequence model would dominate.\n- Evaluated temporal and location-sensitive pay drivers.\n- Built PowerBI views to make results easier to inspect beyond notebook outputs."
+    "content": "## Highlights\n- Compared ML-DL models, ran architecture and hyperparameter searches achieving almost 12% lower RMSE vs. baseline.\n- Visualized features affecting driver pay using Tableau.\n\n## Summary\nComparative modeling project across ANN, Random Forest, LSTM, BiLSTM, and hybrid models for pay prediction.\n\n## Highlights\n- Benchmarked multiple model families instead of assuming one sequence model would dominate.\n- Evaluated temporal and location-sensitive pay drivers.\n- Built Tableau views to make results easier to inspect beyond notebook outputs."
   },
   {
     "frontmatter": {
@@ -80,7 +133,8 @@ export const projectRecords = [
       "featured": false,
       "problem": "Students usually know their deadlines but still struggle to convert them into a realistic revision plan.",
       "approach": "I built a lightweight planning workflow that turns exam constraints into a staged study plan with prioritization logic.",
-      "result": "The project emphasized usable planning outputs over complex modeling and helped me think more carefully about decision support UX."
+      "result": "The project emphasized usable planning outputs over complex modeling and helped me think more carefully about decision support UX.",
+      "category": "Apps & Tools"
     },
     "content": "## Summary\nThis is a compact planning tool designed around a practical use case: reduce the friction between knowing what to study and deciding what to do next.\n\n## Notes\n- Converts high-level deadlines into an ordered prep plan.\n- Emphasizes sequencing and prioritization.\n- Useful as a small product-thinking project rather than a pure ML artifact."
   },
@@ -98,35 +152,23 @@ export const projectRecords = [
         "OpenCV"
       ],
       "status": "published",
-      "featured": true,
-      "isPrivateSource": true,
+      "github": "https://github.com/Ali7109/GreenArm",
+      "demoUrl": "https://green-arm.vercel.app",
+      "featured": false,
       "problem": "Build an end-to-end robotic workflow that can classify and pick waste objects reliably in a fixed workspace.",
       "approach": "I helped build a ROS2 architecture connecting detection, calibration, coordinate mapping, and arm control.",
-      "result": "The system achieved repeatable placement precision once calibration and transform caching were handled carefully."
+      "result": "The system achieved repeatable placement precision once calibration and transform caching were handled carefully.",
+      "category": "Computer Vision & Robotics",
+      "highlight": "Live demo",
+      "pipeline": [
+        "Camera frame",
+        "YOLOv8 detection",
+        "ArUco calibration",
+        "Pixel-to-robot transform",
+        "Arm pick & place"
+      ]
     },
     "content": "## Summary\nGreenArm was an integration-heavy robotics project rather than a single-model exercise.\n\n## What mattered\n- Stable calibration with ArUco markers.\n- Reliable pixel-to-robot coordinate conversion.\n- Better handling of detection-to-actuation latency.\n- Clear separation between perception logic and arm control."
-  },
-  {
-    "frontmatter": {
-      "title": "PixelVault: Image Upload & Gallery Web App",
-      "slug": "image-processing-project",
-      "date": "2024-04-04",
-      "preview": "Full-stack image upload and retrieval app with React frontend, Flask API, and MongoDB-backed image storage.",
-      "tags": [
-        "React",
-        "Flask",
-        "MongoDB",
-        "REST API",
-        "Python"
-      ],
-      "status": "published",
-      "github": "https://github.com/PATELOM925/Image-Processing-Project---Python-Based-",
-      "featured": false,
-      "problem": "The original repo is more than a generic image processing exercise. It is really a full upload, retrieval, and gallery workflow with backend persistence.",
-      "approach": "I renamed it to reflect the actual implementation: React client, Flask API, image handling routes, and MongoDB-backed storage/retrieval.",
-      "result": "The revised framing is clearer for recruiters because it describes the app as a product workflow instead of an overly broad course-project label."
-    },
-    "content": "## Why I renamed it\nThe old title, \"Image Processing Project (Python-Based)\", was too vague and undersold what the repo actually does.\n\n## What the repo really shows\n- React frontend for image interactions.\n- Flask backend endpoints for upload and retrieval.\n- Persistent data handling with MongoDB.\n- A more product-like gallery app structure than a single algorithm demo.\n\n## Better framing\n\"PixelVault\" makes the project easier to remember and aligns the name with the user-facing behavior in the codebase."
   },
   {
     "frontmatter": {
@@ -143,15 +185,47 @@ export const projectRecords = [
       "status": "published",
       "github": "https://github.com/PATELOM925/Indian-Weather-Predictor-Kaggle",
       "demoUrl": "https://www.kaggle.com/code/iamommpatel/indian-weather-predictor",
-      "featured": false
+      "featured": false,
+      "category": "Data Engineering & Analytics",
+      "highlight": "Kaggle top-10"
     },
     "content": "## Summary\nCompetition-focused weather forecasting analysis using multiple regression models and systematic error comparison.\n\n## Highlights\n- Compared tree-based and linear baselines before converging on stronger candidates.\n- Used exploratory analysis to understand feature behavior instead of tuning blindly.\n- Reached a top-10 leaderboard finish in the competition context."
   },
   {
     "frontmatter": {
+      "title": "Interview Lens",
+      "slug": "interview-lens",
+      "date": "2026-06-05",
+      "preview": "ARI module that turns a candidate's take-home project into a structured, role-specific interview brief.",
+      "tags": [
+        "Applied AI",
+        "Next.js",
+        "OpenAI",
+        "PostgreSQL",
+        "Security"
+      ],
+      "status": "published",
+      "featured": true,
+      "problem": "Interviewers can spend an hour reading an unfamiliar take-home project before they know which technical decisions to probe.",
+      "approach": "We built an ARI module that ingests code or a public repository and returns a structured brief, architecture notes, file-grounded questions, answer rubrics, and a signal report.",
+      "result": "The module supports live notes and scoring, role-based candidate pipelines, tenant isolation, and guarded handling of untrusted project content.",
+      "category": "Applied AI & Agents",
+      "pipeline": [
+        "Take-home repository",
+        "Untrusted-content guard",
+        "Project analysis",
+        "Role-specific rubric",
+        "Interview brief",
+        "Live notes & scoring"
+      ]
+    },
+    "content": "## What I built\n\n- Turned candidate code and README content into a structured interview brief in one analysis flow.\n- Generated easy, medium, and hard questions tied to specific files, with strong-answer rubrics.\n- Added live interviewer notes, scoring, and role-based pipeline summaries.\n- Treated candidate content as untrusted input with prompt-injection guards, schema validation, and sanitized rendering.\n\n## Source availability\n\nInterview Lens was built as an ARI hackathon module. The local project checkout has no verified public GitHub remote, so this portfolio does not publish a repository link."
+  },
+  {
+    "frontmatter": {
       "title": "Legal Clarity",
       "slug": "legal-clarity",
-      "date": "2024-11-10",
+      "date": "2024-11-30",
       "preview": "Fine-tuned multilingual transformer summarization and translation pipeline for legal text, packaged as a Flask service.",
       "tags": [
         "NLP",
@@ -161,12 +235,19 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/Legal_Clarity",
-      "featured": true,
+      "featured": false,
       "problem": "Legal text is dense, multilingual, and costly to triage manually.",
       "approach": "I fine-tuned transformer models for summarization and translation, then wrapped the workflow in a reusable Flask service.",
-      "result": "The project translated research-style NLP work into a more deployable document simplification workflow."
+      "result": "The project translated research-style NLP work into a more deployable document simplification workflow.",
+      "category": "NLP & ML Research",
+      "pipeline": [
+        "Legal document",
+        "Fine-tuned summarizer",
+        "Translation",
+        "Flask inference API"
+      ]
     },
-    "content": "## Summary\nThis project focuses on making legal text easier to process through summarization and translation workflows.\n\n## What stands out\n- Fine-tuned Pegasus, T5, and IndicBARTSS variants.\n- Worked across multilingual legal content.\n- Packaged the workflow behind Flask endpoints for easier integration."
+    "content": "## Highlights\n- Fine-tuned transformer models (Pegasus, T5, IndicBARTSS) in PyTorch to summarize and translate long-form, multilingual legal text for faster review.\n- Packaged the pipeline into a Flask service for repeatable inference and downstream integration.\n\n## Summary\nThis project focuses on making legal text easier to process through summarization and translation workflows.\n\n## What stands out\n- Fine-tuned Pegasus, T5, and IndicBARTSS variants.\n- Worked across multilingual legal content.\n- Packaged the workflow behind Flask endpoints for easier integration."
   },
   {
     "frontmatter": {
@@ -182,10 +263,19 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/LLMs-for-Optimization-Problems",
-      "featured": true,
+      "featured": false,
       "problem": "Classical optimization problems carry hard feasibility constraints that vanilla language models often violate.",
       "approach": "I modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts explicitly, and paired that representation with LoRA fine-tuning.",
-      "result": "The pipeline produced a much more structured optimization workflow and made training/runtime tradeoffs manageable for course-scale experimentation."
+      "result": "The pipeline produced a much more structured optimization workflow and made training/runtime tradeoffs manageable for course-scale experimentation.",
+      "category": "NLP & ML Research",
+      "highlight": "70h → 11.5h fine-tuning",
+      "pipeline": [
+        "JSSP instance",
+        "Disjunctive graph",
+        "Serialized constraints",
+        "4-bit LoRA fine-tune",
+        "Schedule output"
+      ]
     },
     "content": "## What I built\nI treated scheduling as a structure-first problem instead of a pure prompting problem. The project converts job shop instances into graph-shaped representations so the model sees precedence and machine conflicts explicitly.\n\n## Core decisions\n- Serialized machine and operation constraints instead of relying on free-form descriptions.\n- Used disjunctive graphs to preserve conflict structure.\n- Applied 4-bit LoRA fine-tuning to keep experimentation feasible.\n- Focused on failure slices where outputs looked plausible but violated constraints.\n\n## What mattered most\nThe project became stronger once I stopped asking whether the LLM could \"solve optimization\" in the abstract and started asking whether the representation exposed enough constraint information for the model to reason over."
   },
@@ -203,7 +293,8 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/MemeApp",
-      "featured": false
+      "featured": false,
+      "category": "Apps & Tools"
     },
     "content": "## Summary\nAndroid app focused on media consumption and API-driven content loading.\n\n## Highlights\n- Consumed Reddit APIs via Retrofit.\n- Used Glide for image loading and caching.\n- Built a smooth Kotlin-based browsing flow for continuous content consumption."
   },
@@ -222,10 +313,17 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/PMML_Project",
-      "featured": true,
+      "featured": false,
       "problem": "Traffic streams contain strong temporal patterns, noise, and event-driven spikes that make anomaly detection easy to overfit.",
       "approach": "I compared a probabilistic GLM baseline against a GRU sequence model, then analyzed how calibration and divergence-based scoring behaved under real traffic variation.",
-      "result": "The work clarified when simpler probabilistic models remain competitive and where sequence models help once temporal context matters."
+      "result": "The work clarified when simpler probabilistic models remain competitive and where sequence models help once temporal context matters.",
+      "category": "NLP & ML Research",
+      "pipeline": [
+        "Traffic counts",
+        "Poisson GLM baseline",
+        "GRU sequence model",
+        "Divergence anomaly scoring"
+      ]
     },
     "content": "## Focus\nThis project was less about chasing one model score and more about understanding what different anomaly detectors assume.\n\n## What I compared\n- Poisson/GLM-style probabilistic modeling for interpretable traffic count behavior.\n- GRU-based sequence modeling for temporal dependency capture.\n- Divergence-oriented anomaly scoring to inspect shifts in learned behavior.\n\n## Main lesson\nIf the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals. Evaluation had to stay tied to practical alert usefulness, not just loss curves."
   },
@@ -243,9 +341,73 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/SQL-AI",
-      "featured": false
+      "featured": false,
+      "category": "Applied AI & Agents"
     },
     "content": "## Summary\nUser-facing app that converts natural language prompts into SQL queries for uploaded databases.\n\n## Highlights\n- Built a natural-language-to-query workflow with practical execution support.\n- Framed the problem as a usability layer over databases, not only a prompting exercise.\n- Useful for showing how LLM interfaces can support analyst-style workflows."
+  },
+  {
+    "frontmatter": {
+      "title": "Synapse AI",
+      "slug": "synapse-ai",
+      "date": "2026-05-31",
+      "preview": "Agent-oriented learning platform that turns uploaded materials into personalized study outputs with teacher oversight.",
+      "tags": [
+        "AI Agents",
+        "FastAPI",
+        "Next.js",
+        "ElevenLabs",
+        "HITL"
+      ],
+      "status": "published",
+      "github": "https://github.com/PATELOM925/Synapse_AgentShfyt_Hackathon",
+      "featured": true,
+      "problem": "Students need personalized study support, but teachers also need visibility into diagnostics, progress, and the learning materials being generated.",
+      "approach": "Our team combined agent workflows, FastAPI, and Next.js to generate notes, flashcards, quizzes, podcasts, and tutoring experiences from uploaded course materials.",
+      "result": "Synapse AI won the AgentShyft Hackathon in May 2026.",
+      "category": "Applied AI & Agents",
+      "highlight": "Hackathon winner",
+      "pipeline": [
+        "Upload learning material",
+        "Diagnostics",
+        "Agent planner",
+        "Notes, flashcards, quizzes, podcasts",
+        "Teacher review",
+        "Student study & analytics"
+      ]
+    },
+    "content": "## Highlights\n- Won a hackathon building an AI agent-led teaching platform supporting diagnostics, tutor streaming, classroom invites, and teacher analytics.\n- Built with FastAPI, Next.js, and the ElevenLabs API to transform uploaded learning materials into personalized study outputs such as notes, flashcards, quizzes, and podcasts.\n\n## My contribution\n\nI worked across the agent-oriented backend and product workflow, connecting diagnostics, tutoring, study-content generation, classroom invites, and teacher analytics.\n\n## Why the workflow mattered\n\nThe system was designed around teacher orchestration rather than a standalone chatbot. Generated learning material stays connected to source content, student needs, and teacher oversight.\n\n## Recognition\n\nWinner, AgentShyft Hackathon, May 2026."
+  },
+  {
+    "frontmatter": {
+      "title": "TTC Interactive Dashboard",
+      "slug": "ttc-interactive-dashboard",
+      "date": "2026-04-30",
+      "preview": "End-to-end TTC reliability platform covering 1,004,682 delay events across bus, subway, GTFS, and live-alert data.",
+      "tags": [
+        "Data Engineering",
+        "Streamlit",
+        "DuckDB",
+        "Parquet",
+        "GTFS-RT"
+      ],
+      "status": "published",
+      "github": "https://github.com/PATELOM925/TTC-PULSE",
+      "featured": true,
+      "problem": "TTC delay history, schedules, route metadata, and live alerts arrive in different formats, which makes reliable route and station analysis difficult.",
+      "approach": "Our team built a reproducible DuckDB and Parquet pipeline, linked delay records to GTFS entities, and served the analytical marts through a multi-page Streamlit dashboard.",
+      "result": "The platform turns 1,004,682 normalized delay events into route, station, time-pattern, cause, and live-alert views with explicit data-quality checks.",
+      "category": "Data Engineering & Analytics",
+      "highlight": "1,004,682 delay events",
+      "pipeline": [
+        "TTC delay data + GTFS + live alerts",
+        "Normalize & join",
+        "DuckDB / Parquet marts",
+        "Route & station quality checks",
+        "Streamlit views + ADK assistant"
+      ]
+    },
+    "content": "## Highlights\n- Co-developed a Python ingestion and normalization pipeline joining TTC delay data with static GTFS and live service alerts.\n- Processed over 1 million delay events into DuckDB and Parquet data marts, with checks for unmatched route and station mappings and reproducible Streamlit views.\n- Integrated Google ADK for in-app AI bot support to dive deeper into analysis for better UX.\n\n## Data workflow\n\n- Processed 1,004,682 bus and subway delay events into query-ready DuckDB and Parquet marts.\n- Linked historical records to static GTFS routes and stations, with QA for unmatched and ambiguous mappings.\n- Added GTFS-RT service-alert ingestion and validation alongside the historical data.\n- Structured the pipeline as raw, bronze, silver, and gold layers for repeatable rebuilds.\n\n## Dashboard focus\n\n- Ranked recurring route and station hotspots using frequency, severity, regularity, and cause mix.\n- Built views for monthly trends, weekday-hour patterns, cause signatures, and entity drill-downs.\n- Compared captured live alerts with historical reliability signals and surfaced coverage limits.\n- Kept metric definitions, lineage, and data-quality caveats visible in the interface.\n\n## Deployment status\n\nThe source repository is public. No verified public Vercel deployment is currently available, so this portfolio links only to the confirmed repository."
   }
 ] as const;
 
@@ -263,7 +425,7 @@ export const blogRecords = [
       ],
       "status": "published"
     },
-    "content": "GreenArm taught me that robotics projects often fail at the interfaces, not inside the individual components. A detector can look good, a robot arm can move correctly, and the system can still miss the object because calibration, frame transforms, or timing assumptions are slightly off.\n\nThe most important part of the pipeline was not YOLO itself. It was the chain from image-space detection to a stable robot-space action. Camera calibration and ArUco-based workspace alignment ended up being the pieces that determined whether the rest of the system felt reliable. Small errors there propagated into picking mistakes very quickly.\n\nAnother lesson was that cached transforms and environment assumptions can help or hurt depending on how disciplined the setup is. In a fixed workspace, caching saves time and reduces repeated computation. But if the camera shifts or the workspace drifts and the cache is treated as truth, the system quietly degrades. That makes validation routines just as important as the calibration logic itself.\n\nWhat I took away from this project is that end-to-end robotics reliability comes from integration discipline. Vision accuracy alone is not enough. The actual product question is whether detection, geometry, and actuation stay coherent together under real operating conditions."
+    "content": "GreenArm taught me that robotics projects often fail at the interfaces, not inside the individual components. A detector can look good, a robot arm can move correctly, and the system can still miss the object because calibration, frame transforms, or timing assumptions are slightly off.\n\n```pipeline\n{\"title\": \"Detection-to-actuation chain\", \"steps\": [\"Camera frame\", \"YOLOv8 detection\", \"ArUco workspace calibration\", \"Pixel-to-robot transform\", \"Arm pick & place\"]}\n```\n\nThe most important part of the pipeline was not YOLO itself. It was the chain from image-space detection to a stable robot-space action. Camera calibration and ArUco-based workspace alignment ended up being the pieces that determined whether the rest of the system felt reliable. Small errors there propagated into picking mistakes very quickly.\n\nAnother lesson was that cached transforms and environment assumptions can help or hurt depending on how disciplined the setup is. In a fixed workspace, caching saves time and reduces repeated computation. But if the camera shifts or the workspace drifts and the cache is treated as truth, the system quietly degrades. That makes validation routines just as important as the calibration logic itself.\n\nWhat I took away from this project is that end-to-end robotics reliability comes from integration discipline. Vision accuracy alone is not enough. The actual product question is whether detection, geometry, and actuation stay coherent together under real operating conditions."
   },
   {
     "frontmatter": {
@@ -279,7 +441,7 @@ export const blogRecords = [
       ],
       "status": "published"
     },
-    "content": "When I started working on LLMs for optimization, the tempting framing was to ask whether a language model could solve Job Shop Scheduling directly. That turned out to be the wrong first question. The useful question was whether I could expose the structure of the optimization problem clearly enough for the model to reason over it.\n\nThe most important change I made was representing each instance as a disjunctive graph and then serializing the hard constraints explicitly. Once precedence rules and machine conflicts were visible in the input format, the model outputs became easier to inspect. They were still wrong in many cases, but they were wrong in more diagnosable ways.\n\nAnother practical lesson was that feasibility matters more than fluency. A schedule can sound coherent and still be invalid. I had to inspect violations systematically instead of treating natural-sounding output as a sign of progress. That forced me to track constraint failures, not just generic text quality.\n\nFine-tuning also became much more manageable after I reduced the runtime burden with 4-bit LoRA. That did not magically solve the core reasoning problem, but it let me iterate faster and test representation changes without turning every experiment into a multi-day wait.\n\nThe biggest caveat is that optimization tasks punish vague prompting. If the structure is underspecified, the model fills gaps with plausible but infeasible decisions. My main takeaway is simple: for constrained optimization, representation design is the real work. The model only becomes useful after the structure is explicit enough to support valid reasoning."
+    "content": "When I started working on LLMs for optimization, the tempting framing was to ask whether a language model could solve Job Shop Scheduling directly. That turned out to be the wrong first question. The useful question was whether I could expose the structure of the optimization problem clearly enough for the model to reason over it.\n\nThe most important change I made was representing each instance as a disjunctive graph and then serializing the hard constraints explicitly. Once precedence rules and machine conflicts were visible in the input format, the model outputs became easier to inspect. They were still wrong in many cases, but they were wrong in more diagnosable ways.\n\n```pipeline\n{\"title\": \"Step through the JSSP pipeline\", \"steps\": [\"Raw JSSP instance\", \"Disjunctive graph (PyTorch Geometric)\", \"Serialized precedence + machine constraints\", \"4-bit LoRA fine-tune\", \"Schedule output + violation check\"]}\n```\n\nAnother practical lesson was that feasibility matters more than fluency. A schedule can sound coherent and still be invalid. I had to inspect violations systematically instead of treating natural-sounding output as a sign of progress. That forced me to track constraint failures, not just generic text quality.\n\nFine-tuning also became much more manageable after I reduced the runtime burden with 4-bit LoRA. That did not magically solve the core reasoning problem, but it let me iterate faster and test representation changes without turning every experiment into a multi-day wait.\n\n```chart\n{\"title\": \"Fine-tuning runtime (hover a bar)\", \"unit\": \"h\", \"ratioLabel\": \"faster iteration\", \"data\": [{\"label\": \"Initial setup\", \"value\": 70}, {\"label\": \"Filtered data + 4-bit LoRA\", \"value\": 11.5}], \"caption\": \"Run on a single NVIDIA RTX A6000 with Unsloth.\"}\n```\n\n```chart\n{\"title\": \"STARJOB instances before and after cleaning\", \"data\": [{\"label\": \"Raw instances (approx.)\", \"value\": 130000}, {\"label\": \"Usable instances\", \"value\": 9525}], \"caption\": \"Filtering noisy and malformed instances was a large part of the runtime win.\"}\n```\n\nThe biggest caveat is that optimization tasks punish vague prompting. If the structure is underspecified, the model fills gaps with plausible but infeasible decisions. My main takeaway is simple: for constrained optimization, representation design is the real work. The model only becomes useful after the structure is explicit enough to support valid reasoning."
   },
   {
     "frontmatter": {
@@ -294,7 +456,7 @@ export const blogRecords = [
       ],
       "status": "published"
     },
-    "content": "In the PMML project, I compared a probabilistic GLM-style baseline with a GRU sequence model for traffic anomaly detection. What I liked about this setup is that it exposed a familiar tradeoff: interpretability and stability versus expressive temporal modeling.\n\nThe GLM side gave me a cleaner picture of what the model believed normal traffic should look like. That made it easier to reason about spikes, count behavior, and feature influence. The GRU was better at absorbing temporal context, but it also made debugging harder because a strange anomaly score could come from a much deeper interaction of sequence dynamics.\n\nOne of the most important caveats was anomaly scoring itself. Divergence-style scores can look mathematically appealing while still being operationally noisy. In traffic streams, daily rhythms, local disruptions, and sensor irregularities can all create distribution shifts that are not equally meaningful. If I did not calibrate the thresholding carefully, the system could produce many alerts that were technically explainable but not useful.\n\nThis project reinforced a habit I want to keep: a stronger model is not automatically a better monitoring system. If an anomaly detector cannot be interpreted, calibrated, and trusted in context, it becomes hard to deploy responsibly. The useful evaluation question is not only \"which model wins?\" but also \"which model produces signals someone could act on without constant manual cleanup?\""
+    "content": "In the PMML project, I compared a probabilistic GLM-style baseline with a GRU sequence model for traffic anomaly detection. What I liked about this setup is that it exposed a familiar tradeoff: interpretability and stability versus expressive temporal modeling.\n\n```pipeline\n{\"title\": \"Two scoring paths compared\", \"steps\": [\"Toronto traffic counts\", \"Poisson GLM baseline\", \"GRU sequence model\", \"Divergence-based anomaly score\", \"Calibration review\"]}\n```\n\nThe GLM side gave me a cleaner picture of what the model believed normal traffic should look like. That made it easier to reason about spikes, count behavior, and feature influence. The GRU was better at absorbing temporal context, but it also made debugging harder because a strange anomaly score could come from a much deeper interaction of sequence dynamics.\n\nOne of the most important caveats was anomaly scoring itself. Divergence-style scores can look mathematically appealing while still being operationally noisy. In traffic streams, daily rhythms, local disruptions, and sensor irregularities can all create distribution shifts that are not equally meaningful. If I did not calibrate the thresholding carefully, the system could produce many alerts that were technically explainable but not useful.\n\nThis project reinforced a habit I want to keep: a stronger model is not automatically a better monitoring system. If an anomaly detector cannot be interpreted, calibrated, and trusted in context, it becomes hard to deploy responsibly. The useful evaluation question is not only \"which model wins?\" but also \"which model produces signals someone could act on without constant manual cleanup?\""
   },
   {
     "frontmatter": {
@@ -310,6 +472,6 @@ export const blogRecords = [
       ],
       "status": "published"
     },
-    "content": "One of the easiest mistakes in RAG systems is over-focusing on the generator. In my ChatPDF work, the faster gains came from retrieval quality, chunking discipline, and grounding checks rather than from changing the language model.\n\nWhen answers were weak, the first thing I needed to know was whether the right evidence had even been retrieved. If the top chunks were wrong or incomplete, no downstream prompt was going to fix that consistently. That pushed me to inspect retrieval recall, chunk boundaries, and failure slices before doing any model-level tuning.\n\nI also learned that answer quality should be judged against support, not style. A polished answer that cites the wrong context is worse than a simpler answer that stays faithful to the document. That is especially important for PDF QA, where users often trust confident wording too easily.\n\nMy working rule now is straightforward: retrieval is the product backbone of a RAG system. If chunking, indexing, and evidence selection are weak, the rest of the stack becomes an expensive way to hide the real problem."
+    "content": "One of the easiest mistakes in RAG systems is over-focusing on the generator. In my ChatPDF work, the faster gains came from retrieval quality, chunking discipline, and grounding checks rather than from changing the language model.\n\n```pipeline\n{\"title\": \"Where each ChatPDF answer comes from\", \"steps\": [\"Upload PDF\", \"LangChain chunking\", \"Embeddings\", \"FAISS index\", \"Top-k retrieval\", \"Agentic answer (OpenAI Agents SDK)\"]}\n```\n\nWhen answers were weak, the first thing I needed to know was whether the right evidence had even been retrieved. If the top chunks were wrong or incomplete, no downstream prompt was going to fix that consistently. That pushed me to inspect retrieval recall, chunk boundaries, and failure slices before doing any model-level tuning.\n\nI also learned that answer quality should be judged against support, not style. A polished answer that cites the wrong context is worse than a simpler answer that stays faithful to the document. That is especially important for PDF QA, where users often trust confident wording too easily.\n\nMy working rule now is straightforward: retrieval is the product backbone of a RAG system. If chunking, indexing, and evidence selection are weak, the rest of the stack becomes an expensive way to hide the real problem."
   }
 ] as const;
