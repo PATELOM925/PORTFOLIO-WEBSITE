@@ -10,8 +10,20 @@ When I started working on LLMs for optimization, the tempting framing was to ask
 
 The most important change I made was representing each instance as a disjunctive graph and then serializing the hard constraints explicitly. Once precedence rules and machine conflicts were visible in the input format, the model outputs became easier to inspect. They were still wrong in many cases, but they were wrong in more diagnosable ways.
 
+```pipeline
+{"title": "Step through the JSSP pipeline", "steps": ["Raw JSSP instance", "Disjunctive graph (PyTorch Geometric)", "Serialized precedence + machine constraints", "4-bit LoRA fine-tune", "Schedule output + violation check"]}
+```
+
 Another practical lesson was that feasibility matters more than fluency. A schedule can sound coherent and still be invalid. I had to inspect violations systematically instead of treating natural-sounding output as a sign of progress. That forced me to track constraint failures, not just generic text quality.
 
 Fine-tuning also became much more manageable after I reduced the runtime burden with 4-bit LoRA. That did not magically solve the core reasoning problem, but it let me iterate faster and test representation changes without turning every experiment into a multi-day wait.
+
+```chart
+{"title": "Fine-tuning runtime (hover a bar)", "unit": "h", "ratioLabel": "faster iteration", "data": [{"label": "Initial setup", "value": 70}, {"label": "Filtered data + 4-bit LoRA", "value": 11.5}], "caption": "Run on a single NVIDIA RTX A6000 with Unsloth."}
+```
+
+```chart
+{"title": "STARJOB instances before and after cleaning", "data": [{"label": "Raw instances (approx.)", "value": 130000}, {"label": "Usable instances", "value": 9525}], "caption": "Filtering noisy and malformed instances was a large part of the runtime win."}
+```
 
 The biggest caveat is that optimization tasks punish vague prompting. If the structure is underspecified, the model fills gaps with plausible but infeasible decisions. My main takeaway is simple: for constrained optimization, representation design is the real work. The model only becomes useful after the structure is explicit enough to support valid reasoning.

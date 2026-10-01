@@ -1,17 +1,23 @@
 ---
 title: "Autograder: Precision in Every Grade"
 slug: "autograder"
-date: "2024-08-01"
+date: "2023-11-30"
 preview: "Semi-automated grading system with BERT-based NLP and OCR to evaluate typed and handwritten responses."
-tags: ["NLP", "BERT", "OCR", "React", "Flask"]
+tags: ["NLP", "BERT", "spaCy", "OCR", "React", "Flask"]
 status: "published"
 github: "https://github.com/PATELOM925/AutoGrader"
 youtubeUrl: "https://youtu.be/oRnjj6-C8ZM?si=bJebTWnANw7fOfsn"
-featured: true
+featured: false
 problem: "Manual grading is slow and inconsistent when submissions include both typed and handwritten responses."
 approach: "I combined semantic similarity, OCR extraction, and a grading workflow UI to support semi-automated evaluation."
 result: "The project demonstrated how NLP and OCR can reduce repetitive grading effort while still keeping human review in the loop."
+category: "NLP & ML Research"
+highlight: "Video demo"
+pipeline: ["Typed or handwritten answer", "OCR (PyTesseract)", "BERT semantic similarity", "Suggested score", "Human review"]
 ---
+## Highlights
+- Led a 6-person team to build an auto-grading pipeline (BERT-uncased, spaCy, PyTesseract) with a React front-end and Flask backend, enabling semi-automated grading for handwritten and typed responses.
+
 ## Design
 The main idea was not to remove human evaluation completely, but to shorten the repetitive parts of grading.
 

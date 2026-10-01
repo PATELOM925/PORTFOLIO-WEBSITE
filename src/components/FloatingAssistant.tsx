@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 export function FloatingAssistant() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const href = pathname === "/" ? "/#assistant" : "/#assistant";
+  const onFitCheck = pathname === "/";
 
   return (
-    <div className="floating-assistant" aria-live="polite">
-      <button
-        type="button"
+    <div className="floating-assistant">
+      <Link
+        href="/#fit-check"
         className="assistant-fab"
-        aria-expanded={open}
-        aria-controls="assistant-fab-panel"
-        aria-label="Open recruiter fit assistant"
-        onClick={() => setOpen((value) => !value)}
+        aria-label="Open Role Fit Check: see how Om matches your role"
+        onClick={() => {
+          if (!onFitCheck) return;
+          // Same page: focus the first field once the smooth scroll starts.
+          window.setTimeout(() => document.querySelector<HTMLSelectElement>("#fit-check select")?.focus({ preventScroll: true }), 400);
+        }}
       >
         <span className="assistant-fab-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
@@ -27,17 +27,8 @@ export function FloatingAssistant() {
             />
           </svg>
         </span>
-        <span>Recruiter Bot</span>
-      </button>
-
-      {open ? (
-        <div id="assistant-fab-panel" className="assistant-fab-panel">
-          <p>Share a role or JD to review Om&apos;s fit against your requirements.</p>
-          <Link href={href} className="btn btn-primary" onClick={() => setOpen(false)}>
-            Open assistant
-          </Link>
-        </div>
-      ) : null}
+        <span className="assistant-fab-label">Role Fit Check</span>
+      </Link>
     </div>
   );
 }

@@ -19,13 +19,13 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     type: "website",
     url: siteConfig.siteUrl,
-    images: [{ url: "/assets/profile-photo.png", width: 1400, height: 1400 }]
+    images: [{ url: "/assets/profile-photo.jpg", width: 1254, height: 1254 }]
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.title,
     description: siteConfig.description,
-    images: ["/assets/profile-photo.png"]
+    images: ["/assets/profile-photo.jpg"]
   },
   icons: {
     icon: "/assets/om-monogram.svg",

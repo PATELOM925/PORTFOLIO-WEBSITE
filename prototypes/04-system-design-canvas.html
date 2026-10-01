@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Om M. Patel · Applied AI Engineer · System Design Canvas (prototype 04)</title>
+<meta name="description" content="Om M. Patel, Applied AI Engineer in Toronto. Interactive system-design canvas of experience, projects, research and skills.">
+<!--
+================================================================================
+DESIGN SPEC · Prototype 04 · "System Design Canvas"
+================================================================================
+CONCEPT
+  The portfolio *is* an architecture canvas (Excalidraw / tldraw / cloud-diagram
+  feel). Experience, projects, research and skills are nodes on a dotted grid,
+  wired together by the skills they share. A second mode ("System Design
+  Walkthroughs") steps through four sequence diagrams with packets moving along
+  edges and narration explaining trade-offs. Walkthroughs are framed as design
+  reasoning, never as claims about production systems.
+
+TARGET IMPRESSION
+  "This person thinks in systems": components, data flow, failure modes,
+  human review, auditability, and what changes at 10x scale. Calm, precise,
+  a little hand-made (offset ink shadows, dashed group frames, a sticky note),
+  not flashy.
+
+PALETTE (hex)
+  Paper / canvas bg   #F6F4EE     Grid dots        #D3CDBF
+  Ink (text, borders) #22262B     Muted text       #5E636A
+  Edge (idle)         #B9B3A6     Panel            #FFFFFF
+  Accent (active)     #C8553D     Focus ring       #1D4ED8
+  Experience  stroke #B4622A  fill #F7E8DA
+  Project     stroke #2E6A89  fill #DFEBF2
+  Research    stroke #76589A  fill #EAE3F2
+  Skill       stroke #4D7A48  fill #E2EDDF
+  Sticky note #FFF3C4 · Available badge #2F7D4F on #E3F1E7
+
+TYPE SCALE (system UI stack; mono = ui-monospace/SF Mono/Menlo for labels)
+  11px mono caps (node tags, frame labels) · 13px (node sub, UI chrome)
+  15px (body, node titles) · 18px (panel titles) · 24px (section titles)
+  32px (reserved for hero in the ported site). Line-height 1.45 body.
+
+DATA MODEL (JSON shape; x/y are node centres in world units, world = 1360x980)
+  {
+    "nodes": [{
+      "id": "p-ttc", "type": "experience|project|research|skill",
+      "label": "TTC Dashboard", "sub": "1,004,682 events",
+      "x": 1200, "y": 680,
+      "title": "TTC Interactive Dashboard", "org": "", "meta": "Jan – Apr 2026",
+      "bullets": ["..."], "note": "optional caveat",
+      "links": [{ "label": "GitHub", "href": "https://..." }],
+      "walk": "ttc",                      // optional walkthrough id
+      "kw": ["duckdb","gtfs"]             // skills: regex aliases for JD match
+    }],
+    "edges": [["s-duckdb", "p-ttc"]],     // undirected, skill id first by convention
+    "roles": { "data-eng": { "label": "Data Engineer", "ids": ["p-ttc", "..."], "walk": "ttc", "pitch": "..." } },
+    "walkthroughs": [{
+      "id": "ttc", "tab": "TTC pipeline", "title": "...", "disclaimer": "...",
+      "comps": [{ "id": "csv", "label": "Raw delay CSVs", "sub": "", "kind": "ui|svc|model|data|gate", "x": 20, "y": 40 }],
+      "edges": [["csv","norm"]],           // [from, to, "dashed"?]
+      "steps": [{ "on": "norm", "edge": ["csv","norm"], "title": "...", "text": "..." }],
+      "scale": ["caching ...", "queues ...", "eval sets ...", "observability ..."]
+    }]
+  }
+
+INTERACTION CATALOGUE
+  Top bar      : avatar "OP", name, role, Available full-time badge, Resume
+                 (/go/resume), Email, GitHub, LinkedIn, "Recruiter view" button.
+  Mode tabs    : Canvas | Walkthroughs | List (ARIA tablist, arrow keys move).
+  Canvas       : drag / one-finger pan; wheel, pinch, +/- buttons and keys zoom;
+                 reset (fit) button and "0" key; hover or focus any node to
+                 highlight its neighbours; click / Enter / Space opens inspector;
+                 Esc closes; background click closes; type filter toggles
+                 (aria-pressed) hide nodes + their edges; focused off-screen
+                 nodes are auto-centred; deterministic hand-placed layout.
+  Inspector    : details, links, connected nodes (buttons jump + centre),
+                 "Open walkthrough" where one exists.
+  Walkthroughs : 4 tabs; Prev / Next / Play-Pause; step dots; arrow keys on
+                 stage; packet animates along the active edge; active component
+                 highlighted; narration in aria-live region; 10x-scale note.
+  List view    : full semantic fallback (experience, projects, research,
+                 education, awards, skills) with "Show on canvas".
+  Recruiter    : role select (6 roles + Custom role... -> text input) lights up
+                 relevant nodes on canvas and in list; JD textarea + "Generate
+                 brief" builds a deterministic keyword-matched brief labelled
+                 PROTOTYPE (no model call).
+  A11y         : Tab order through nodes, visible focus, prefers-reduced-motion
+                 removes packets / transitions / tweens (steps still change),
+                 touch-action:none on canvas only, inert drawer when closed.
+
+PORTING NOTES (Next.js App Router site)
+  1. Data  -> src/config/canvas.ts exporting typed `canvasNodes`, `canvasEdges`,
+     `canvasRoles`, `walkthroughs` (types in src/types/content.ts). Derive text
+     from the existing siteConfig / experience / research entries in
+     src/config/site.ts so there is one source of truth.
+  2. UI    -> src/components/system-canvas/SystemCanvas.tsx ("use client"):
+     useReducer for {view, hiddenTypes, hoverId, selectedId, roleIds}; pan/zoom
+     in a useRef (not state) and write the transform imperatively to avoid
+     re-rendering on every pointermove. Walkthrough.tsx is a separate client
+     component taking `id` so it can be reused outside the canvas.
+     Server page renders the List view as the default HTML (SEO + no-JS), then
+     the client component hydrates the canvas on top.
+  3. Blog  -> MDX fence: ```walkthrough id="rag-chatpdf"``` handled by mapping
+     `pre`/`code` with language "walkthrough" in the MDX components map (or a
+     small remark plugin) to <Walkthrough id="..." compact />. Unknown ids
+     render nothing. Lazy-load with next/dynamic({ ssr:false }).
+  4. Recruiter brief -> can later call the existing /api assistant route; keep
+     the "prototype" label until it does, and never claim an evaluation.
+================================================================================
+-->
+<style>
+:root{
+  --paper:#F6F4EE; --grid:#D3CDBF; --ink:#22262B; --muted:#5E636A; --line:#B9B3A6; --panel:#FFFFFF;
+  --accent:#C8553D; --focus:#1D4ED8;
+  --exp:#B4622A; --exp-bg:#F7E8DA; --proj:#2E6A89; --proj-bg:#DFEBF2;
+  --res:#76589A; --res-bg:#EAE3F2; --skill:#4D7A48; --skill-bg:#E2EDDF;
+  --sticky:#FFF3C4; --ok:#2F7D4F; --ok-bg:#E3F1E7;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--sans);font-size:15px;line-height:1.45;color:var(--ink);background:var(--paper);display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;padding:10px 16px;background:var(--panel);border-bottom:1.5px solid var(--ink)}
+.id{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#E9E6DD;border:1.5px solid var(--ink);font:600 15px var(--mono);letter-spacing:.5px}
+.id h1{font-size:18px;margin:0;line-height:1.2}
+.id p{margin:0;font-size:13px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ok);background:var(--ok-bg);border:1.5px solid var(--ok);padding:3px 9px;border-radius:999px}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.links{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.links a{font-size:13px;text-decoration:none;padding:6px 10px;border-radius:8px;border:1.5px solid transparent}
+.links a:hover{border-color:var(--ink)}
+.btn{font:inherit;font-size:13px;color:var(--ink);border:1.5px solid var(--ink);background:#fff;border-radius:8px;padding:6px 11px;box-shadow:2px 2px 0 var(--ink);cursor:pointer;line-height:1.2}
+.btn:hover{background:#FAF8F2}
+.btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+.btn.primary{background:var(--ink);color:#fff}
+.btn[aria-pressed="true"]{background:var(--ink);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- mode bar ---------- */
+.modebar{display:flex;gap:4px;align-items:center;padding:8px 16px;border-bottom:1.5px dashed var(--line);background:rgba(246,244,238,.9);flex-wrap:wrap}
+.modebar [role=tab]{font:inherit;font-size:13px;background:none;border:1.5px solid transparent;border-radius:8px;padding:5px 12px;cursor:pointer;color:var(--muted)}
+.modebar [role=tab][aria-selected="true"]{border-color:var(--ink);color:var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink)}
+.modebar .hint{margin-left:auto;font:11px var(--mono);color:var(--muted)}
+
+main{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;overflow:auto}
+.view[hidden]{display:none}
+#view-canvas{overflow:hidden}
+
+/* ---------- canvas ---------- */
+#graph{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#graph.grabbing{cursor:grabbing}
+.frame{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:6 6}
+.frame-label{font:600 11px var(--mono);letter-spacing:1.2px;fill:var(--muted)}
+.edge{fill:none;stroke:var(--line);stroke-width:1.4;stroke-linecap:round;opacity:.75;transition:opacity .15s,stroke .15s}
+.node{cursor:pointer;transition:opacity .15s}
+.node .shadow{fill:var(--ink)}
+.node .body{stroke-width:1.5}
+.node .ring{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:5 4;opacity:0}
+.node .title{font:600 15px var(--sans);fill:var(--ink)}
+.node .sub{font:13px var(--sans);fill:var(--muted)}
+.node .tag{font:600 11px var(--mono);letter-spacing:1px}
+.node .label{font:500 13px var(--sans);fill:var(--ink)}
+.node:focus{outline:none}
+.node:focus-visible .body{stroke:var(--focus);stroke-width:3}
+.node.selected .body{stroke-width:3}
+.t-experience .body{fill:var(--exp-bg);stroke:var(--exp)} .t-experience .stripe,.t-experience .tag{fill:var(--exp)}
+.t-project .body{fill:var(--proj-bg);stroke:var(--proj)} .t-project .stripe,.t-project .tag{fill:var(--proj)}
+.t-research .body{fill:var(--res-bg);stroke:var(--res)} .t-research .stripe,.t-research .tag{fill:var(--res)}
+.t-skill .body{fill:var(--skill-bg);stroke:var(--skill)}
+.node.hidden,.edge.hidden{display:none}
+/* role highlight */
+#graph.role-on .node:not(.role-hit){opacity:.25}
+#graph.role-on .edge:not(.role-hit){opacity:.12}
+#graph.role-on .node.role-hit .ring{opacity:1}
+#graph.role-on .edge.role-hit{stroke:var(--accent);opacity:.6}
+/* hover / focus highlight (declared after role rules so it wins) */
+#graph.hovering .node:not(.hl){opacity:.22}
+#graph.hovering .node.hl{opacity:1}
+#graph.hovering .edge{opacity:.08}
+#graph.hovering .edge.hl{opacity:1;stroke:var(--ink);stroke-width:2.2}
+.sticky rect{fill:var(--sticky);stroke:#C9B25E;stroke-width:1.2}
+.sticky text{font:13px var(--sans);fill:#4A4020}
+.sticky .h{font-weight:700}
+
+.overlay{position:absolute;display:flex;gap:6px;flex-wrap:wrap;align-items:center;pointer-events:none}
+.overlay>*{pointer-events:auto}
+.ov-tl{top:12px;left:12px;max-width:calc(100% - 200px)}
+.ov-tr{top:12px;right:12px}
+.ov-bl{bottom:12px;left:12px;right:12px}
+.filter{display:inline-flex;align-items:center;gap:6px}
+.filter .sw{width:10px;height:10px;border-radius:3px;border:1.5px solid currentColor}
+.filter[aria-pressed="false"]{opacity:.55;text-decoration:line-through;box-shadow:none}
+.filter[aria-pressed="true"]{background:#fff;color:var(--ink)}
+.filter[data-type=experience] .sw{background:var(--exp-bg);color:var(--exp)}
+.filter[data-type=project] .sw{background:var(--proj-bg);color:var(--proj)}
+.filter[data-type=research] .sw{background:var(--res-bg);color:var(--res)}
+.filter[data-type=skill] .sw{background:var(--skill-bg);color:var(--skill)}
+.zoom .btn{min-width:34px}
+.chip{font:11px var(--mono);color:var(--muted);background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.rolestatus{font-size:13px;background:#fff;border:1.5px solid var(--accent);border-radius:8px;padding:5px 10px;display:none;gap:8px;align-items:center}
+.rolestatus.on{display:inline-flex}
+.rolestatus button{font:inherit;font-size:12px;background:none;border:none;text-decoration:underline;cursor:pointer;color:var(--accent);padding:0}
+.mobile-note{display:none}
+@media (max-width:720px){
+  .mobile-note{display:inline-flex}
+  .ov-tl{max-width:calc(100% - 24px)}
+  .ov-tr{top:auto;bottom:56px}
+  .modebar .hint{display:none}
+  .topbar{padding:8px 12px;gap:6px}
+  .avatar{width:34px;height:34px;font-size:13px}
+  .id{gap:8px}.id h1{font-size:16px}.id p{font-size:12px}
+  .links a{padding:4px 6px}
+  .modebar{padding:6px 12px}
+  .modebar [role=tab]{padding:4px 8px}
+  .filter{padding:4px 8px}
+}
+
+/* ---------- inspector ---------- */
+.inspector{position:absolute;top:60px;right:12px;bottom:12px;width:min(370px,calc(100% - 24px));background:var(--panel);border:1.5px solid var(--ink);border-radius:12px;box-shadow:4px 4px 0 var(--ink);overflow:auto;padding:16px 18px 18px;z-index:5}
+.inspector[hidden]{display:none}
+.inspector h2{font-size:18px;margin:6px 0 2px;line-height:1.25}
+.inspector h2:focus{outline:none}
+.inspector .org{font-size:13px;color:var(--muted);margin:0 0 10px}
+.inspector ul{padding-left:18px;margin:8px 0}
+.inspector li{margin:4px 0}
+.inspector h3{font:600 11px var(--mono);letter-spacing:1px;color:var(--muted);margin:14px 0 6px;text-transform:uppercase}
+.type-pill{display:inline-block;font:600 11px var(--mono);letter-spacing:1px;padding:2px 7px;border-radius:5px;border:1.5px solid}
+.type-pill.experience{color:var(--exp);background:var(--exp-bg)} .type-pill.project{color:var(--proj);background:var(--proj-bg)}
+.type-pill.research{color:var(--res);background:var(--res-bg)} .type-pill.skill{color:var(--skill);background:var(--skill-bg)}
+.close{position:absolute;top:10px;right:10px}
+.note{font-size:13px;background:#F3F1EA;border-left:3px solid var(--line);padding:6px 10px;border-radius:4px;color:var(--muted)}
+.conn{display:flex;flex-wrap:wrap;gap:6px}
+.conn button{font:inherit;font-size:12px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;cursor:pointer}
+.conn button:hover{border-color:var(--ink)}
+.conn button.experience{border-color:var(--exp)} .conn button.project{border-color:var(--proj)} .conn button.research{border-color:var(--res)} .conn button.skill{border-color:var(--skill)}
+.linkrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.linkrow a{font-size:13px}
+@media (max-width:720px){.inspector{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:62%}}
+
+/* ---------- walkthroughs ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+.wrap h2{font-size:24px;margin:4px 0 4px}
+.lede{color:var(--muted);margin:0 0 14px;max-width:760px}
+.wtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.wtabs [role=tab]{font:inherit;font-size:13px;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer}
+.wtabs [role=tab][aria-selected="true"]{border-color:var(--ink);box-shadow:2px 2px 0 var(--ink);font-weight:600}
+.stage-card{background:var(--panel) radial-gradient(var(--grid) 1.1px,transparent 1.3px) 0 0/22px 22px;border:1.5px solid var(--ink);border-radius:12px;box-shadow:4px 4px 0 var(--ink);overflow-x:auto}
+#stage{display:block;width:100%;min-width:720px;height:auto}
+#stage:focus{outline:none}
+.stage-card:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+.wc rect{fill:#fff;stroke:var(--ink);stroke-width:1.5;transition:stroke .2s,fill .2s}
+.wc .sh{fill:var(--ink);stroke:none}
+.wc text{font:600 14px var(--sans);fill:var(--ink)}
+.wc .s{font:500 12px var(--sans);fill:var(--muted)}
+.wc .k{font:600 10px var(--mono);letter-spacing:1px}
+.wc.ui .k{fill:var(--proj)} .wc.svc .k{fill:var(--muted)} .wc.model .k{fill:var(--res)} .wc.data .k{fill:var(--skill)} .wc.gate .k{fill:var(--exp)}
+.wc.visited.ui rect.b{fill:var(--proj-bg)} .wc.visited.model rect.b{fill:var(--res-bg)} .wc.visited.data rect.b{fill:var(--skill-bg)} .wc.visited.gate rect.b{fill:var(--exp-bg)} .wc.visited.svc rect.b{fill:#ECEAE3}
+.wc.active rect.b{stroke:var(--accent);stroke-width:3.5}
+.wc{opacity:.55;transition:opacity .2s}
+.wc.visited,.wc.active{opacity:1}
+.wedge{stroke:var(--line);stroke-width:2;fill:none}
+.wedge.dashed{stroke-dasharray:6 5}
+.wedge.done{stroke:var(--ink)}
+.wedge.active{stroke:var(--accent);stroke-width:3}
+.packet{fill:var(--accent);stroke:#fff;stroke-width:2}
+.wgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;margin-top:14px}
+@media (max-width:860px){.wgrid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1.5px solid var(--ink);border-radius:12px;padding:14px 16px}
+.narr .stepno{font:600 11px var(--mono);letter-spacing:1px;color:var(--accent)}
+.narr h3{margin:4px 0 6px;font-size:18px}
+.narr p{margin:0 0 10px;min-height:4.4em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dots{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+.dots button{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink);background:#fff;padding:0;cursor:pointer}
+.dots button[aria-current="step"]{background:var(--accent);border-color:var(--accent)}
+.dots button.seen{background:var(--line)}
+.scale h3{font-size:15px;margin:0 0 6px}
+.scale ul{margin:0;padding-left:18px;font-size:14px}
+.scale li{margin:4px 0}
+.disclaimer{font-size:13px;color:var(--muted);margin:10px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font:11px var(--mono);color:var(--muted);margin:8px 0 0}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;border:1.5px solid currentColor}
+.legend .ui{color:var(--proj)} .legend .svc{color:var(--muted)} .legend .model{color:var(--res)} .legend .data{color:var(--skill)} .legend .gate{color:var(--exp)}
+
+/* ---------- list view ---------- */
+#view-list{background:radial-gradient(var(--grid) 1px,transparent 1.2px) 0 0/22px 22px}
+.list h2{font-size:24px;margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+.list h2 .sw{width:12px;height:12px;border-radius:3px;border:1.5px solid}
+.item{background:var(--panel);border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px;margin:0 0 10px;box-shadow:3px 3px 0 var(--ink);border-left-width:6px}
+.item.experience{border-left-color:var(--exp)} .item.project{border-left-color:var(--proj)} .item.research{border-left-color:var(--res)}
+.item.role-hit{outline:2.5px dashed var(--accent);outline-offset:3px}
+.item h3{margin:0;font-size:16px}
+.item .meta{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.item ul{margin:6px 0;padding-left:18px}
+.item .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px}
+.item .row button{font:inherit;font-size:13px;background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;color:var(--proj)}
+.skills-list{display:flex;flex-wrap:wrap;gap:6px}
+.skills-list span{font-size:13px;background:var(--skill-bg);border:1.5px solid var(--skill);border-radius:999px;padding:2px 10px}
+.skills-list span.role-hit{outline:2px dashed var(--accent);outline-offset:2px}
+
+/* ---------- recruiter drawer ---------- */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--panel);border-left:1.5px solid var(--ink);box-shadow:-4px 0 0 var(--ink);z-index:20;transform:translateX(105%);transition:transform .25s ease;overflow:auto;padding:18px}
+.drawer.open{transform:none}
+.drawer h2{margin:0 0 4px;font-size:18px}
+.drawer p.sub{margin:0 0 14px;font-size:13px;color:var(--muted)}
+.field{margin:0 0 12px}
+.field label{display:block;font-size:13px;font-weight:600;margin:0 0 4px}
+.field select,.field input,.field textarea{width:100%;font:inherit;font-size:14px;border:1.5px solid var(--ink);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink)}
+.field textarea{min-height:120px;resize:vertical}
+.proto{display:inline-block;font:700 11px var(--mono);letter-spacing:1.2px;color:#fff;background:var(--accent);border-radius:4px;padding:2px 6px}
+#brief{margin-top:14px}
+#brief .card{box-shadow:3px 3px 0 var(--ink)}
+#brief h4{margin:8px 0 4px;font-size:16px}
+#brief h5{font:600 11px var(--mono);letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+#brief ul{margin:0;padding-left:18px;font-size:14px}
+#brief .kw{display:flex;flex-wrap:wrap;gap:5px}
+#brief .kw span{font-size:12px;background:var(--skill-bg);border:1px solid var(--skill);border-radius:999px;padding:1px 8px}
+#brief .fine{font-size:12px;color:var(--muted);margin-top:10px}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition:none !important;animation:none !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="id">
+    <div class="avatar" aria-hidden="true">OP</div>
+    <div>
+      <h1>Om M. Patel</h1>
+      <p>Applied AI Engineer · Toronto, Ontario · Vector AI Scholar</p>
+    </div>
+    <span class="badge"><span class="dot" aria-hidden="true"></span>Available full-time</span>
+  </div>
+  <nav class="links" aria-label="Contact and profiles">
+    <a href="/go/resume">Resume</a>
+    <a href="mailto:iampatelom@gmail.com">Email</a>
+    <a href="https://github.com/PATELOM925" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://linkedin.com/in/om-m-patel" target="_blank" rel="noopener">LinkedIn</a>
+    <button class="btn primary" id="openDrawer" aria-controls="drawer" aria-expanded="false">Recruiter view</button>
+  </nav>
+</header>
+
+<div class="modebar">
+  <div role="tablist" aria-label="View mode" id="modeTabs">
+    <button role="tab" id="tab-canvas" aria-controls="view-canvas" aria-selected="true">Canvas</button>
+    <button role="tab" id="tab-walk" aria-controls="view-walk" aria-selected="false" tabindex="-1">System design walkthroughs</button>
+    <button role="tab" id="tab-list" aria-controls="view-list" aria-selected="false" tabindex="-1">View as list</button>
+  </div>
+  <span class="hint">drag to pan · wheel / pinch to zoom · Tab + Enter to inspect</span>
+</div>
+
+<main>
+  <!-- ================= CANVAS ================= -->
+  <section id="view-canvas" class="view" role="tabpanel" aria-labelledby="tab-canvas">
+    <svg id="graph" aria-label="Knowledge graph of Om's experience, projects, research and skills. Use Tab to move between nodes and Enter to open details." role="group">
+      <defs>
+        <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="12" cy="12" r="1.5" fill="#C9C2B2"/>
+        </pattern>
+      </defs>
+      <g id="world">
+        <rect x="-4000" y="-4000" width="9400" height="9000" fill="url(#dots)"/>
+        <g id="frames"></g>
+        <g id="edges"></g>
+        <g id="nodes"></g>
+      </g>
+    </svg>
+
+    <div class="overlay ov-tl" role="group" aria-label="Filter node types">
+      <button class="btn filter" data-type="experience" aria-pressed="true"><span class="sw"></span>Experience</button>
+      <button class="btn filter" data-type="project" aria-pressed="true"><span class="sw"></span>Projects</button>
+      <button class="btn filter" data-type="research" aria-pressed="true"><span class="sw"></span>Research</button>
+      <button class="btn filter" data-type="skill" aria-pressed="true"><span class="sw"></span>Skills</button>
+    </div>
+    <div class="overlay ov-tr zoom" role="group" aria-label="Zoom">
+      <button class="btn" id="zoomOut" aria-label="Zoom out">&minus;</button>
+      <button class="btn" id="zoomIn" aria-label="Zoom in">+</button>
+      <button class="btn" id="zoomReset" aria-label="Reset view to fit">Reset</button>
+    </div>
+    <div class="overlay ov-bl">
+      <span class="rolestatus" id="roleStatus" role="status"><span id="roleStatusText"></span><button id="roleClear2">Clear</button></span>
+      <button class="btn mobile-note" id="mobileList">Small screen? View as list</button>
+      <span class="chip" id="zoomChip" aria-hidden="true">100%</span>
+    </div>
+
+    <aside class="inspector" id="inspector" hidden aria-label="Node details"></aside>
+  </section>
+
+  <!-- ================= WALKTHROUGHS ================= -->
+  <section id="view-walk" class="view" role="tabpanel" aria-labelledby="tab-walk" hidden>
+    <div class="wrap">
+      <h2>System design walkthroughs</h2>
+      <p class="lede">Step through how I reason about four systems: components, data flow, and the trade-offs at each hop. These are design walkthroughs, not claims about production behaviour.</p>
+      <div class="wtabs" role="tablist" aria-label="Walkthrough" id="wtabs"></div>
+      <div class="stage-card">
+        <svg id="stage" viewBox="0 0 1000 400" tabindex="0" role="img" aria-labelledby="stageTitle">
+          <title id="stageTitle">Sequence diagram</title>
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B9B3A6"/></marker>
+            <marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#22262B"/></marker>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C8553D"/></marker>
+          </defs>
+          <g id="stageEdges"></g><g id="stageComps"></g>
+          <circle id="packet" class="packet" r="7" cx="-50" cy="-50"/>
+        </svg>
+      </div>
+      <div class="legend" aria-hidden="true"><span class="ui">UI / input</span><span class="svc">Service</span><span class="model">Model</span><span class="data">Data</span><span class="gate">Control / gate</span></div>
+      <div class="wgrid">
+        <div class="card narr">
+          <div class="stepno" id="stepNo">STEP 1 / 1</div>
+          <div aria-live="polite" id="narr"><h3 id="stepTitle"></h3><p id="stepText"></p></div>
+          <div class="controls">
+            <button class="btn" id="prev">&larr; Prev</button>
+            <button class="btn" id="play" aria-pressed="false">Play</button>
+            <button class="btn" id="next">Next &rarr;</button>
+            <div class="dots" id="dots" aria-label="Jump to step"></div>
+          </div>
+          <p class="disclaimer" id="disclaimer"></p>
+        </div>
+        <div class="card scale">
+          <h3>What would I change at 10&times; scale?</h3>
+          <ul id="scaleList"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LIST ================= -->
+  <section id="view-list" class="view" role="tabpanel" aria-labelledby="tab-list" hidden>
+    <div class="wrap list" id="listRoot"></div>
+  </section>
+</main>
+
+<!-- ================= RECRUITER DRAWER ================= -->
+<aside class="drawer" id="drawer" aria-labelledby="drawerTitle" inert>
+  <button class="btn close" id="closeDrawer" aria-label="Close recruiter view">&times;</button>
+  <h2 id="drawerTitle">Recruiter view</h2>
+  <p class="sub">Pick a role to light up the relevant nodes on the canvas (and in the list). Paste a JD for a quick keyword-matched brief.</p>
+  <div class="field">
+    <label for="roleSel">Role</label>
+    <select id="roleSel">
+      <option value="">Choose a role…</option>
+      <option value="applied">Applied AI Engineer</option>
+      <option value="aiml">AI/ML Engineer</option>
+      <option value="nlp">NLP Engineer</option>
+      <option value="dataeng">Data Engineer</option>
+      <option value="datasci">Data Scientist</option>
+      <option value="mlops">MLOps Engineer</option>
+      <option value="custom">Custom role…</option>
+    </select>
+  </div>
+  <div class="field" id="customField" hidden>
+    <label for="customRole">Custom role title</label>
+    <input id="customRole" type="text" placeholder="e.g. LLM Platform Engineer" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="jd">Job description (optional)</label>
+    <textarea id="jd" placeholder="Paste the JD here. Keywords are matched locally; nothing leaves this page."></textarea>
+  </div>
+  <div class="controls">
+    <button class="btn primary" id="genBrief">Generate brief</button>
+    <button class="btn" id="roleClear">Clear highlight</button>
+  </div>
+  <div id="brief" aria-live="polite"></div>
+</aside>
+
+<script>
+(function(){
+'use strict';
+/* ============================ DATA ============================ */
+const TYPES={experience:{label:'Experience',tag:'EXP'},project:{label:'Project',tag:'PRJ'},research:{label:'Research',tag:'RES'},skill:{label:'Skill',tag:'SKL'}};
+const GH='https://github.com/PATELOM925/';
+
+const NODES=[
+ /* ---- experience (left column, centres x=160) ---- */
+ {id:'exp-1pour',type:'experience',label:'1Pour',sub:'Applied AI Eng · Co-op',x:160,y:150,
+  title:'Applied AI Engineer (Co-op)',org:'1Pour (formerly BarLens) · Toronto',meta:'Jun 2026 – Aug 2026',
+  bullets:['Integrated Gemini vision suggestions into a Next.js capture workflow; people confirm uncertain results before they affect operational data (human-in-the-loop).',
+           'Built Supabase-backed, location-scoped data flows with private media retention and auditable records for reporting.',
+           'Tested changes in sandboxes and reviewed automated checks before production releases.'],
+  note:'Professional experience. Source is private, so this stays high level.',links:[],walk:'hitl'},
+ {id:'exp-uarra-de',type:'experience',label:'Uarra',sub:'Data Engineering Intern',x:160,y:250,
+  title:'Data Engineering Intern',org:'Uarra (formerly Sharperly) · Nigeria (Remote)',meta:'Dec 2024 – Aug 2025',
+  bullets:['Python/Flask geospatial APIs for address, Plus Code, and route data.','MongoDB-backed records.','Dockerized API with auth, rate limiting, logging, and health checks.'],links:[]},
+ {id:'exp-uarra-ds',type:'experience',label:'Uarra',sub:'Data Science Intern',x:160,y:350,
+  title:'Data Science Intern',org:'Uarra',meta:'Mar 2024 – Jul 2024',
+  bullets:['Flask + GeoPandas geocoding APIs that cut Google Maps API cost by up to 45%.','20k+ addresses scraped into versioned datasets.','RNN / Autoencoder / K-Means experiments.'],links:[]},
+ /* ---- research ---- */
+ {id:'r-gujarati',type:'research',label:'Gujarati Sentiment',sub:'Research Assistant · York',x:160,y:590,
+  title:'Low-Resource Gujarati Sentiment Analysis',org:'Research Assistant with Prof. Uyen T. Nguyen · York University',meta:'Mar 2026 – present',
+  bullets:['Translated SST-2 plus native GSAC data.','TF-IDF baselines vs MuRIL.','Error analysis of polarity shifts, negation errors, mistranslations, and social-text noise.'],links:[]},
+ {id:'r-jssp',type:'research',label:'LLMs for JSSP',sub:'Optimization · York',x:160,y:690,
+  title:'LLMs for Optimization (Job Shop Scheduling)',org:'York University',meta:'Sep – Dec 2025',
+  bullets:['JSSP instances → disjunctive graphs (PyTorch Geometric) → serialized constraints in prompts.','~130k raw → 9,525 usable instances.','Fine-tuning runtime 70h → 11.5h with 4-bit LoRA (Unsloth) on an RTX A6000.'],
+  links:[{label:'GitHub',href:GH+'LLMs-for-Optimization-Problems'}]},
+ {id:'r-adcis',type:'research',label:'Sleep Stage Survey',sub:'ADCIS 2024 · Springer',x:160,y:790,
+  title:'Automated Sleep Stage Classification (survey)',org:'ADCIS 2024 · Springer · co-author',meta:'2024',
+  bullets:['Survey of 90+ studies.','Taxonomy across EEG / ECG / EOG / EMG signals.'],links:[]},
+ /* ---- projects (right column, centres x=1200) ---- */
+ {id:'p-synapse',type:'project',label:'Synapse AI',sub:'Hackathon winner',x:1200,y:110,
+  title:'Synapse AI',org:'Winner, AgentShyft Hackathon',meta:'May 2026 · FastAPI · Next.js · ElevenLabs',
+  bullets:['Agent-led learning platform with teacher oversight, diagnostics, tutor streaming, classroom invites, and teacher analytics.','Uploaded material → notes, flashcards, quizzes, podcasts.'],
+  links:[{label:'GitHub',href:GH+'Synapse_AgentShfyt_Hackathon'}]},
+ {id:'p-lens',type:'project',label:'Interview Lens',sub:'Next.js · OpenAI',x:1200,y:205,
+  title:'Interview Lens',org:'Next.js · OpenAI · PostgreSQL',meta:'Jun 2026',
+  bullets:["Turns a candidate's take-home project into a structured, role-specific interview brief.",'Live notes and scoring, role-based pipelines, tenant isolation.','Guarded handling of untrusted content.'],
+  note:'No public repo.',links:[]},
+ {id:'p-claw',type:'project',label:'ClawCompass',sub:'Capability broker',x:1200,y:300,
+  title:'ClawCompass',org:'TypeScript',meta:'May 2026',
+  bullets:['Capability broker that routes agent tasks to the right tool.','Redacts sensitive context and gates paid execution via x402 payment-state checks.','Buyer/seller flows and reputation tracking.'],
+  links:[{label:'GitHub',href:GH+'openclaw-hack-ttw26'}],walk:'claw'},
+ {id:'p-chatpdf',type:'project',label:'ChatPDF AI',sub:'RAG · FAISS',x:1200,y:395,
+  title:'ChatPDF AI',org:'LangChain · Google GenAI embeddings · FAISS · Gemini · Streamlit',meta:'Sep 2024',
+  bullets:['LangChain chunking, Google GenAI embeddings, FAISS vector search, Gemini answers, Streamlit UI.'],links:[],walk:'rag'},
+ {id:'p-legal',type:'project',label:'Legal Clarity',sub:'Multilingual summaries',x:1200,y:490,
+  title:'Legal Clarity',org:'Pegasus · T5 · IndicBART · Flask',meta:'Nov 2024',
+  bullets:['Fine-tuned Pegasus / T5 / IndicBART for multilingual legal summarization and translation.','Served through a Flask service.'],links:[]},
+ {id:'p-autograder',type:'project',label:'Autograder',sub:'Led 6-person team',x:1200,y:585,
+  title:'Autograder',org:'BERT · PyTesseract OCR · React · Flask',meta:'2023 – 24',
+  bullets:['Led a 6-person team.','BERT similarity + OCR (PyTesseract) with a React/Flask app.'],
+  links:[{label:'YouTube demo',href:'https://youtu.be/oRnjj6-C8ZM'}]},
+ {id:'p-ttc',type:'project',label:'TTC Dashboard',sub:'1,004,682 events',x:1200,y:680,
+  title:'TTC Interactive Dashboard',org:'DuckDB · Parquet · Streamlit · Google ADK',meta:'Jan – Apr 2026',
+  bullets:['1,004,682 normalized TTC delay events joined with static GTFS and live alerts.','DuckDB/Parquet marts with route/station mapping checks.','Streamlit views plus a Google ADK assistant.'],
+  links:[{label:'GitHub',href:GH+'TTC-PULSE'}],walk:'ttc'},
+ {id:'p-pmml',type:'project',label:'Traffic Anomaly',sub:'Poisson GLM vs GRU',x:1200,y:775,
+  title:'PMML Traffic Anomaly Detection',org:'Toronto traffic data',meta:'Dec 2025',
+  bullets:['Poisson GLM vs GRU on Toronto traffic.','Divergence-based anomaly scoring.'],links:[]},
+ {id:'p-greenarm',type:'project',label:'GreenArm',sub:'ROS2 · perception',x:1200,y:870,
+  title:'GreenArm',org:'ROS2 · YOLOv8 · OpenCV · Kinova arm',meta:'Dec 2025',
+  bullets:['ROS2 perception → manipulation pipeline.','YOLOv8 + OpenCV, ArUco calibration, pixel-to-robot transforms on a Kinova arm.'],
+  links:[{label:'Demo',href:'https://green-arm.vercel.app'}]},
+ /* ---- skills (centres; col A x=470, B x=660, C x=850) ---- */
+ {id:'s-hitl',type:'skill',label:'Human-in-the-loop',x:470,y:110,kw:['human[- ]in[- ]the[- ]loop','hitl','human review','review workflow']},
+ {id:'s-gemini',type:'skill',label:'Gemini',x:470,y:175,kw:['gemini','vertex']},
+ {id:'s-supabase',type:'skill',label:'Supabase',x:470,y:240,kw:['supabase']},
+ {id:'s-cicd',type:'skill',label:'CI/CD',x:470,y:305,kw:['ci/cd','cicd','continuous integration','github actions']},
+ {id:'s-docker',type:'skill',label:'Docker',x:470,y:370,kw:['docker','container']},
+ {id:'s-mongodb',type:'skill',label:'MongoDB',x:470,y:435,kw:['mongo']},
+ {id:'s-flask',type:'skill',label:'Flask',x:470,y:500,kw:['flask']},
+ {id:'s-python',type:'skill',label:'Python',x:470,y:580,kw:['python']},
+ {id:'s-pytorch',type:'skill',label:'PyTorch',x:470,y:690,kw:['pytorch','torch']},
+ {id:'s-lora',type:'skill',label:'LoRA / QLoRA',x:470,y:760,kw:['lora','qlora','fine[- ]?tun','peft']},
+ {id:'s-nextjs',type:'skill',label:'Next.js',x:660,y:140,kw:['next\\.?js']},
+ {id:'s-postgres',type:'skill',label:'PostgreSQL',x:660,y:270,kw:['postgres']},
+ {id:'s-hf',type:'skill',label:'Hugging Face',x:660,y:470,kw:['hugging ?face','transformers']},
+ {id:'s-sql',type:'skill',label:'SQL',x:660,y:640,kw:['sql']},
+ {id:'s-airflow',type:'skill',label:'Airflow',x:660,y:740,kw:['airflow','orchestration']},
+ {id:'s-fastapi',type:'skill',label:'FastAPI',x:850,y:110,kw:['fastapi']},
+ {id:'s-agents',type:'skill',label:'Agent workflows',x:850,y:175,kw:['agent','agentic','tool use','tool calling']},
+ {id:'s-typescript',type:'skill',label:'TypeScript',x:850,y:240,kw:['typescript']},
+ {id:'s-openai',type:'skill',label:'OpenAI API',x:850,y:305,kw:['openai','gpt']},
+ {id:'s-langchain',type:'skill',label:'LangChain',x:850,y:380,kw:['langchain','llamaindex','rag','retrieval']},
+ {id:'s-faiss',type:'skill',label:'FAISS',x:850,y:445,kw:['faiss','vector (search|database|store)','embedding']},
+ {id:'s-react',type:'skill',label:'React',x:850,y:560,kw:['react']},
+ {id:'s-adk',type:'skill',label:'Google ADK',x:850,y:640,kw:['adk','agent development kit']},
+ {id:'s-duckdb',type:'skill',label:'DuckDB',x:850,y:705,kw:['duckdb','parquet']},
+ {id:'s-opencv',type:'skill',label:'OpenCV',x:850,y:790,kw:['opencv','computer vision']},
+ {id:'s-yolo',type:'skill',label:'YOLOv8',x:850,y:850,kw:['yolo','object detection']},
+ {id:'s-ros2',type:'skill',label:'ROS2',x:850,y:910,kw:['ros2?\\b','robotics']}
+];
+const EDGES=[
+ ['s-gemini','exp-1pour'],['s-nextjs','exp-1pour'],['s-supabase','exp-1pour'],['s-hitl','exp-1pour'],['s-cicd','exp-1pour'],
+ ['s-python','exp-uarra-de'],['s-flask','exp-uarra-de'],['s-mongodb','exp-uarra-de'],['s-docker','exp-uarra-de'],
+ ['s-python','exp-uarra-ds'],['s-flask','exp-uarra-ds'],
+ ['s-hf','r-gujarati'],['s-python','r-gujarati'],
+ ['s-pytorch','r-jssp'],['s-lora','r-jssp'],['s-python','r-jssp'],
+ ['s-fastapi','p-synapse'],['s-nextjs','p-synapse'],['s-hitl','p-synapse'],['s-agents','p-synapse'],
+ ['s-nextjs','p-lens'],['s-openai','p-lens'],['s-postgres','p-lens'],
+ ['s-typescript','p-claw'],['s-agents','p-claw'],
+ ['s-langchain','p-chatpdf'],['s-faiss','p-chatpdf'],['s-gemini','p-chatpdf'],['s-python','p-chatpdf'],
+ ['s-hf','p-legal'],['s-flask','p-legal'],
+ ['s-flask','p-autograder'],['s-react','p-autograder'],['s-python','p-autograder'],
+ ['s-duckdb','p-ttc'],['s-sql','p-ttc'],['s-python','p-ttc'],['s-adk','p-ttc'],
+ ['s-python','p-pmml'],
+ ['s-ros2','p-greenarm'],['s-opencv','p-greenarm'],['s-yolo','p-greenarm']
+];
+const FRAMES=[
+ {x:40,y:90,w:240,h:300,label:'EXPERIENCE',c:'#B4622A'},
+ {x:40,y:525,w:240,h:310,label:'RESEARCH',c:'#76589A'},
+ {x:385,y:40,w:550,h:910,label:'SKILLS · shared components',c:'#4D7A48'},
+ {x:1080,y:40,w:240,h:900,label:'PROJECTS',c:'#2E6A89'}
+];
+const ROLES={
+ applied:{label:'Applied AI Engineer',walk:'hitl',ids:['exp-1pour','p-synapse','p-lens','p-claw','p-chatpdf','s-gemini','s-openai','s-agents','s-hitl','s-langchain','s-nextjs','s-fastapi','s-adk'],
+   pitch:'Ships AI features inside real products: Gemini vision suggestions with human review at 1Pour, agent-led learning (Synapse AI, hackathon winner), and RAG (ChatPDF AI).'},
+ aiml:{label:'AI/ML Engineer',walk:'rag',ids:['r-jssp','r-gujarati','p-pmml','p-greenarm','p-legal','exp-uarra-ds','s-pytorch','s-lora','s-hf','s-yolo','s-opencv','s-python'],
+   pitch:'Model work end to end: 4-bit LoRA fine-tuning for JSSP (70h → 11.5h), Pegasus/T5/IndicBART fine-tuning, GLM vs GRU anomaly detection, YOLOv8 perception on a robot arm.'},
+ nlp:{label:'NLP Engineer',walk:'rag',ids:['r-gujarati','p-legal','p-chatpdf','r-jssp','p-autograder','s-hf','s-langchain','s-faiss','s-lora'],
+   pitch:'Low-resource and multilingual NLP: Gujarati sentiment (TF-IDF vs MuRIL, error analysis), multilingual legal summarization, RAG over PDFs, BERT similarity grading.'},
+ dataeng:{label:'Data Engineer',walk:'ttc',ids:['p-ttc','exp-uarra-de','exp-uarra-ds','s-duckdb','s-airflow','s-sql','s-mongodb','s-postgres','s-python','s-docker'],
+   pitch:'Pipelines and data APIs: 1,004,682 normalized TTC events in DuckDB/Parquet marts with mapping checks; Dockerized geospatial APIs and versioned datasets at Uarra.'},
+ datasci:{label:'Data Scientist',walk:'ttc',ids:['exp-uarra-ds','p-pmml','p-ttc','r-gujarati','r-adcis','s-python','s-sql','s-pytorch'],
+   pitch:'Analysis with rigour: Poisson GLM vs GRU anomaly scoring, careful NLP error analysis, a 90+ study survey, and geocoding work that cut Maps API cost by up to 45%.'},
+ mlops:{label:'MLOps Engineer',walk:'hitl',ids:['exp-1pour','exp-uarra-de','r-jssp','s-docker','s-cicd','s-lora','s-supabase'],
+   pitch:'Reliable delivery: sandbox testing and automated checks before releases, Dockerized APIs with auth, rate limiting, logging and health checks, and cheaper fine-tuning runs.'}
+};
+
+/* ------------------------ walkthroughs ------------------------ */
+const WALKS=[
+{id:'hitl',tab:'HITL vision capture',title:'Human-in-the-loop vision capture',
+ disclaimer:'A generic version of the human-in-the-loop pattern from my Applied AI co-op at 1Pour. Illustrative design reasoning only, not the production architecture.',
+ comps:[
+  {id:'client',label:'Capture client',sub:'web app',kind:'ui',x:30,y:50},
+  {id:'api',label:'API',sub:'auth + scoping',kind:'svc',x:280,y:50},
+  {id:'vision',label:'Vision model',sub:'suggestion + score',kind:'model',x:530,y:50},
+  {id:'thresh',label:'Confidence gate',sub:'threshold',kind:'gate',x:780,y:50},
+  {id:'media',label:'Private media',sub:'retention window',kind:'data',x:30,y:260},
+  {id:'report',label:'Reporting',sub:'confirmed only',kind:'ui',x:280,y:260},
+  {id:'db',label:'Audited DB',sub:'who / what / when',kind:'data',x:530,y:260},
+  {id:'review',label:'Review queue',sub:'human confirms',kind:'ui',x:780,y:260}
+ ],
+ edges:[['client','api'],['api','media'],['api','vision'],['vision','thresh'],['thresh','db','dashed'],['thresh','review'],['review','db'],['db','report']],
+ steps:[
+  {on:'client',title:'Capture',text:'A person takes a photo in the web app. The client only uploads: it never calls the model directly, so keys, prompts and model choice stay server-side and can change without a client release.'},
+  {edge:['client','api'],title:'Intake at the API',text:'The API authenticates the request, scopes it to the right tenant, and writes an intake record before any AI runs, so every later step has something to attach to.'},
+  {edge:['api','media'],title:'Private media retention',text:'Originals go to private storage behind short-lived signed URLs with a retention window. Photos are evidence for review, not public assets, and should not outlive their purpose.'},
+  {edge:['api','vision'],title:'Latency vs accuracy',text:'The vision model returns a structured suggestion plus a confidence score. A bigger model is usually more accurate but slower; running it asynchronously lets the person keep working while the suggestion arrives.'},
+  {edge:['vision','thresh'],title:'The confidence gate',text:'A threshold routes each result. It is a product decision, not just a model setting: raise it and reviewers see more items; lower it and more errors slip through unnoticed.'},
+  {edge:['thresh','db'],title:'Confident path',text:'Confident suggestions can be pre-filled for a quick confirm and are written with the same audit fields as everything else. Speed without losing traceability.'},
+  {edge:['thresh','review'],title:'Why keep humans in the loop',text:'Uncertain results go to a review queue, and a person confirms or corrects them before they affect operational data. Models are good at suggesting; people stay accountable for what gets recorded.'},
+  {edge:['review','db'],title:'Audit trail',text:'Writes record the model suggestion, the final value, who confirmed it and when. That trail explains any number later and makes model/human disagreement measurable.'},
+  {edge:['db','report'],title:'Reporting',text:'Reports read only confirmed, audited records, so what people see reflects human-approved data rather than raw model output.'}
+ ],
+ scale:['Queue: put inference behind a job queue with retries and backpressure so capture never blocks on the model.','Caching: dedupe by image hash so re-uploads do not pay for inference twice.','Eval set: turn reviewer corrections into a labelled set and re-tune the threshold against it before changing models.','Observability: track confidence distribution, override rate and review-queue age; alert on drift.','Storage: move media lifecycle into storage policies instead of application code.']},
+{id:'ttc',tab:'TTC data pipeline',title:'TTC delay analytics pipeline',
+ disclaimer:'Walkthrough of the TTC Interactive Dashboard design (1,004,682 normalized events). Trade-off notes are my reasoning, not benchmarks.',
+ comps:[
+  {id:'csv',label:'Raw delay CSVs',sub:'historical logs',kind:'data',x:20,y:40},
+  {id:'gtfs',label:'GTFS static',sub:'routes, stops',kind:'data',x:20,y:180},
+  {id:'alerts',label:'Live alerts',sub:'service context',kind:'data',x:20,y:320},
+  {id:'norm',label:'Normalize',sub:'types, codes, time',kind:'svc',x:235,y:40},
+  {id:'join',label:'Join',sub:'events ↔ network',kind:'svc',x:440,y:180},
+  {id:'marts',label:'DuckDB / Parquet',sub:'analytic marts',kind:'data',x:645,y:180},
+  {id:'qc',label:'Quality checks',sub:'unmatched routes / stations',kind:'gate',x:645,y:30},
+  {id:'st',label:'Streamlit views',sub:'routes, stations',kind:'ui',x:840,y:110},
+  {id:'adk',label:'ADK assistant',sub:'Google ADK',kind:'model',x:840,y:300}
+ ],
+ edges:[['csv','norm'],['norm','join'],['gtfs','join'],['alerts','join'],['join','marts'],['marts','qc'],['marts','st'],['marts','adk']],
+ steps:[
+  {on:'csv',title:'Raw inputs',text:'Delay records arrive as raw CSVs. Before they can be compared across files, columns, types and codes need a single shape.'},
+  {edge:['csv','norm'],title:'Normalize',text:'Standardize timestamps, types, and route/station codes. The output is 1,004,682 normalized delay events, one consistent table.'},
+  {edge:['gtfs','join'],title:'Reference network',text:'Static GTFS provides the routes and stops, so events can be placed on the network and grouped consistently.'},
+  {edge:['alerts','join'],title:'Live context',text:'Live alerts add current service context next to the historical delays.'},
+  {edge:['norm','join'],title:'Join',text:'Normalized events are joined to the network. Joining on cleaned codes rather than free text is what makes the later checks meaningful.'},
+  {edge:['join','marts'],title:'Why DuckDB + Parquet',text:'Columnar Parquet files queried by DuckDB: fast group-bys, no database server to run, and files that are easy to version. The trade-off is a local-first, single-writer model, which suits an analytics app.'},
+  {edge:['marts','qc'],title:'Quality checks',text:'Unmatched routes and stations are surfaced instead of silently dropped, so mapping gaps are visible and fixable rather than quietly skewing charts.'},
+  {edge:['marts','st'],title:'Streamlit views',text:'Dashboards read straight from the marts for route and station exploration.'},
+  {edge:['marts','adk'],title:'ADK assistant',text:'A Google ADK assistant answers questions over the same marts, so chat answers and charts share one source of truth.'}
+ ],
+ scale:['Incremental loads: partition Parquet by date and only process new files.','Orchestration: schedule and retry stages with a tool such as Airflow instead of manual runs.','Queues: ingest alerts through a queue so bursts do not block the batch path.','Eval set: a fixed list of assistant questions with known answers from the marts, re-run on every change.','Observability: track unmatched-route/station rates over time as a data-quality metric; cache common aggregates.']},
+{id:'rag',tab:'RAG (ChatPDF)',title:'Retrieval-augmented answers over PDFs',
+ disclaimer:'Design walkthrough of a ChatPDF-AI-style RAG flow (LangChain, Google GenAI embeddings, FAISS, Gemini). The citation step shows how I would ground answers; no accuracy claims.',
+ comps:[
+  {id:'pdf',label:'PDF upload',sub:'text + page no.',kind:'ui',x:20,y:30},
+  {id:'chunk',label:'Chunker',sub:'LangChain',kind:'svc',x:235,y:30},
+  {id:'embed',label:'Embeddings',sub:'Google GenAI',kind:'model',x:450,y:30},
+  {id:'faiss',label:'FAISS index',sub:'vectors',kind:'data',x:665,y:30},
+  {id:'q',label:'User question',sub:'',kind:'ui',x:20,y:300},
+  {id:'ret',label:'Retrieve top-k',sub:'nearest chunks',kind:'svc',x:665,y:170},
+  {id:'llm',label:'Gemini',sub:'grounded prompt',kind:'model',x:665,y:310},
+  {id:'ans',label:'Answer',sub:'+ citations',kind:'ui',x:850,y:310}
+ ],
+ edges:[['pdf','chunk'],['chunk','embed'],['embed','faiss'],['q','embed'],['faiss','ret'],['ret','llm'],['llm','ans']],
+ steps:[
+  {on:'pdf',title:'Ingest',text:'A PDF is uploaded and text is extracted page by page, keeping page numbers so any answer can point back to where it came from.'},
+  {edge:['pdf','chunk'],title:'Chunking trade-off',text:'LangChain splits text into overlapping chunks. Small chunks retrieve precisely but lose context; large chunks keep context but dilute relevance and cost more tokens.'},
+  {edge:['chunk','embed'],title:'Embed',text:'Each chunk is embedded with Google GenAI embeddings.'},
+  {edge:['embed','faiss'],title:'Index',text:'Vectors go into a FAISS index: in-process and fast, with no extra service to operate.'},
+  {edge:['q','embed'],title:'Embed the question',text:'The question is embedded with the same model, so the query and the chunks live in the same vector space.'},
+  {edge:['faiss','ret'],title:'Retrieve top-k',text:'FAISS returns the k nearest chunks. k is a knob: higher k improves recall but adds noise and prompt length.'},
+  {edge:['ret','llm'],title:'Grounded generation',text:'Gemini gets the question plus only the retrieved chunks, with instructions to answer from them and to say so when the answer is not there.'},
+  {edge:['llm','ans'],title:'Citations',text:'The answer carries references to the chunks and pages it used, so the reader can verify instead of trusting blindly.'}
+ ],
+ scale:['Caching: key embeddings by chunk hash; cache answers for repeated questions per document.','Queues: move ingestion (extract, chunk, embed) to a background queue.','Storage: move from in-process FAISS to a sharded or managed vector store with metadata filters.','Eval set: question / expected-source pairs to measure retrieval recall and groundedness before changing chunk size, k, or models.','Observability: trace latency and token cost per stage; log which chunks were cited.']},
+{id:'claw',tab:'ClawCompass',title:'Capability-brokered agent tasks',
+ disclaimer:'Design walkthrough of ClawCompass (hackathon project, TypeScript). Scale notes are design reasoning.',
+ comps:[
+  {id:'task',label:'Agent task',sub:'buyer',kind:'ui',x:20,y:170},
+  {id:'reg',label:'Capability registry',sub:'seller listings',kind:'data',x:230,y:20},
+  {id:'router',label:'Capability router',sub:'match + rank',kind:'svc',x:230,y:170},
+  {id:'redact',label:'Context redaction',sub:'least privilege',kind:'gate',x:440,y:170},
+  {id:'pay',label:'x402 payment gate',sub:'payment-state check',kind:'gate',x:650,y:170},
+  {id:'exec',label:'Execution',sub:'seller tool',kind:'svc',x:840,y:60},
+  {id:'rep',label:'Reputation',sub:'outcomes',kind:'data',x:840,y:300}
+ ],
+ edges:[['task','router'],['reg','router'],['router','redact'],['redact','pay'],['pay','exec'],['exec','rep'],['rep','router','dashed']],
+ steps:[
+  {on:'task',title:'A task arrives',text:'A buyer agent submits a task describing the capability it needs, not a specific tool.'},
+  {edge:['task','router'],title:'Capability routing',text:'The broker matches the task to capabilities instead of hard-coding tools, so new sellers can join without changing buyers.'},
+  {edge:['reg','router'],title:'Registry',text:'Sellers list capabilities in a registry; the router ranks candidates using capability fit and reputation.'},
+  {edge:['router','redact'],title:'Context redaction',text:'Before anything leaves the broker, sensitive context is redacted so a seller sees only what the task needs. Least privilege, applied to context.'},
+  {edge:['redact','pay'],title:'x402 payment gate',text:'Paid execution is gated on x402 payment-state checks: without a valid payment state, nothing executes.'},
+  {edge:['pay','exec'],title:'Execution',text:'The selected seller tool runs the task and the result returns to the buyer.'},
+  {edge:['exec','rep'],title:'Reputation update',text:'The outcome updates the seller’s reputation.'},
+  {edge:['rep','router'],title:'Feedback loop',text:'Reputation feeds back into routing, so reliable sellers are preferred on the next task.'}
+ ],
+ scale:['Idempotency keys on payment and execution so retries never double-charge.','Queues with timeouts for execution; circuit-break failing sellers.','Caching: cache registry lookups and ranking inputs.','Eval set: tasks with expected routes, plus redaction tests seeded with synthetic secrets.','Observability: one trace per task across route → redact → pay → execute → reputation.']}
+];
+
+const OTHER_PROJECTS=[
+ {title:'Uber NYC Driver Pay Prediction',meta:'ML'},
+ {title:'SQL-AI',meta:'Natural language → SQL'},
+ {title:'Indian Weather Predictor',meta:'Kaggle ML Olympiad top-10'}
+];
+
+/* ============================ HELPERS ============================ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const NS='http://www.w3.org/2000/svg';
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)');
+const reduced=()=>RM.matches;
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);if(attrs)for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const byId={};NODES.forEach(n=>byId[n.id]=n);
+const adj={};NODES.forEach(n=>adj[n.id]=new Set());
+EDGES.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a);});
+const dims=n=>n.type==="skill"?[140,30]:[200,58];
+const W=1360,H=980;
+
+/* ============================ CANVAS ============================ */
+const svg=$('#graph'),world=$('#world'),gE=$('#edges'),gN=$('#nodes'),gF=$('#frames');
+const nodeEls={},edgeEls=[];
+
+FRAMES.forEach(f=>{
+  el('rect',{class:'frame',x:f.x,y:f.y,width:f.w,height:f.h,rx:14},gF);
+  const t=el('text',{class:'frame-label',x:f.x+12,y:f.y+20,fill:f.c},gF);t.style.fill=f.c;t.textContent=f.label;
+});
+// sticky note (hand-placed, slightly rotated)
+(function(){
+  const g=el('g',{class:'sticky',transform:'translate(52,408) rotate(-1.6)'},gF);
+  el('rect',{x:0,y:0,width:216,height:100,rx:3},g);
+  [['Om M. Patel',1],['MSc CS (AI) · York · GPA 3.77/4',0],['Vector AI Scholar · 2025',0],['Toronto · open to full-time',0]].forEach(([s,b],i)=>{
+    const t=el('text',{x:12,y:24+i*21,class:b?'h':''},g);t.textContent=s;});
+})();
+
+function anchor(n,other){const [w]=dims(n);return [n.x+(other.x>n.x?1:-1)*w/2,n.y];}
+EDGES.forEach(([a,b])=>{
+  const A=byId[a],B=byId[b];const [x1,y1]=anchor(A,B),[x2,y2]=anchor(B,A);const dx=(x2-x1)*.5;
+  const p=el('path',{class:'edge',d:`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`},gE);
+  p.dataset.a=a;p.dataset.b=b;edgeEls.push(p);
+});
+
+NODES.forEach(n=>{
+  const [w,h]=dims(n),rx=n.type==='skill'?15:10;
+  const g=el('g',{class:`node t-${n.type}`,transform:`translate(${n.x-w/2},${n.y-h/2})`,tabindex:'0',role:'button'},gN);
+  g.dataset.id=n.id;
+  const cnt=adj[n.id].size;
+  g.setAttribute('aria-label',`${TYPES[n.type].label}: ${n.label}${n.sub?', '+n.sub:''}. ${cnt} connection${cnt===1?'':'s'}. Press Enter for details.`);
+  el('rect',{class:'ring',x:-6,y:-6,width:w+12,height:h+12,rx:rx+5},g);
+  el('rect',{class:'shadow',x:3,y:3,width:w,height:h,rx},g);
+  el('rect',{class:'body',width:w,height:h,rx},g);
+  if(n.type==='skill'){
+    const t=el('text',{class:'label',x:w/2,y:h/2+4.5,'text-anchor':'middle'},g);t.textContent=n.label;
+  }else{
+    el('rect',{class:'stripe',x:9,y:11,width:4,height:h-22,rx:2},g);
+    const t=el('text',{class:'title',x:22,y:26},g);t.textContent=n.label;
+    const s=el('text',{class:'sub',x:22,y:44},g);s.textContent=n.sub||'';
+    const tg=el('text',{class:'tag',x:w-10,y:17,'text-anchor':'end'},g);tg.textContent=TYPES[n.type].tag;
+  }
+  nodeEls[n.id]=g;
+  g.addEventListener('pointerenter',()=>highlight(n.id));
+  g.addEventListener('pointerleave',()=>highlight(null));
+  g.addEventListener('focus',()=>{highlight(n.id);ensureVisible(n.id);});
+  g.addEventListener('blur',()=>highlight(null));
+  g.addEventListener('click',()=>{if(!drag.moved)openInspector(n.id);});
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openInspector(n.id);}});
+});
+
+function highlight(id){
+  if(!id){svg.classList.remove('hovering');$$('.hl',svg).forEach(x=>x.classList.remove('hl'));return;}
+  svg.classList.add('hovering');
+  const set=new Set([id,...adj[id]]);
+  for(const k in nodeEls)nodeEls[k].classList.toggle('hl',set.has(k));
+  edgeEls.forEach(p=>p.classList.toggle('hl',p.dataset.a===id||p.dataset.b===id));
+}
+
+/* ---- pan / zoom ---- */
+const view={x:0,y:0,k:1};
+let userMoved=false;
+function apply(){world.setAttribute('transform',`translate(${view.x},${view.y}) scale(${view.k})`);$('#zoomChip').textContent=Math.round(view.k*100)+'%';}
+function fit(){const r=svg.getBoundingClientRect();if(!r.width)return;const k=clamp(Math.min(r.width/(W+60),(r.height-40)/(H+60)),.25,1.4);
+  view.k=k;view.x=(r.width-W*k)/2;view.y=(r.height-H*k)/2+18;apply();}
+function zoomAt(f,px,py){userMoved=true;const nk=clamp(view.k*f,.25,3);const s=nk/view.k;view.x=px-(px-view.x)*s;view.y=py-(py-view.y)*s;view.k=nk;apply();}
+function zoomCenter(f){const r=svg.getBoundingClientRect();zoomAt(f,r.width/2,r.height/2);}
+let tween=null;
+function panTo(tx,ty){
+  cancelAnimationFrame(tween);
+  if(reduced()){view.x=tx;view.y=ty;apply();return;}
+  const sx=view.x,sy=view.y,t0=performance.now(),D=320;
+  const step=t=>{const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,3);view.x=sx+(tx-sx)*e;view.y=sy+(ty-sy)*e;apply();if(p<1)tween=requestAnimationFrame(step);};
+  tween=requestAnimationFrame(step);
+}
+function centerOn(id){
+  const n=byId[id],r=svg.getBoundingClientRect();
+  const insOpen=!$('#inspector').hidden;const wide=r.width>720;
+  const cx=insOpen&&wide?(r.width-380)/2:r.width/2, cy=insOpen&&!wide?r.height*.25:r.height/2;
+  panTo(cx-n.x*view.k,cy-n.y*view.k);
+}
+function ensureVisible(id){
+  const n=byId[id],r=svg.getBoundingClientRect();const sx=n.x*view.k+view.x,sy=n.y*view.k+view.y,m=60;
+  if(sx<m||sy<m||sx>r.width-m||sy>r.height-m)centerOn(id);
+}
+const pts=new Map();const drag={moved:false,origin:null,pinch:null};
+function pinchInfo(){const [a,b]=[...pts.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y)||1,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2};}
+svg.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){drag.moved=false;drag.origin={x:e.clientX,y:e.clientY};}
+  if(pts.size===2)drag.pinch=pinchInfo();
+  cancelAnimationFrame(tween);
+});
+window.addEventListener('pointermove',e=>{
+  if(!pts.has(e.pointerId))return;
+  const prev=pts.get(e.pointerId),cur={x:e.clientX,y:e.clientY};pts.set(e.pointerId,cur);
+  if(pts.size===1){
+    if(!drag.moved&&Math.hypot(cur.x-drag.origin.x,cur.y-drag.origin.y)>5){drag.moved=true;svg.classList.add('grabbing');}
+    if(drag.moved){userMoved=true;view.x+=cur.x-prev.x;view.y+=cur.y-prev.y;apply();}
+  }else if(pts.size===2){
+    const p=pinchInfo(),r=svg.getBoundingClientRect();
+    if(drag.pinch){zoomAt(p.d/drag.pinch.d,p.cx-r.left,p.cy-r.top);view.x+=p.cx-drag.pinch.cx;view.y+=p.cy-drag.pinch.cy;apply();}
+    drag.pinch=p;drag.moved=true;
+  }
+});
+function endPtr(e){pts.delete(e.pointerId);if(pts.size<2)drag.pinch=null;if(pts.size===1){const v=[...pts.values()][0];drag.origin={x:v.x,y:v.y};}if(!pts.size)svg.classList.remove('grabbing');}
+window.addEventListener('pointerup',endPtr);window.addEventListener('pointercancel',endPtr);
+svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();
+  const dy=e.deltaMode===1?e.deltaY*16:e.deltaY;zoomAt(Math.exp(-dy*(e.ctrlKey?.01:.0015)),e.clientX-r.left,e.clientY-r.top);},{passive:false});
+svg.addEventListener('click',e=>{if(!drag.moved&&!e.target.closest('.node'))closeInspector(false);});
+$('#zoomIn').onclick=()=>zoomCenter(1.25);$('#zoomOut').onclick=()=>zoomCenter(.8);$('#zoomReset').onclick=()=>{fit();userMoved=false;};
+$('#view-canvas').addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea,select'))return;
+  if(e.key==='+'||e.key==='=')zoomCenter(1.2);else if(e.key==='-')zoomCenter(.83);else if(e.key==='0')fit();
+  else if(e.key==='Escape')closeInspector(true);
+});
+
+/* ---- filters ---- */
+const hiddenTypes=new Set();
+$$('.filter').forEach(b=>b.addEventListener('click',()=>{
+  const t=b.dataset.type,on=b.getAttribute('aria-pressed')==='true';b.setAttribute('aria-pressed',String(!on));
+  on?hiddenTypes.add(t):hiddenTypes.delete(t);
+  for(const k in nodeEls)nodeEls[k].classList.toggle('hidden',hiddenTypes.has(byId[k].type));
+  edgeEls.forEach(p=>p.classList.toggle('hidden',hiddenTypes.has(byId[p.dataset.a].type)||hiddenTypes.has(byId[p.dataset.b].type)));
+  const sel=$('#inspector').dataset.id;if(sel&&hiddenTypes.has(byId[sel].type))closeInspector(false);
+}));
+
+/* ---- inspector ---- */
+const ins=$('#inspector');let returnFocus=null;
+function openInspector(id){
+  const n=byId[id];returnFocus=nodeEls[id];
+  $$('.node.selected',svg).forEach(x=>x.classList.remove('selected'));nodeEls[id].classList.add('selected');
+  const conns=[...adj[id]].map(k=>byId[k]).sort((a,b)=>a.type.localeCompare(b.type)||a.label.localeCompare(b.label));
+  let h=`<button class="btn close" id="insClose" aria-label="Close details">&times;</button>
+  <span class="type-pill ${n.type}">${TYPES[n.type].label.toUpperCase()}</span>
+  <h2 tabindex="-1">${esc(n.title||n.label)}</h2>`;
+  if(n.org||n.meta)h+=`<p class="org">${esc([n.org,n.meta].filter(Boolean).join(' · '))}</p>`;
+  if(n.bullets)h+=`<ul>${n.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`;
+  if(n.type==='skill')h+=`<p class="org">Used in ${conns.length||'no'} item${conns.length===1?'':'s'} on this canvas.</p>`;
+  if(n.note)h+=`<p class="note">${esc(n.note)}</p>`;
+  if(n.links&&n.links.length)h+=`<h3>Links</h3><div class="linkrow">${n.links.map(l=>`<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} &#8599;</a>`).join('')}</div>`;
+  if(n.walk){const w=WALKS.find(x=>x.id===n.walk);h+=`<h3>Walkthrough</h3><button class="btn" data-walk="${w.id}">Open: ${esc(w.title)}${n.id==='exp-1pour'?' (generic pattern)':''}</button>`;}
+  if(conns.length)h+=`<h3>Connected (${conns.length})</h3><div class="conn">${conns.map(c=>`<button class="${c.type}" data-goto="${c.id}">${esc(c.label)}${c.type!=='skill'&&c.sub?' · '+esc(c.sub):''}</button>`).join('')}</div>`;
+  ins.innerHTML=h;ins.dataset.id=id;ins.hidden=false;
+  $('#insClose').onclick=()=>closeInspector(true);
+  $$('[data-goto]',ins).forEach(b=>b.onclick=()=>{const t=b.dataset.goto;if(hiddenTypes.has(byId[t].type))$(`.filter[data-type=${byId[t].type}]`).click();openInspector(t);centerOn(t);});
+  $$('[data-walk]',ins).forEach(b=>b.onclick=()=>{showView('walk');selectWalk(b.dataset.walk,true);});
+  ins.onkeydown=e=>{if(e.key==='Escape'){e.stopPropagation();closeInspector(true);}};
+  $('h2',ins).focus({preventScroll:true});
+  ensureVisible(id);
+}
+function closeInspector(restore){
+  if(ins.hidden)return;ins.hidden=true;delete ins.dataset.id;
+  $$('.node.selected',svg).forEach(x=>x.classList.remove('selected'));
+  if(restore&&returnFocus)returnFocus.focus({preventScroll:true});
+}
+
+/* ============================ ROLE HIGHLIGHT ============================ */
+let roleSet=null;
+function setRole(ids,label){
+  roleSet=ids&&ids.size?ids:null;
+  svg.classList.toggle('role-on',!!roleSet);
+  for(const k in nodeEls)nodeEls[k].classList.toggle('role-hit',!!roleSet&&roleSet.has(k));
+  edgeEls.forEach(p=>p.classList.toggle('role-hit',!!roleSet&&roleSet.has(p.dataset.a)&&roleSet.has(p.dataset.b)));
+  $$('[data-node]',$('#listRoot')).forEach(x=>x.classList.toggle('role-hit',!!roleSet&&roleSet.has(x.dataset.node)));
+  const st=$('#roleStatus');st.classList.toggle('on',!!roleSet);
+  $('#roleStatusText').textContent=roleSet?`Highlighting: ${label} · ${roleSet.size} nodes`:'';
+}
+function clearRole(){setRole(null);$('#roleSel').value='';$('#customField').hidden=true;$('#brief').innerHTML='';}
+$('#roleClear').onclick=clearRole;$('#roleClear2').onclick=clearRole;
+
+function kwRegex(k){return new RegExp('(^|[^a-z0-9])'+k,'i');}
+function matchSkills(text){
+  const t=(text||'').toLowerCase();if(!t.trim())return[];
+  return NODES.filter(n=>n.type==='skill'&&n.kw.some(k=>kwRegex(k).test(t)));
+}
+function customIds(text){
+  const t=(text||'').toLowerCase();const ids=new Set();
+  matchSkills(t).forEach(s=>{ids.add(s.id);adj[s.id].forEach(x=>ids.add(x));});
+  const words=t.split(/[^a-z0-9.+]+/).filter(w=>w.length>2&&!['engineer','senior','junior','the','and','for','with','developer','role','lead','staff'].includes(w));
+  NODES.forEach(n=>{if(n.type==='skill')return;const hay=[n.label,n.title,n.org,n.sub,...(n.bullets||[])].join(' ').toLowerCase();if(words.some(w=>hay.includes(w)))ids.add(n.id);});
+  // simple title heuristics
+  if(/\b(ai|llm|genai|ml)\b/.test(t))ROLES.applied.ids.forEach(i=>ids.add(i));
+  if(/\bdata\b/.test(t))ROLES.dataeng.ids.forEach(i=>ids.add(i));
+  if(/\bnlp|language\b/.test(t))ROLES.nlp.ids.forEach(i=>ids.add(i));
+  return ids;
+}
+
+/* ============================ DRAWER ============================ */
+const drawer=$('#drawer'),openBtn=$('#openDrawer');
+function openDrawer(){drawer.classList.add('open');drawer.inert=false;openBtn.setAttribute('aria-expanded','true');setTimeout(()=>$('#roleSel').focus(),reduced()?0:200);}
+function closeDrawer(){drawer.classList.remove('open');drawer.inert=true;openBtn.setAttribute('aria-expanded','false');openBtn.focus();}
+openBtn.onclick=()=>drawer.classList.contains('open')?closeDrawer():openDrawer();
+$('#closeDrawer').onclick=closeDrawer;
+drawer.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+function currentRole(){
+  const v=$('#roleSel').value;
+  if(v==='custom'){const t=$('#customRole').value.trim();return t?{key:'custom',label:t,ids:customIds(t),walk:'rag',pitch:null}:null;}
+  if(!v)return null;const r=ROLES[v];return{key:v,label:r.label,ids:new Set(r.ids),walk:r.walk,pitch:r.pitch};
+}
+function applyRole(){const r=currentRole();if(r)setRole(r.ids,r.label);else setRole(null);}
+$('#roleSel').addEventListener('change',()=>{const c=$('#roleSel').value==='custom';$('#customField').hidden=!c;if(c)$('#customRole').focus();applyRole();$('#brief').innerHTML='';});
+$('#customRole').addEventListener('input',applyRole);
+$('#genBrief').onclick=()=>{
+  const r=currentRole(),jd=$('#jd').value;
+  const matched=matchSkills(jd);
+  const label=r?r.label:'the role';
+  const ids=new Set(r?r.ids:[]);matched.forEach(s=>ids.add(s.id));
+  if(ids.size)setRole(ids,label+(matched.length?' + JD':''));
+  // rank items: role membership + linked matched skills
+  const ms=new Set(matched.map(s=>s.id));
+  const items=NODES.filter(n=>n.type!=='skill').map(n=>{let sc=(r&&r.ids.has(n.id))?2:0;adj[n.id].forEach(k=>{if(ms.has(k))sc+=1;});return{n,sc};})
+    .filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc||(a.n.type==='experience'?-1:1)).slice(0,4);
+  const walk=WALKS.find(w=>w.id===((r&&r.walk)||'rag'));
+  let h=`<div class="card"><span class="proto">PROTOTYPE</span>
+  <h4>Om M. Patel for ${esc(label)}</h4>
+  <p style="margin:0;font-size:14px">Applied AI Engineer in Toronto, available for full-time roles in Canada. MSc Computer Science (AI), York University; Vector AI Scholar.</p>`;
+  if(r&&r.pitch)h+=`<h5>Why this role</h5><p style="margin:0;font-size:14px">${esc(r.pitch)}</p>`;
+  h+=`<h5>Most relevant evidence</h5>`;
+  h+=items.length?`<ul>${items.map(({n})=>`<li><b>${esc(n.title||n.label)}</b>${n.type==='experience'?' ('+esc(n.org.split(' · ')[0])+')':''}: ${esc(n.bullets[0])}</li>`).join('')}</ul>`:`<p style="margin:0;font-size:14px">Pick a role or paste a JD to rank evidence.</p>`;
+  h+=`<h5>JD keywords matched</h5>`;
+  h+=matched.length?`<div class="kw">${matched.map(s=>`<span>${esc(s.label)}</span>`).join('')}</div>`:`<p style="margin:0;font-size:14px;color:var(--muted)">${jd.trim()?'No listed skills matched.':'No JD pasted.'}</p>`;
+  h+=`<h5>Suggested walkthrough</h5><button class="btn" data-bwalk="${walk.id}">${esc(walk.title)}</button>
+  <p class="fine">Prototype: a deterministic keyword match run locally in your browser. No model call, and not an evaluation of fit.</p></div>`;
+  $('#brief').innerHTML=h;
+  $('[data-bwalk]').onclick=e=>{closeDrawer();showView('walk');selectWalk(e.currentTarget.dataset.bwalk,true);};
+};
+
+/* ============================ VIEWS ============================ */
+const tabs=$$('#modeTabs [role=tab]');let fitted=false;
+function showView(name){
+  tabs.forEach(t=>{const on=t.id==='tab-'+name;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;});
+  $$('main>.view').forEach(v=>v.hidden=v.id!=='view-'+name);
+  if(name==='canvas'&&!fitted){fit();fitted=true;}
+  if(name!=='walk')stopPlay();
+}
+function tablistKeys(list,onSelect){
+  list.addEventListener('keydown',e=>{
+    const ts=$$('[role=tab]',list),i=ts.indexOf(document.activeElement);if(i<0)return;
+    let j=null;if(e.key==='ArrowRight')j=(i+1)%ts.length;else if(e.key==='ArrowLeft')j=(i-1+ts.length)%ts.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=ts.length-1;
+    if(j!==null){e.preventDefault();ts[j].focus();onSelect(ts[j]);}
+  });
+}
+tabs.forEach(t=>t.onclick=()=>showView(t.id.slice(4)));
+tablistKeys($('#modeTabs'),t=>showView(t.id.slice(4)));
+$('#mobileList').onclick=()=>{showView('list');$('#tab-list').focus();};
+window.addEventListener('resize',()=>{if(!$('#view-canvas').hidden&&!userMoved)fit();});
+
+/* ============================ LIST VIEW ============================ */
+(function(){
+  const root=$('#listRoot');
+  const sec=(title,type)=>`<h2><span class="sw" style="background:var(--${type==='experience'?'exp':type==='project'?'proj':type==='research'?'res':'skill'}-bg);border-color:var(--${type==='experience'?'exp':type==='project'?'proj':type==='research'?'res':'skill'})"></span>${title}</h2>`;
+  const item=n=>`<article class="item ${n.type}" data-node="${n.id}">
+    <h3>${esc(n.title)}</h3><p class="meta">${esc([n.org,n.meta].filter(Boolean).join(' · '))}</p>
+    <ul>${n.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+    ${n.note?`<p class="note">${esc(n.note)}</p>`:''}
+    <div class="row">${(n.links||[]).map(l=>`<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} &#8599;</a>`).join('')}
+    <button data-show="${n.id}">Show on canvas</button>${n.walk?`<button data-lwalk="${n.walk}">Walkthrough</button>`:''}</div></article>`;
+  let h=`<h2 style="margin-top:6px">Om M. Patel · Applied AI Engineer</h2>
+  <p class="lede">Toronto, Ontario. Available for full-time roles (Applied AI, AI/ML, NLP, Data Engineering) in Canada. <a href="/go/resume">Resume</a> · <a href="mailto:iampatelom@gmail.com">iampatelom@gmail.com</a> · <a href="https://github.com/PATELOM925">GitHub</a> · <a href="https://linkedin.com/in/om-m-patel">LinkedIn</a> · <a href="https://kaggle.com/iamommpatel">Kaggle</a></p>`;
+  h+=sec('Experience','experience')+NODES.filter(n=>n.type==='experience').map(item).join('');
+  h+=sec('Projects','project')+NODES.filter(n=>n.type==='project').map(item).join('');
+  h+=`<article class="item project"><h3>More projects</h3><ul>${OTHER_PROJECTS.map(p=>`<li>${esc(p.title)} · ${esc(p.meta)}</li>`).join('')}</ul></article>`;
+  h+=sec('Research','research')+NODES.filter(n=>n.type==='research').map(item).join('');
+  h+=`<h2>Education</h2>
+  <article class="item"><h3>MSc Computer Science (AI Specialization)</h3><p class="meta">York University · Sep 2025 – Aug 2026 · GPA 3.77/4</p></article>
+  <article class="item"><h3>BTech Computer Engineering</h3><p class="meta">Pandit Deendayal Energy University, India · Nov 2021 – May 2025 · GPA 3.47/4</p></article>
+  <h2>Awards</h2><article class="item"><ul><li>Winner, AgentShyft Hackathon (May 2026)</li><li>Vector AI Scholarship (May 2025)</li><li>Top-10, Kaggle ML Olympiad (2024)</li><li>Mentored 10+ students</li></ul></article>`;
+  h+=sec('Skills','skill')+`<div class="skills-list">${NODES.filter(n=>n.type==='skill').map(n=>`<span data-node="${n.id}">${esc(n.label)}</span>`).join('')}<span>Java</span><span>LlamaIndex</span><span>Vercel</span></div>`;
+  root.innerHTML=h;
+  root.addEventListener('click',e=>{
+    const s=e.target.closest('[data-show]'),w=e.target.closest('[data-lwalk]');
+    if(s){const id=s.dataset.show;showView('canvas');openInspector(id);centerOn(id);}
+    if(w){showView('walk');selectWalk(w.dataset.lwalk,true);}
+  });
+})();
+
+/* ============================ WALKTHROUGHS ============================ */
+const CW=170,CH=64;
+const stage=$('#stage'),sE=$('#stageEdges'),sC=$('#stageComps'),packet=$('#packet');
+const wt={walk:null,i:0,timer:null,raf:null,geo:{}};
+const wtabs=$('#wtabs');
+WALKS.forEach((w,i)=>{const b=document.createElement('button');b.setAttribute('role','tab');b.id='wt-'+w.id;b.textContent=w.tab;
+  b.setAttribute('aria-selected',i===0?'true':'false');b.setAttribute('aria-controls','stage');b.tabIndex=i===0?0:-1;
+  b.onclick=()=>selectWalk(w.id);wtabs.appendChild(b);});
+tablistKeys(wtabs,t=>selectWalk(t.id.slice(3)));
+
+function border(c,tx,ty){const cx=c.x+CW/2,cy=c.y+CH/2,dx=tx-cx,dy=ty-cy;const s=Math.min((CW/2+4)/Math.abs(dx||1e-6),(CH/2+4)/Math.abs(dy||1e-6));return[cx+dx*s,cy+dy*s];}
+function selectWalk(id,focusStage){
+  stopPlay();
+  const w=WALKS.find(x=>x.id===id);wt.walk=w;wt.i=0;wt.geo={};
+  $$('[role=tab]',wtabs).forEach(t=>{const on=t.id==='wt-'+id;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;});
+  sE.innerHTML='';sC.innerHTML='';
+  const C={};w.comps.forEach(c=>C[c.id]=c);
+  w.edges.forEach(([a,b,style])=>{
+    const A=C[a],B=C[b];const [x1,y1]=border(A,B.x+CW/2,B.y+CH/2),[x2,y2]=border(B,A.x+CW/2,A.y+CH/2);
+    const l=el('line',{x1,y1,x2,y2,class:'wedge'+(style?' '+style:''),'marker-end':'url(#arr)'},sE);l.dataset.k=a+'>'+b;wt.geo[a+'>'+b]={x1,y1,x2,y2,l};
+  });
+  w.comps.forEach(c=>{
+    const g=el('g',{class:'wc '+c.kind,transform:`translate(${c.x},${c.y})`},sC);g.dataset.id=c.id;
+    el('rect',{class:'sh',x:3,y:3,width:CW,height:CH,rx:9},g);
+    el('rect',{class:'b',width:CW,height:CH,rx:9},g);
+    const k=el('text',{class:'k',x:10,y:15},g);k.textContent={ui:'UI',svc:'SERVICE',model:'MODEL',data:'DATA',gate:'GATE'}[c.kind];
+    const t=el('text',{x:CW/2,y:c.sub?38:42,'text-anchor':'middle'},g);t.textContent=c.label;
+    if(c.sub){const s=el('text',{class:'s',x:CW/2,y:55,'text-anchor':'middle'},g);s.textContent=c.sub;}
+  });
+  $('#stageTitle').textContent=w.title+': sequence diagram with '+w.comps.length+' components';
+  $('#scaleList').innerHTML=w.scale.map(s=>`<li>${esc(s)}</li>`).join('');
+  $('#disclaimer').textContent=w.disclaimer;
+  const dots=$('#dots');dots.innerHTML='';
+  w.steps.forEach((s,i)=>{const b=document.createElement('button');b.setAttribute('aria-label',`Step ${i+1}: ${s.title}`);b.onclick=()=>{stopPlay();go(i);};dots.appendChild(b);});
+  go(0);
+  if(focusStage)stage.focus({preventScroll:true});
+}
+function go(i){
+  const w=wt.walk;wt.i=clamp(i,0,w.steps.length-1);const s=w.steps[wt.i];
+  const visited=new Set(),done=new Set();
+  w.steps.slice(0,wt.i+1).forEach(st=>{if(st.on)visited.add(st.on);if(st.edge){visited.add(st.edge[0]);visited.add(st.edge[1]);}});
+  w.steps.slice(0,wt.i).forEach(st=>{if(st.edge)done.add(st.edge.join('>'));});
+  const active=s.on||s.edge[1];const ak=s.edge?s.edge.join('>'):null;
+  $$('.wc',sC).forEach(g=>{g.classList.toggle('visited',visited.has(g.dataset.id));g.classList.toggle('active',g.dataset.id===active);});
+  for(const k in wt.geo){const l=wt.geo[k].l;l.classList.toggle('done',done.has(k)&&k!==ak);l.classList.toggle('active',k===ak);
+    l.setAttribute('marker-end',k===ak?'url(#arrA)':done.has(k)?'url(#arrD)':'url(#arr)');}
+  $('#stepNo').textContent=`STEP ${wt.i+1} / ${w.steps.length}`;
+  $('#stepTitle').textContent=s.title;$('#stepText').textContent=s.text;
+  $$('#dots button').forEach((b,j)=>{b.toggleAttribute('aria-current',false);if(j===wt.i)b.setAttribute('aria-current','step');b.classList.toggle('seen',j<wt.i);});
+  $('#prev').disabled=wt.i===0;$('#next').disabled=wt.i===w.steps.length-1;
+  animatePacket(ak);
+}
+function animatePacket(k){
+  cancelAnimationFrame(wt.raf);
+  if(!k||reduced()){packet.setAttribute('cx',-50);packet.setAttribute('cy',-50);return;}
+  const g=wt.geo[k];const D=1100,t0=performance.now();
+  const f=t=>{const p=((t-t0)%(D+350))/D,q=Math.min(1,p),e=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;
+    packet.setAttribute('cx',g.x1+(g.x2-g.x1)*e);packet.setAttribute('cy',g.y1+(g.y2-g.y1)*e);packet.style.opacity=p>1?0:1;wt.raf=requestAnimationFrame(f);};
+  wt.raf=requestAnimationFrame(f);
+}
+function stopPlay(){clearInterval(wt.timer);wt.timer=null;const b=$('#play');b.textContent='Play';b.setAttribute('aria-pressed','false');}
+function togglePlay(){
+  if(wt.timer){stopPlay();return;}
+  if(wt.i>=wt.walk.steps.length-1)go(0);
+  const b=$('#play');b.textContent='Pause';b.setAttribute('aria-pressed','true');
+  wt.timer=setInterval(()=>{if(wt.i>=wt.walk.steps.length-1){stopPlay();return;}go(wt.i+1);},3600);
+}
+$('#prev').onclick=()=>{stopPlay();go(wt.i-1);};
+$('#next').onclick=()=>{stopPlay();go(wt.i+1);};
+$('#play').onclick=togglePlay;
+stage.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'){e.preventDefault();stopPlay();go(wt.i+1);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();stopPlay();go(wt.i-1);}
+  else if(e.key===' '){e.preventDefault();togglePlay();}
+});
+RM.addEventListener&&RM.addEventListener('change',()=>{if(wt.walk)go(wt.i);});
+
+/* ============================ INIT ============================ */
+selectWalk('hitl');
+apply();
+requestAnimationFrame(()=>{fit();fitted=true;});
+})();
+</script>
+</body>
+</html>

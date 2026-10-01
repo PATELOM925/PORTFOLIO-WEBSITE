@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Layout } from "@/components/Layout";
-import { ProjectCard } from "@/components/ProjectCard";
+import { ProjectExplorer } from "@/components/ProjectExplorer";
 import { getAllProjects } from "@/lib/content";
 
 export const metadata = {
@@ -17,12 +17,8 @@ export default async function ProjectsPage() {
       <main className="container page-spacing">
         <p className="eyebrow">Portfolio</p>
         <h1>Projects</h1>
-        <p className="lead">Detailed writeups with links, stack, and impact.</p>
-        <div className="card-grid">
-          {projects.map((project) => (
-            <ProjectCard key={project.frontmatter.slug} project={project.frontmatter} />
-          ))}
-        </div>
+        <p className="lead">Filter by area, then open a project to step through how it works.</p>
+        <ProjectExplorer projects={projects.map((project) => project.frontmatter)} />
         <Link href="/" className="text-link back-link">
           Back to home
         </Link>

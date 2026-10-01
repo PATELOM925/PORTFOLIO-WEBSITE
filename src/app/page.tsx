@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BlogCard } from "@/components/BlogCard";
 import { ContactForm } from "@/components/ContactForm";
 import { Layout } from "@/components/Layout";
-import { ProjectCard } from "@/components/ProjectCard";
+import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { RecruiterAssistant } from "@/components/RecruiterAssistant";
 import { Section } from "@/components/Section";
 import { TimelineItem } from "@/components/TimelineItem";
@@ -17,11 +17,12 @@ import {
   skills,
   socialLinks
 } from "@/config/site";
-import { getFeaturedProjects, getLatestBlogPosts } from "@/lib/content";
+import { getAllProjects, getFeaturedProjects, getLatestBlogPosts } from "@/lib/content";
 
 export default async function HomePage() {
-  const [featuredProjects, latestPosts] = await Promise.all([
+  const [featuredProjects, allProjects, latestPosts] = await Promise.all([
     getFeaturedProjects(),
+    getAllProjects(),
     getLatestBlogPosts(4)
   ]);
 
@@ -73,16 +74,19 @@ export default async function HomePage() {
         </section>
 
         <section className="cta-strip animate-rise">
-          <p>{siteConfig.description} Open to AI/ML/NLP internships, research collaborations, and backend data engineering opportunities in Canada.</p>
+          <p>{siteConfig.description} Available for full-time applied AI, AI/ML, NLP, and data engineering roles in Canada.</p>
         </section>
 
-        <Section id="skills" title="Skills">
-          <div className="skills-grid">
-            {skills.map((skill) => (
-              <article key={skill.category} className="card skill-card">
-                <h3>{skill.category}</h3>
-                <p>{skill.items}</p>
-              </article>
+        <Section id="experience" title="Industry Experience">
+          <div className="timeline-grid">
+            {industryExperience.map((item) => (
+              <TimelineItem
+                key={item.title + item.period}
+                title={item.title}
+                meta={item.organization}
+                period={item.period}
+                bullets={item.bullets}
+              />
             ))}
           </div>
         </Section>
@@ -138,30 +142,21 @@ export default async function HomePage() {
           </div>
         </Section>
 
-        <Section id="experience" title="Industry Experience">
-          <div className="timeline-grid">
-            {industryExperience.map((item) => (
-              <TimelineItem
-                key={item.title + item.period}
-                title={item.title}
-                meta={item.organization}
-                period={item.period}
-                bullets={item.bullets}
-              />
-            ))}
-          </div>
+        <Section id="projects" title="Featured Projects">
+          <FeaturedCarousel
+            projects={featuredProjects.slice(0, 4).map((project) => project.frontmatter)}
+            totalCount={allProjects.length}
+          />
         </Section>
 
-        <Section id="projects" title="Featured Projects">
-          <div className="card-grid">
-            {featuredProjects.map((project) => (
-              <ProjectCard key={project.frontmatter.slug} project={project.frontmatter} />
+        <Section id="skills" title="Skills">
+          <div className="skills-grid">
+            {skills.map((skill) => (
+              <article key={skill.category} className="card skill-card">
+                <h3>{skill.category}</h3>
+                <p>{skill.items}</p>
+              </article>
             ))}
-          </div>
-          <div className="inline-actions">
-            <Link href="/projects" className="text-link">
-              Check all the projects
-            </Link>
           </div>
         </Section>
 
@@ -178,7 +173,7 @@ export default async function HomePage() {
           </div>
         </Section>
 
-        <Section id="assistant" title="Recruiter Fit Assistant">
+        <Section id="fit-check" title="Role Fit Check" subtitle="Hiring for a role? Paste the job description to get an evidence-based summary of how Om matches it, plus suggested interview questions.">
           <RecruiterAssistant />
         </Section>
 
@@ -207,6 +202,11 @@ export default async function HomePage() {
 
         <Section id="contact" title="Contact">
           <div className="card form-card">
+            <p className="contact-details">
+              <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
+              <span aria-hidden="true"> • </span>
+              <a href={`tel:${siteConfig.phone.replace(/\s/g, "")}`}>{siteConfig.phone}</a>
+            </p>
             <ContactForm formspreeId={siteConfig.formspreeId} />
           </div>
         </Section>

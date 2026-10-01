@@ -1,21 +1,27 @@
 ---
 title: "ChatPDF AI"
 slug: "chatpdf-ai"
-date: "2024-09-20"
-preview: "Retrieval-grounded document QA system using LangChain and FAISS with agentic query workflows."
-tags: ["RAG", "LangChain", "FAISS", "Agents", "LLM"]
+date: "2024-02-28"
+preview: "Retrieval-first document QA with LangChain + FAISS and OpenAI Agents SDK workflows, reaching 80% accuracy on a manual test set (N ≤ 50)."
+tags: ["RAG", "LangChain", "FAISS", "OpenAI Agents SDK", "Streamlit"]
 status: "published"
 github: "https://github.com/PATELOM925/ChatPDF-AI"
-demoUrl: "https://om-m-patel.streamlit.app/"
-featured: true
+featured: false
 problem: "Users need grounded answers over long PDFs without the model inventing unsupported claims."
-approach: "I built a retrieval-first pipeline with chunking, vector indexing, and controlled context assembly before answer generation."
-result: "The system was most useful when retrieval quality was treated as the main product surface instead of an invisible backend detail."
+approach: "I built a retrieval-first pipeline with LangChain chunking and FAISS vector search, then added OpenAI Agents SDK workflows for document querying and response generation."
+result: "The Streamlit app reached 80% accuracy on a manual test set (N ≤ 50) with answers grounded in source text."
+category: "Applied AI & Agents"
+pipeline: ["Upload PDF", "LangChain chunking", "Embeddings", "FAISS index", "Top-k retrieval", "Agentic answer (OpenAI Agents SDK)", "Streamlit UI"]
+highlight: "80% on manual test set"
 ---
+## Highlights
+- Built a retrieval-first document QA system using LangChain and FAISS to ground answers from source text.
+- Integrated Agents SDK for agentic workflows in document querying and response generation, resulting in 80% accuracy on a manual test set (N ≤ 50). Deployed on Streamlit.
+
 ## Core build
-This project combines document chunking, embedding-based retrieval, and answer generation into a practical PDF assistant.
+This project combines LangChain document chunking, embedding-based FAISS vector search, and OpenAI Agents SDK workflows for querying and answer generation in a Streamlit app.
 
 ## What I learned
 - Chunking strategy affects answer quality more than people expect.
-- Retrieval diagnostics are essential; the model cannot recover from weak context.
-- Grounding checks are necessary if the app is meant to feel trustworthy.
+- Retrieval quality limits answer quality; the model cannot recover from weak context.
+- Retrieved passages should remain inspectable when assessing an answer.

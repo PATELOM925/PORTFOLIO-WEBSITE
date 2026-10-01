@@ -10,32 +10,33 @@ import {
 export const siteConfig = {
   name: "Om M. Patel",
   shortName: "Om Patel",
-  title: "Om M. Patel | AI/ML Portfolio",
-  description: "Vector AI Scholar from York University building NLP, optimization, and applied ML systems.",
-  role: "MSc CS (AI) at York University",
-  focus: "NLP + Optimization",
+  title: "Om M. Patel | Applied AI Engineer",
+  description: "Vector AI Scholar and Applied AI engineer building production AI integrations, data pipelines, and backend systems to help teams make better operational decisions. Experience spans evaluating AI, agent routing loops for human review, LLM fine-tuning, and NLP research.",
+  role: "Applied AI Engineer",
+  focus: "AI Integration • Data Engineering • NLP",
   location: "Toronto, Ontario, Canada",
   email: "iampatelom@gmail.com",
   phone: "+1 437-212-3702",
-  resumePath: "/assets/Om_Resume.pdf",
-  profileImage: "/assets/profile-photo.png",
+  resumePath: "/assets/Om_Resume.pdf?v=2026-10-01",
+  profileImage: "/assets/profile-photo.jpg",
   logoPath: "/assets/om-monogram.svg",
   formspreeId: (((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {})["NEXT_PUBLIC_FORMSPREE_ID"] || "xnnjbpve",
   siteUrl: (((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {})["NEXT_PUBLIC_SITE_URL"] || "https://iampatelom.com",
   analyticsToken: (((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {})["NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN"] || ""
 };
 
+// Primary items stay visible on tablets; secondary items move into "More" (tablet) or the menu sheet (phone).
 export const navigation = [
   { label: "About", href: "/#about", sectionId: "about" },
-  { label: "Skills", href: "/#skills", sectionId: "skills" },
-  { label: "Education", href: "/#education", sectionId: "education" },
-  { label: "Research", href: "/#research", sectionId: "research" },
   { label: "Experience", href: "/#experience", sectionId: "experience" },
+  { label: "Education", href: "/#education", sectionId: "education", secondary: true },
+  { label: "Research", href: "/#research", sectionId: "research" },
   { label: "Projects", href: "/#projects", sectionId: "projects", routePrefix: "/projects" },
+  { label: "Skills", href: "/#skills", sectionId: "skills", secondary: true },
   { label: "Blog", href: "/#blog", sectionId: "blog", routePrefix: "/blog" },
-  { label: "Recruiter Bot", href: "/#assistant", sectionId: "assistant" },
-  { label: "Certifications", href: "/#certifications", sectionId: "certifications" },
-  { label: "Extracurriculars", href: "/#extracurricular", sectionId: "extracurricular" },
+  { label: "Role Fit Check", href: "/#fit-check", sectionId: "fit-check", secondary: true },
+  { label: "Certifications", href: "/#certifications", sectionId: "certifications", secondary: true },
+  { label: "Extracurriculars", href: "/#extracurricular", sectionId: "extracurricular", secondary: true },
   { label: "Contact", href: "/#contact", sectionId: "contact" }
 ] as const;
 
@@ -48,14 +49,14 @@ export const socialLinks = [
 ];
 
 export const skills: SkillGroup[] = [
-  { category: "Languages", items: "Python, SQL, JavaScript, TypeScript, Kotlin, Java, HTML/CSS" },
+  { category: "Languages", items: "TypeScript, Python, Java, SQL, JavaScript, Kotlin, HTML/CSS" },
   {
     category: "ML/NLP & LLM",
-    items: "PyTorch, TensorFlow, Scikit-learn, Hugging Face Transformers, LangChain, LlamaIndex, spaCy, FAISS, RAG pipelines"
+    items: "PyTorch, Pandas, NumPy, Scikit-learn, TensorFlow, Hugging Face Transformers, LangChain, LlamaIndex, FAISS, ChromaDB, RAG and evaluation pipelines"
   },
   {
-    category: "Optimization & Modeling",
-    items: "PyTorch Geometric, disjunctive-graph modeling, LoRA fine-tuning (4-bit), constrained prompting, GLM/GRU anomaly workflows"
+    category: "Agents & Applied AI",
+    items: "OpenAI SDK and Agents SDK, Google ADK, Gemini API, agent workflows, human-in-the-loop review, structured prompting, LoRA/QLoRA"
   },
   {
     category: "Robotics & Computer Vision",
@@ -63,11 +64,11 @@ export const skills: SkillGroup[] = [
   },
   {
     category: "Data Engineering & Backend",
-    items: "Airflow, Flask, REST API design, MongoDB, GeoPandas, Selenium, Beautiful Soup, ETL pipelines"
+    items: "React, FastAPI, Flask, Next.js, Airflow, PostgreSQL, Supabase, Neo4j, ChromaDB, MongoDB, GeoPandas, REST APIs, ETL pipelines"
   },
   {
     category: "Product, Deployment & Tooling",
-    items: "Docker, CI/CD, AWS EC2, Azure, Render, Next.js, Streamlit, Git/GitHub, Postman, PowerBI, Jira, Confluence"
+    items: "Docker, CI/CD, GitHub, Jira, Vercel, GCP, Cloudflare, Postman, Azure, Render, Streamlit, Tableau, Power BI"
   }
 ];
 
@@ -75,9 +76,9 @@ export const education: EducationEntry[] = [
   {
     degree: "Master of Science in Computer Science (AI Specialization)",
     school: "York University, Ontario, Canada",
-    period: "Sep 2025 - Apr 2027",
-    gpa: "3.63/4",
-    relevantCoursework: "Data Mining, Probabilistic Models and Machine Learning, Fairness and Bias in AI, Machine Learning Theory, Robotics"
+    period: "Sep 2025 - Aug 2026",
+    gpa: "3.77/4",
+    relevantCoursework: "Fairness and Bias in AI, Robotics, Data Mining, Probabilistic Models and Machine Learning, Machine Learning Theory, Data Analysis and Visualization"
   },
   {
     degree: "Bachelor of Technology in Computer Engineering",
@@ -90,40 +91,62 @@ export const education: EducationEntry[] = [
 
 export const researchEntries: ResearchEntry[] = [
   {
+    slug: "low-resource-gujarati-sentiment",
+    title: "Sentiment Detection and Cross-Lingual Preservation",
+    role: "Research Assistant under Prof. Uyen T. Nguyen (York University) · Manuscript in preparation",
+    period: "Mar 2026 - Present",
+    bullets: [
+      "Built a Gujarati sentiment-analysis pipeline across translated SST-2 and native GSAC data to evaluate polarity preservation in English–Gujarati transfer.",
+      "Benchmarked multilingual and Indic-focused NLP models, including TF-IDF baselines and MuRIL.",
+      "Designed disjoint GSAC adaptation/test evaluation and analyzed polarity shifts, negation errors, mistranslations, and social-text noise for the manuscript."
+    ]
+  },
+  {
+    slug: "llms-for-optimization",
+    title: "LLMs for Optimization: Job Shop Scheduling Optimization (JSSP)",
+    role: "Technical Project under Prof. Aijun An (York University)",
+    period: "Sep 2025 - Dec 2025",
+    bullets: [
+      "Built a GNN-augmented LLM pipeline for scheduling by converting JSSP instances into disjunctive graphs (PyTorch Geometric) and serializing constraints into structured prompts.",
+      "Pre-processed the noisy STARJOB dataset (~130k to 9,525 usable instances), reducing fine-tuning runtime from 70h to 11.5h using 4-bit LoRA (Unsloth) on an NVIDIA RTX A6000."
+    ],
+    codeUrl: "https://github.com/PATELOM925/LLMs-for-Optimization-Problems"
+  },
+  {
     slug: "sleep-stage-classification",
     title: "ADCIS 2024 (Springer): Automated Sleep Stage Classification Using Machine Intelligence Techniques",
     role: "Co-author",
     period: "Sep 2024 - Jul 2025",
     bullets: [
-      "Surveyed 90+ automated sleep staging studies and organized signal modalities and PSG data representations into an end-to-end taxonomy.",
-      "Consolidated model families and evaluation practices with reporting guidance around data leakage, imbalance, and cross-subject generalization."
+      "Surveyed 90+ automated sleep staging studies and organized signal modalities (EEG/ECG/EOG/EMG) and PSG data representations into an end-to-end taxonomy used for system design.",
+      "Consolidated model families and evaluation practice (classical ML → deep learning) with reporting guidance around leakage, imbalance, and cross-subject generalization."
     ],
     codeUrl: "https://github.com/PATELOM925/Automated_Sleep_Staging_Techniques",
     publicationUrl: "https://www.researchgate.net/publication/394044040_Automated_Sleep_Stage_Classification_Using_Machine_Intelligence_Techniques_Physiological_Signals_Sleep_Data_Presentation_and_Models"
-  },
-  {
-    slug: "llms-for-optimization",
-    title: "LLMs for Optimization: Job Shop Scheduling Optimization (JSSP)",
-    role: "Course Research Project, York University",
-    period: "Sep 2025 - Dec 2025",
-    bullets: [
-      "Built a GNN-augmented LLM workflow by converting JSSP instances into disjunctive graphs and explicit machine/precedence constraints.",
-      "Processed STARJOB-style data from ~130k raw records to 9,525 usable instances and reduced fine-tuning runtime from 70h to 11.5h with 4-bit LoRA."
-    ],
-    codeUrl: "https://github.com/PATELOM925/LLMs-for-Optimization-Problems"
   }
 ];
 
 export const industryExperience: ExperienceEntry[] = [
   {
-    title: "Backend & Data Engineering Intern",
-    organization: "Uarra (Prev. Sharperly), Nigeria (Remote)",
+    title: "Applied AI Engineer (Co-op)",
+    organization: "BarLens, Toronto",
+    period: "Jun 2026 - Aug 2026",
+    bullets: [
+      "Integrated Gemini vision API with Next.js to read labels and reduced manual work by 64%.",
+      "Streamlined human-verified captures by HITL validation, POS reconciliation, and dashboards.",
+      "Designed Supabase-backed data storage, private media retention, and audit-ready ledgers.",
+      "Deployed on Cloudflare, running live on 20+ locations.",
+      "Reviewed AI agents to deliver skills for automated tests, CI checks, and sandbox QA to support reliable releases."
+    ]
+  },
+  {
+    title: "Data Engineering Intern",
+    organization: "Uarra (formerly Sharperly), Nigeria (Remote)",
     period: "Dec 2024 - Aug 2025",
     bullets: [
-      "Designed Airflow-powered ETL pipelines for geospatial datasets, improving throughput by around 25%.",
-      "Deployed Dockerized services on Render and Azure via CI/CD.",
-      "Optimized MongoDB schemas and indexes for low-latency real-time lookups.",
-      "Collaborated with ML and product teams to integrate production APIs and improve post-deployment reliability."
+      "Built Airflow-powered ETL pipelines to parse geospatial datasets using GeoPandas to increase data throughput by around 23%.",
+      "Improved query performance by optimizing PostgreSQL schemas and indexing for real-time lookups used by downstream ML and analytics components.",
+      "Coordinated with engineering and ML teams to monitor API behavior and support iterative post-deployment improvements to data and model-backed APIs."
     ]
   },
   {
@@ -147,6 +170,7 @@ export const certifications: CredentialEntry[] = [
 ];
 
 export const extracurriculars: ExtracurricularEntry[] = [
+  { label: "Winner, AgentShyft Hackathon - built Synapse AI with teacher-orchestrated learning workflows", period: "May 2026" },
   { label: "Vector AI Scholarship Recipient, York University", period: "May 2025" },
   { label: "Top-10 rank in Indian weather prediction at Kaggle ML Olympiad", period: "Apr 2024 - May 2024" },
   { label: "AI/ML Mentor for 10+ students on projects including Autograder and Legal Clarity" },

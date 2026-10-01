@@ -8,6 +8,10 @@ status: "published"
 ---
 GreenArm taught me that robotics projects often fail at the interfaces, not inside the individual components. A detector can look good, a robot arm can move correctly, and the system can still miss the object because calibration, frame transforms, or timing assumptions are slightly off.
 
+```pipeline
+{"title": "Detection-to-actuation chain", "steps": ["Camera frame", "YOLOv8 detection", "ArUco workspace calibration", "Pixel-to-robot transform", "Arm pick & place"]}
+```
+
 The most important part of the pipeline was not YOLO itself. It was the chain from image-space detection to a stable robot-space action. Camera calibration and ArUco-based workspace alignment ended up being the pieces that determined whether the rest of the system felt reliable. Small errors there propagated into picking mistakes very quickly.
 
 Another lesson was that cached transforms and environment assumptions can help or hurt depending on how disciplined the setup is. In a fixed workspace, caching saves time and reduces repeated computation. But if the camera shifts or the workspace drifts and the cache is treated as truth, the system quietly degrades. That makes validation routines just as important as the calibration logic itself.

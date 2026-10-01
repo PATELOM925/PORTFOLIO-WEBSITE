@@ -8,3 +8,5 @@ out
 .DS_Store
 coverage
 *.tsbuildinfo
+.wrangler
+prototypes/CONTENT_BRIEF.md

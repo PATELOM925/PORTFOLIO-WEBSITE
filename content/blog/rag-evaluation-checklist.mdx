@@ -8,6 +8,10 @@ status: "published"
 ---
 One of the easiest mistakes in RAG systems is over-focusing on the generator. In my ChatPDF work, the faster gains came from retrieval quality, chunking discipline, and grounding checks rather than from changing the language model.
 
+```pipeline
+{"title": "Where each ChatPDF answer comes from", "steps": ["Upload PDF", "LangChain chunking", "Embeddings", "FAISS index", "Top-k retrieval", "Agentic answer (OpenAI Agents SDK)"]}
+```
+
 When answers were weak, the first thing I needed to know was whether the right evidence had even been retrieved. If the top chunks were wrong or incomplete, no downstream prompt was going to fix that consistently. That pushed me to inspect retrieval recall, chunk boundaries, and failure slices before doing any model-level tuning.
 
 I also learned that answer quality should be judged against support, not style. A polished answer that cites the wrong context is worse than a simpler answer that stays faithful to the document. That is especially important for PDF QA, where users often trust confident wording too easily.

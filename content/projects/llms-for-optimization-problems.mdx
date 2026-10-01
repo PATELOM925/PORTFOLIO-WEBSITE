@@ -6,10 +6,13 @@ preview: "Research-driven project exploring LLM + graph representations for cons
 tags: ["Optimization", "LLM", "JSSP", "Graph ML"]
 status: "published"
 github: "https://github.com/PATELOM925/LLMs-for-Optimization-Problems"
-featured: true
+featured: false
 problem: "Classical optimization problems carry hard feasibility constraints that vanilla language models often violate."
 approach: "I modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts explicitly, and paired that representation with LoRA fine-tuning."
 result: "The pipeline produced a much more structured optimization workflow and made training/runtime tradeoffs manageable for course-scale experimentation."
+category: "NLP & ML Research"
+highlight: "70h → 11.5h fine-tuning"
+pipeline: ["JSSP instance", "Disjunctive graph", "Serialized constraints", "4-bit LoRA fine-tune", "Schedule output"]
 ---
 ## What I built
 I treated scheduling as a structure-first problem instead of a pure prompting problem. The project converts job shop instances into graph-shaped representations so the model sees precedence and machine conflicts explicitly.

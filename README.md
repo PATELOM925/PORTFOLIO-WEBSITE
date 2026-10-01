@@ -56,3 +56,28 @@ and map scripts accordingly.
 - Add project files to `content/projects/*.mdx`
 - Add blog files to `content/blog/*.mdx`
 - Keep frontmatter aligned with `src/types/content.ts`
+
+### Project frontmatter extras
+- `category`: one of `PROJECT_CATEGORIES` in `src/types/content.ts` (drives the filter chips on `/projects`)
+- `highlight`: short badge text, e.g. `"Hackathon winner"` (verified facts only)
+- `pipeline`: JSON array of step labels, rendered as an interactive "How it works" stepper
+- `youtubeUrl`: also rendered as a click-to-load video on the project page
+
+### Interactive blocks in blog/project bodies
+Use fenced blocks with JSON bodies (rendered by `src/components/RichContent.tsx`):
+
+````md
+```chart
+{"title": "Fine-tuning runtime", "unit": "h", "ratioLabel": "faster iteration", "data": [{"label": "Before", "value": 70}, {"label": "After", "value": 11.5}]}
+```
+
+```pipeline
+{"title": "How it works", "steps": ["Ingest", "Normalize", "Serve"]}
+```
+
+```video
+{"url": "https://youtu.be/VIDEO_ID", "title": "Walkthrough"}
+```
+````
+
+`prototypes/` holds standalone HTML design explorations; it is not deployed.

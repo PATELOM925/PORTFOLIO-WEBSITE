@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Layout } from "@/components/Layout";
-import { MarkdownContent } from "@/components/MarkdownContent";
+import { PipelineDiagram } from "@/components/PipelineDiagram";
+import { RichContent } from "@/components/RichContent";
 import { TagBadge } from "@/components/TagBadge";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { getAllProjects, getProjectBySlug } from "@/lib/content";
 
 export async function generateStaticParams() {
@@ -33,7 +35,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   return (
     <Layout>
       <main className="container page-spacing detail-page">
-        <p className="eyebrow">Project</p>
+        <p className="eyebrow">
+          {frontmatter.category || "Project"} · {frontmatter.date.slice(0, 4)}
+          {frontmatter.highlight ? <span className="highlight-badge">{frontmatter.highlight}</span> : null}
+        </p>
         <h1>{frontmatter.title}</h1>
         <p className="lead">{frontmatter.preview}</p>
         <div className="tag-row detail-tags">
@@ -49,12 +54,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           ) : null}
           {frontmatter.demoUrl ? (
             <a href={`/go/project/${frontmatter.slug}/demo`} target="_blank" rel="noreferrer">
-              Demo
+              Live demo
             </a>
           ) : null}
           {frontmatter.youtubeUrl ? (
             <a href={`/go/project/${frontmatter.slug}/youtube`} target="_blank" rel="noreferrer">
-              YouTube
+              Video
             </a>
           ) : null}
         </div>
@@ -80,8 +85,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           ) : null}
         </div>
 
+        {frontmatter.pipeline?.length ? <PipelineDiagram steps={frontmatter.pipeline} /> : null}
+
+        {frontmatter.youtubeUrl ? <VideoEmbed url={frontmatter.youtubeUrl} title={`${frontmatter.title}: demo video`} /> : null}
+
         <article className="card markdown-shell">
-          <MarkdownContent content={content} />
+          <RichContent content={content} />
         </article>
 
         <Link href="/projects" className="text-link back-link">
