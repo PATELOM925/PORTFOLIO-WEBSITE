@@ -17,7 +17,7 @@ export const siteConfig = {
   location: "Toronto, Ontario, Canada",
   email: "iampatelom@gmail.com",
   phone: "+1 437-212-3702",
-  resumePath: "/assets/Om_Resume.pdf",
+  resumePath: "/assets/Om_Resume.pdf?v=2026-10-01",
   profileImage: "/assets/profile-photo.jpg",
   logoPath: "/assets/om-monogram.svg",
   formspreeId: (((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {})["NEXT_PUBLIC_FORMSPREE_ID"] || "xnnjbpve",
@@ -129,10 +129,10 @@ export const researchEntries: ResearchEntry[] = [
 export const industryExperience: ExperienceEntry[] = [
   {
     title: "Applied AI Engineer (Co-op)",
-    organization: "1Pour (formerly BarLens), Toronto",
+    organization: "BarLens, Toronto",
     period: "Jun 2026 - Aug 2026",
     bullets: [
-      "Integrated Gemini vision API into a Next.js application to detect and read object labels.",
+      "Integrated Gemini vision API with Next.js to read labels and reduced manual work by 64%.",
       "Streamlined human-verified captures by HITL validation, POS reconciliation, and dashboards.",
       "Designed Supabase-backed data storage, private media retention, and audit-ready ledgers.",
       "Deployed on Cloudflare, running live on 20+ locations.",
@@ -144,7 +144,7 @@ export const industryExperience: ExperienceEntry[] = [
     organization: "Uarra (formerly Sharperly), Nigeria (Remote)",
     period: "Dec 2024 - Aug 2025",
     bullets: [
-      "Built Airflow-powered ETL pipelines to parse geospatial datasets using GeoPandas and Python, increasing data throughput by around 23%.",
+      "Built Airflow-powered ETL pipelines to parse geospatial datasets using GeoPandas to increase data throughput by around 23%.",
       "Improved query performance by optimizing PostgreSQL schemas and indexing for real-time lookups used by downstream ML and analytics components.",
       "Coordinated with engineering and ML teams to monitor API behavior and support iterative post-deployment improvements to data and model-backed APIs."
     ]

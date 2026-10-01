@@ -64,7 +64,7 @@ export const projectRecords = [
       ],
       "highlight": "80% on manual test set"
     },
-    "content": "## Highlights\n- Built a retrieval-first document QA system using LangChain + FAISS to ground answers in source text.\n- Integrated OpenAI Agents SDK for agentic workflows in document querying and response generation, resulting in 80% accuracy on a manual test set (N ≤ 50). Deployed on Streamlit.\n\n## Core build\nThis project combines LangChain document chunking, embedding-based FAISS vector search, and OpenAI Agents SDK workflows for querying and answer generation in a Streamlit app.\n\n## What I learned\n- Chunking strategy affects answer quality more than people expect.\n- Retrieval quality limits answer quality; the model cannot recover from weak context.\n- Retrieved passages should remain inspectable when assessing an answer."
+    "content": "## Highlights\n- Built a retrieval-first document QA system using LangChain and FAISS to ground answers from source text.\n- Integrated Agents SDK for agentic workflows in document querying and response generation, resulting in 80% accuracy on a manual test set (N ≤ 50). Deployed on Streamlit.\n\n## Core build\nThis project combines LangChain document chunking, embedding-based FAISS vector search, and OpenAI Agents SDK workflows for querying and answer generation in a Streamlit app.\n\n## What I learned\n- Chunking strategy affects answer quality more than people expect.\n- Retrieval quality limits answer quality; the model cannot recover from weak context.\n- Retrieved passages should remain inspectable when assessing an answer."
   },
   {
     "frontmatter": {
@@ -115,7 +115,7 @@ export const projectRecords = [
       "category": "Data Engineering & Analytics",
       "highlight": "12% lower RMSE"
     },
-    "content": "## Highlights\n- Compared ML-DL models, ran architecture and hyperparameter searches achieving almost 12% lower RMSE vs. baseline.\n- Visualized features affecting driver pay using Tableau.\n\n## Summary\nComparative modeling project across ANN, Random Forest, LSTM, BiLSTM, and hybrid models for pay prediction.\n\n## Highlights\n- Benchmarked multiple model families instead of assuming one sequence model would dominate.\n- Evaluated temporal and location-sensitive pay drivers.\n- Built Tableau views to make results easier to inspect beyond notebook outputs."
+    "content": "## Highlights\n- Compared ML-DL models, ran architecture and hyperparameter searches achieving almost 12% lower RMSE vs. baseline.\n- Visualized features affecting driver pay on Tableau.\n\n## Summary\nComparative modeling project across ANN, Random Forest, LSTM, BiLSTM, and hybrid models for pay prediction.\n\n## Highlights\n- Benchmarked multiple model families instead of assuming one sequence model would dominate.\n- Evaluated temporal and location-sensitive pay drivers.\n- Built Tableau views to make results easier to inspect beyond notebook outputs."
   },
   {
     "frontmatter": {
@@ -247,7 +247,7 @@ export const projectRecords = [
         "Flask inference API"
       ]
     },
-    "content": "## Highlights\n- Fine-tuned transformer models (Pegasus, T5, IndicBARTSS) in PyTorch to summarize and translate long-form, multilingual legal text for faster review.\n- Packaged the pipeline into a Flask service for repeatable inference and downstream integration.\n\n## Summary\nThis project focuses on making legal text easier to process through summarization and translation workflows.\n\n## What stands out\n- Fine-tuned Pegasus, T5, and IndicBARTSS variants.\n- Worked across multilingual legal content.\n- Packaged the workflow behind Flask endpoints for easier integration."
+    "content": "## Highlights\n- Fine-tuned transformer models (Pegasus, T5, IndicBART) in PyTorch to summarize and translate long-form, multilingual legal text for faster review.\n- Packaged the pipeline into a Flask service for repeatable inference and downstream integration.\n\n## Summary\nThis project focuses on making legal text easier to process through summarization and translation workflows.\n\n## What stands out\n- Fine-tuned Pegasus, T5, and IndicBART variants.\n- Worked across multilingual legal content.\n- Packaged the workflow behind Flask endpoints for easier integration."
   },
   {
     "frontmatter": {

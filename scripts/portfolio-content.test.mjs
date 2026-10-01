@@ -69,15 +69,16 @@ test("hackathon work has dedicated project pages and only verified source links"
   assert.match(clawCompass.text, /\/go\/project\/clawcompass\/github/);
 });
 
-test("1Pour is shown as experience only, with the resume bullets", async () => {
+test("BarLens is shown as experience only, with the resume bullets", async () => {
   const homepage = await fetchText("/");
   const projects = await fetchText("/projects");
 
   assert.equal(homepage.response.status, 200);
-  assert.match(homepage.text, /1Pour \(formerly BarLens\)/);
+  assert.match(homepage.text, /BarLens, Toronto/);
+  assert.match(homepage.text, /reduced manual work by 64%/);
   assert.match(homepage.text, /POS reconciliation/);
   assert.match(homepage.text, /Deployed on Cloudflare, running live on 20\+ locations/);
-  assert.match(homepage.text, /increasing data throughput by around 23%/);
+  assert.match(homepage.text, /increase data throughput by around 23%/);
   assert.doesNotMatch(projects.text, /1Pour|BarLens/);
   assert.doesNotMatch(homepage.text, /\/go\/project\/barlens/);
 
