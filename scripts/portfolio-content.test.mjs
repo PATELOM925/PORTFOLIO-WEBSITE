@@ -169,7 +169,8 @@ test("TTC project exposes the verified repository without an unverified demo", a
 
   assert.equal(response.status, 200);
   assert.match(text, /TTC Interactive Dashboard/);
-  assert.match(text, /1,004,682/);
+  assert.match(text, /1\.09 million/);
+  assert.doesNotMatch(text, /1,004,682/);
   assert.match(text, /route|station/i);
   assert.match(text, /\/go\/project\/ttc-interactive-dashboard\/github/);
   assert.doesNotMatch(text, /\/go\/project\/ttc-interactive-dashboard\/demo/);
