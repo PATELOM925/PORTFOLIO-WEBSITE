@@ -13,7 +13,7 @@ test("homepage presents the current Canada job-search profile", async () => {
   const { response, text } = await fetchText("/");
 
   assert.equal(response.status, 200);
-  assert.match(text, /Applied AI Engineer \(Co-op\)/);
+  assert.match(text, /Applied AI Engineer/);
   assert.match(text, /Aug 2026/);
   assert.match(text, /\+1 437-212-3702/);
   assert.match(text, /BarLens/);
@@ -33,11 +33,13 @@ test("featured work prioritizes current applied-AI and hackathon projects", asyn
   const interviewLensIndex = featured.indexOf("Interview Lens");
   const synapseIndex = featured.indexOf("Synapse AI");
   const clawCompassIndex = featured.indexOf("ClawCompass");
+  const remoteCodexIndex = featured.indexOf("Remote Codex Control");
   const ttcIndex = featured.indexOf("TTC Interactive Dashboard");
   assert.ok(interviewLensIndex >= 0, "Interview Lens is featured");
   assert.ok(synapseIndex > interviewLensIndex, "Synapse AI follows Interview Lens");
   assert.ok(clawCompassIndex > synapseIndex, "ClawCompass follows Synapse AI");
-  assert.ok(ttcIndex > clawCompassIndex, "TTC follows ClawCompass");
+  assert.ok(remoteCodexIndex > clawCompassIndex, "Remote Codex Control follows ClawCompass");
+  assert.ok(ttcIndex > remoteCodexIndex, "TTC follows Remote Codex Control");
   assert.doesNotMatch(featured, /1Pour|BarLens/, "1Pour is experience, not a featured project");
   assert.doesNotMatch(
     featured,
@@ -75,10 +77,11 @@ test("BarLens is shown as experience only, with the resume bullets", async () =>
 
   assert.equal(homepage.response.status, 200);
   assert.match(homepage.text, /BarLens, Toronto/);
-  assert.match(homepage.text, /reduced manual work by 64%/);
+  assert.match(homepage.text, /reduce manual work by 64%/);
   assert.match(homepage.text, /POS reconciliation/);
-  assert.match(homepage.text, /Deployed on Cloudflare, running live on 20\+ locations/);
-  assert.match(homepage.text, /increase data throughput by around 23%/);
+  assert.match(homepage.text, /Playwright e2e tests, CI checks and Sentry monitoring/);
+  assert.match(homepage.text, /serving dashboard endpoints in under 1\.5 s/);
+  assert.doesNotMatch(homepage.text, /20\+ locations|throughput by around 23%/);
   assert.doesNotMatch(projects.text, /1Pour|BarLens/);
   assert.doesNotMatch(homepage.text, /\/go\/project\/barlens/);
 
@@ -104,11 +107,11 @@ test("homepage sections follow the recruiter-first order", async () => {
   for (let i = 1; i < order.length; i++) assert.ok(order[i] > order[i - 1], "sections are in order");
 });
 
-test("featured projects carousel shows four cards and a link to all projects", async () => {
+test("featured projects carousel shows five cards and a link to all projects", async () => {
   const { text } = await fetchText("/");
   const start = text.indexOf('<section id="projects"');
   const section = text.slice(start, text.indexOf("</section>", start));
-  assert.equal((section.match(/class="carousel-slide"/g) || []).length, 5);
+  assert.equal((section.match(/class="carousel-slide"/g) || []).length, 6);
   assert.match(section, /Check all projects/);
   assert.match(section, /href="\/projects"/);
 });
@@ -192,9 +195,9 @@ test("downloadable resume contains the current Canadian facts", () => {
   assert.equal(extracted.status, 0, extracted.stderr);
   const text = extracted.stdout.replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, "-");
   assert.match(text, /\+1 437-212-3702/);
-  assert.match(text, /August 2026/);
-  assert.match(text, /Applied AI Engineer \(Co-op\)/);
-  assert.match(text, /June 2026 - August 2026/);
-  assert.match(text, /ChatPdf AI/);
+  assert.match(text, /Applied AI Engineer/);
+  assert.match(text, /Jun 2026 - Aug 2026/);
+  assert.match(text, /Remote Codex Control/);
+  assert.match(text, /Specialization in Artificial Intelligence/);
   assert.doesNotMatch(text, /\+91|Gandhinagar, Gujarat|Final-year/);
 });

@@ -2,25 +2,26 @@
 title: "Synapse AI"
 slug: "synapse-ai"
 date: "2026-05-31"
-preview: "Agent-oriented learning platform that turns uploaded materials into personalized study outputs with teacher oversight."
-tags: ["AI Agents", "FastAPI", "Next.js", "ElevenLabs", "HITL"]
+preview: "Multi-agent tutoring platform that turns uploaded materials into personalized study outputs with teacher oversight."
+tags: ["AI Agents", "MCP", "FastAPI", "Supabase", "Next.js", "HITL"]
 status: "published"
 github: "https://github.com/PATELOM925/Synapse_AgentShfyt_Hackathon"
 featured: true
 problem: "Students need personalized study support, but teachers also need visibility into diagnostics, progress, and the learning materials being generated."
-approach: "Our team combined agent workflows, FastAPI, and Next.js to generate notes, flashcards, quizzes, podcasts, and tutoring experiences from uploaded course materials."
+approach: "Our team of three combined a multi-agent backend, an MCP server for course material, FastAPI, and Next.js to generate notes, flashcards, quizzes, podcasts, and streamed tutoring from uploaded course materials."
 result: "Synapse AI won the AgentShyft Hackathon in May 2026."
 category: "Applied AI & Agents"
 highlight: "Hackathon winner"
 pipeline: ["Upload learning material", "Diagnostics", "Agent planner", "Notes, flashcards, quizzes, podcasts", "Teacher review", "Student study & analytics"]
 ---
 ## Highlights
-- Won a hackathon building an AI agent-led teaching platform supporting diagnostics, tutor streaming, classroom invites, and teacher analytics.
-- Built with FastAPI, Next.js, and the ElevenLabs API to transform uploaded learning materials into personalized study outputs such as notes, flashcards, quizzes, and podcasts.
+- Won the AgentShyft Hackathon with a multi-agent tutoring platform: agents call course-material tools through an MCP server and stream answers over SSE.
+- Built the teacher side in FastAPI and Supabase: classroom invites, material uploads, and class APIs.
+- The platform turns uploaded learning materials into personalized study outputs such as notes, flashcards, quizzes, and podcasts (Next.js, ElevenLabs API).
 
 ## My contribution
 
-I worked across the agent-oriented backend and product workflow, connecting diagnostics, tutoring, study-content generation, classroom invites, and teacher analytics.
+I built the teacher side of the backend in FastAPI and Supabase: classroom invites, material uploads, class APIs, and the database migration behind them. I also added the endpoint that picks a student's weakest topics and starts the diagnostic agent. My teammates built the agent runtime and the frontend.
 
 ## Why the workflow mattered
 

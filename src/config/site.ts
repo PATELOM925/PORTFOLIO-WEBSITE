@@ -10,14 +10,14 @@ import {
 export const siteConfig = {
   name: "Om M. Patel",
   shortName: "Om Patel",
-  title: "Om M. Patel | Applied AI Engineer",
-  description: "Vector AI Scholar and Applied AI engineer building production AI integrations, data pipelines, and backend systems to help teams make better operational decisions. Experience spans evaluating AI, agent routing loops for human review, LLM fine-tuning, and NLP research.",
-  role: "Applied AI Engineer",
+  title: "Om M. Patel | AI Engineer",
+  description: "AI Engineer building production AI integrations, data pipelines, and backend systems to help teams make better operational decisions efficiently. Vector AI Scholar with about 2 years across AI, data and research roles.",
+  role: "AI Engineer",
   focus: "AI Integration • Data Engineering • NLP",
   location: "Toronto, Ontario, Canada",
   email: "iampatelom@gmail.com",
   phone: "+1 437-212-3702",
-  resumePath: "/assets/Om_Resume.pdf?v=2026-10-01",
+  resumePath: "/assets/Om_Resume.pdf?v=2026-10-07",
   profileImage: "/assets/profile-photo.jpg",
   logoPath: "/assets/om-monogram.svg",
   formspreeId: (((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {})["NEXT_PUBLIC_FORMSPREE_ID"] || "xnnjbpve",
@@ -56,7 +56,7 @@ export const skills: SkillGroup[] = [
   },
   {
     category: "Agents & Applied AI",
-    items: "OpenAI SDK and Agents SDK, Google ADK, Gemini API, agent workflows, human-in-the-loop review, structured prompting, LoRA/QLoRA"
+    items: "OpenAI SDK and Agents SDK, Google ADK, Gemini API, multi-agent workflows, MCP servers, human-in-the-loop review, structured prompting, LoRA/QLoRA fine-tuning"
   },
   {
     category: "Robotics & Computer Vision",
@@ -64,21 +64,22 @@ export const skills: SkillGroup[] = [
   },
   {
     category: "Data Engineering & Backend",
-    items: "React, FastAPI, Flask, Next.js, Airflow, PostgreSQL, Supabase, Neo4j, ChromaDB, MongoDB, GeoPandas, REST APIs, ETL pipelines"
+    items: "React, FastAPI, Flask, Next.js, Airflow, PostgreSQL, Supabase, Neo4j, Redis, MongoDB, SQLite, ChromaDB, GeoPandas, REST APIs, ETL pipelines"
   },
   {
     category: "Product, Deployment & Tooling",
-    items: "Docker, CI/CD, GitHub, Jira, Vercel, GCP, Cloudflare, Postman, Azure, Render, Streamlit, Tableau, Power BI"
+    items: "Docker, CI/CD, GitHub, Jira, Vercel, GCP, Playwright, Sentry, Cloudflare, Postman, Azure, Render, Streamlit, Tableau, Power BI"
   }
 ];
 
 export const education: EducationEntry[] = [
   {
-    degree: "Master of Science in Computer Science (AI Specialization)",
-    school: "York University, Ontario, Canada",
+    degree: "Master of Science in Computer Science, Specialization in Artificial Intelligence",
+    school: "York University, Toronto, Canada",
     period: "Sep 2025 - Aug 2026",
     gpa: "3.77/4",
-    relevantCoursework: "Fairness and Bias in AI, Robotics, Data Mining, Probabilistic Models and Machine Learning, Machine Learning Theory, Data Analysis and Visualization"
+    note: "Vector Scholarship in AI, Vector Institute ($17,500 merit award) · Supervisor: Dr. Aijun An",
+    relevantCoursework: "Probabilistic Models and Machine Learning, Machine Learning Theory, Data Mining, Fairness and Bias in AI, Data Analytics and Visualization, Introduction to Robotics"
   },
   {
     degree: "Bachelor of Technology in Computer Engineering",
@@ -94,21 +95,21 @@ export const researchEntries: ResearchEntry[] = [
     slug: "low-resource-gujarati-sentiment",
     title: "Sentiment Detection and Cross-Lingual Preservation",
     role: "Research Assistant under Prof. Uyen T. Nguyen (York University) · Manuscript in preparation",
-    period: "Mar 2026 - Present",
+    period: "Mar 2026 - Aug 2026",
     bullets: [
-      "Built a Gujarati sentiment-analysis pipeline across translated SST-2 and native GSAC data to evaluate polarity preservation in English–Gujarati transfer.",
-      "Benchmarked multilingual and Indic-focused NLP models, including TF-IDF baselines and MuRIL.",
-      "Designed disjoint GSAC adaptation/test evaluation and analyzed polarity shifts, negation errors, mistranslations, and social-text noise for the manuscript."
+      "Built a Gujarati sentiment-analysis pipeline across translated SST-2 and native GSAC data to evaluate polarity preservation.",
+      "Achieved weighted F1 of 0.804 with a MuRIL-based model and a 2,908-entry sentiment lexicon on a held-out GSAC test split.",
+      "Kept adaptation and test data disjoint and analyzed polarity shifts, negation errors, mistranslations, and social-text noise for the manuscript."
     ]
   },
   {
     slug: "llms-for-optimization",
-    title: "LLMs for Optimization: Job Shop Scheduling Optimization (JSSP)",
-    role: "Technical Project under Prof. Aijun An (York University)",
+    title: "LLMs for Job-Shop Scheduling",
+    role: "Course Research under Prof. Aijun An (York University)",
     period: "Sep 2025 - Dec 2025",
     bullets: [
-      "Built a GNN-augmented LLM pipeline for scheduling by converting JSSP instances into disjunctive graphs (PyTorch Geometric) and serializing constraints into structured prompts.",
-      "Pre-processed the noisy STARJOB dataset (~130k to 9,525 usable instances), reducing fine-tuning runtime from 70h to 11.5h using 4-bit LoRA (Unsloth) on an NVIDIA RTX A6000."
+      "Fine-tuned Llama 3.1 8B with 4-bit QLoRA (Unsloth) on an NVIDIA RTX A6000, in a graph-augmented pipeline that converts each instance into a disjunctive graph (PyTorch Geometric) serialized into the prompt.",
+      "Pre-processed the noisy STARJOB dataset (~130k to 9,525 usable instances), cutting fine-tuning runtime from 70h to 11.5h."
     ],
     codeUrl: "https://github.com/PATELOM925/LLMs-for-Optimization-Problems"
   },
@@ -128,35 +129,35 @@ export const researchEntries: ResearchEntry[] = [
 
 export const industryExperience: ExperienceEntry[] = [
   {
-    title: "Applied AI Engineer (Co-op)",
+    title: "Applied AI Engineer",
     organization: "BarLens, Toronto",
     period: "Jun 2026 - Aug 2026",
     bullets: [
-      "Integrated Gemini vision API with Next.js to read labels and reduced manual work by 64%.",
-      "Streamlined human-verified captures by HITL validation, POS reconciliation, and dashboards.",
-      "Designed Supabase-backed data storage, private media retention, and audit-ready ledgers.",
-      "Deployed on Cloudflare, running live on 20+ locations.",
-      "Reviewed AI agents to deliver skills for automated tests, CI checks, and sandbox QA to support reliable releases."
+      "Integrated vision APIs (with routing layer) with Next.js for extracting data to reduce manual work by 64%.",
+      "Built an eval layer to measure extraction quality and invoke HITL validation and POS reconciliation on the user dashboard.",
+      "Designed Supabase PostgreSQL-backed data storage, with location-based access and private media retention for stock audit.",
+      "Automated email ingestion pipeline to normalize POS sales reports (EML, CSV, PDF), avoiding paid access to POS APIs.",
+      "Shipped via AI coding agents: Playwright e2e tests, CI checks and Sentry monitoring in production to support reliable releases."
+    ]
+  },
+  {
+    title: "Data Engineer",
+    organization: "Uarra (formerly Sharperly), Nigeria (Remote)",
+    period: "Dec 2024 - Aug 2025",
+    bullets: [
+      "Built Python ETL pipelines to parse API logs into a PostgreSQL analytics database, serving dashboard endpoints in under 1.5 s.",
+      "Refactored a Flask monolith into Dockerized microservices with Redis caching, cutting route latency by 30-40% (1 s to 600 ms).",
+      "Coordinated with backend and ML teams to monitor API behavior and support iterative post-deployment improvements."
     ]
   },
   {
     title: "Data Engineering Intern",
     organization: "Uarra (formerly Sharperly), Nigeria (Remote)",
-    period: "Dec 2024 - Aug 2025",
-    bullets: [
-      "Built Airflow-powered ETL pipelines to parse geospatial datasets using GeoPandas to increase data throughput by around 23%.",
-      "Improved query performance by optimizing PostgreSQL schemas and indexing for real-time lookups used by downstream ML and analytics components.",
-      "Coordinated with engineering and ML teams to monitor API behavior and support iterative post-deployment improvements to data and model-backed APIs."
-    ]
-  },
-  {
-    title: "Data Science Intern",
-    organization: "Uarra, Nigeria (Remote)",
     period: "Mar 2024 - Jul 2024",
     bullets: [
-      "Built geocoding APIs in Flask + GeoPandas to reduce Google Maps API dependence and cut monthly cost by up to 45%.",
-      "Scraped and processed 20k+ addresses to produce versioned datasets for ML training.",
-      "Trained and evaluated RNN, Autoencoder, and K-Means models for user behavior prediction, route clustering, and anomaly detection."
+      "Developed geocoding APIs with Flask and GeoPandas to reduce dependency on the Google Maps API, saving about 350 USD monthly.",
+      "Scraped and pre-processed 20k+ addresses to create training datasets, producing versioned datasets for ML training.",
+      "Built MongoDB-backed credit and Paystack payment flows with rate limiting and CSRF protection. Shipped with Docker on Render."
     ]
   }
 ];

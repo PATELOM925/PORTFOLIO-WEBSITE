@@ -251,21 +251,22 @@ export const projectRecords = [
   },
   {
     "frontmatter": {
-      "title": "LLMs for Optimization Problems",
+      "title": "LLMs for Job-Shop Scheduling",
       "slug": "llms-for-optimization-problems",
       "date": "2025-12-12",
-      "preview": "Research-driven project exploring LLM + graph representations for constrained optimization (JSSP and related tasks).",
+      "preview": "Course research on fine-tuning Llama 3.1 8B with graph-augmented prompts for job-shop scheduling (JSSP).",
       "tags": [
         "Optimization",
         "LLM",
+        "QLoRA",
         "JSSP",
-        "Graph ML"
+        "PyTorch Geometric"
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/LLMs-for-Optimization-Problems",
       "featured": false,
       "problem": "Classical optimization problems carry hard feasibility constraints that vanilla language models often violate.",
-      "approach": "I modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts explicitly, and paired that representation with LoRA fine-tuning.",
+      "approach": "Our team of three modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts into the prompt, and fine-tuned Llama 3.1 8B with 4-bit QLoRA.",
       "result": "The pipeline produced a much more structured optimization workflow and made training/runtime tradeoffs manageable for course-scale experimentation.",
       "category": "NLP & ML Research",
       "highlight": "70h → 11.5h fine-tuning",
@@ -273,11 +274,11 @@ export const projectRecords = [
         "JSSP instance",
         "Disjunctive graph",
         "Serialized constraints",
-        "4-bit LoRA fine-tune",
+        "4-bit QLoRA fine-tune",
         "Schedule output"
       ]
     },
-    "content": "## What I built\nI treated scheduling as a structure-first problem instead of a pure prompting problem. The project converts job shop instances into graph-shaped representations so the model sees precedence and machine conflicts explicitly.\n\n## Core decisions\n- Serialized machine and operation constraints instead of relying on free-form descriptions.\n- Used disjunctive graphs to preserve conflict structure.\n- Applied 4-bit LoRA fine-tuning to keep experimentation feasible.\n- Focused on failure slices where outputs looked plausible but violated constraints.\n\n## What mattered most\nThe project became stronger once I stopped asking whether the LLM could \"solve optimization\" in the abstract and started asking whether the representation exposed enough constraint information for the model to reason over."
+    "content": "## Highlights\n- Fine-tuned Llama 3.1 8B with 4-bit QLoRA (Unsloth) on an NVIDIA RTX A6000, in a graph-augmented pipeline that converts each instance into a disjunctive graph (PyTorch Geometric) serialized into the prompt.\n- Pre-processed the noisy STARJOB dataset (~130k to 9,525 usable instances), cutting fine-tuning runtime from 70h to 11.5h.\n\nCourse research project under Prof. Aijun An at York University, built in a team of three.\n\n## What I built\nI treated scheduling as a structure-first problem instead of a pure prompting problem. The project converts job shop instances into graph-shaped representations so the model sees precedence and machine conflicts explicitly.\n\n## Core decisions\n- Serialized machine and operation constraints instead of relying on free-form descriptions.\n- Used disjunctive graphs to preserve conflict structure.\n- Applied 4-bit QLoRA fine-tuning to keep experimentation feasible.\n- Focused on failure slices where outputs looked plausible but violated constraints.\n\n## What mattered most\nThe project became stronger once I stopped asking whether the LLM could \"solve optimization\" in the abstract and started asking whether the representation exposed enough constraint information for the model to reason over."
   },
   {
     "frontmatter": {
@@ -329,6 +330,38 @@ export const projectRecords = [
   },
   {
     "frontmatter": {
+      "title": "Remote Codex Control",
+      "slug": "remote-codex-control",
+      "date": "2026-05-14",
+      "preview": "Human-approval layer for autonomous coding agents: approve, steer or deny each tool action from a private Telegram chat while execution stays local.",
+      "tags": [
+        "AI Agents",
+        "HITL",
+        "TypeScript",
+        "SQLite",
+        "Security"
+      ],
+      "status": "published",
+      "github": "https://github.com/PATELOM925/Remote-Codex-Control-Public",
+      "featured": true,
+      "problem": "Autonomous coding agents run commands and edit files on your machine, but approvals are stuck at the desk. Stepping away means the agent either stalls or runs without review.",
+      "approach": "I built a local-first supervision layer: the agent keeps running on the local machine, and each command, file change and permission request goes to a private Telegram chat where one trusted operator approves, steers or denies it.",
+      "result": "A public alpha in 17k+ lines of TypeScript with SQLite state, a chat allowlist, stale-approval protection and a documented threat model.",
+      "category": "Applied AI & Agents",
+      "highlight": "Human-in-the-loop",
+      "pipeline": [
+        "Agent requests an action",
+        "Policy checks",
+        "Approval sent to Telegram",
+        "Operator approves, steers or denies",
+        "Action runs locally",
+        "Event journal"
+      ]
+    },
+    "content": "## Highlights\n- Built a human-approval layer for autonomous coding agents: an operator approves, steers or denies each tool action from a private Telegram chat while execution stays on the local machine.\n- Directed AI coding agents to produce 17k+ lines of TypeScript with SQLite state, a chat allowlist, stale-approval protection and a documented threat model.\n\n## How it works\n\n- Connects to the coding agent's app server and streams turn and tool-call events to the operator.\n- Routes command, file-change and permission requests to Telegram with the project, thread and action shown.\n- Accepts replies only from allowlisted chat IDs and rejects expired or superseded approvals.\n- Records agent events and approvals in a local SQLite journal.\n\n## Safety decisions\n\n- Execution never leaves the local machine. Telegram is the control surface, not a remote runner.\n- Uploaded files are treated as untrusted context, and the threat model covers prompt injection and stale-approval replay.\n- Model and reasoning-effort changes apply to the next turn, never in the middle of an action.\n\n## Status\n\nPublic alpha for one machine and one trusted operator. The web console and hosted relay in the repository are experimental."
+  },
+  {
+    "frontmatter": {
       "title": "SQL-AI",
       "slug": "sql-ai",
       "date": "2024-03-18",
@@ -351,19 +384,20 @@ export const projectRecords = [
       "title": "Synapse AI",
       "slug": "synapse-ai",
       "date": "2026-05-31",
-      "preview": "Agent-oriented learning platform that turns uploaded materials into personalized study outputs with teacher oversight.",
+      "preview": "Multi-agent tutoring platform that turns uploaded materials into personalized study outputs with teacher oversight.",
       "tags": [
         "AI Agents",
+        "MCP",
         "FastAPI",
+        "Supabase",
         "Next.js",
-        "ElevenLabs",
         "HITL"
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/Synapse_AgentShfyt_Hackathon",
       "featured": true,
       "problem": "Students need personalized study support, but teachers also need visibility into diagnostics, progress, and the learning materials being generated.",
-      "approach": "Our team combined agent workflows, FastAPI, and Next.js to generate notes, flashcards, quizzes, podcasts, and tutoring experiences from uploaded course materials.",
+      "approach": "Our team of three combined a multi-agent backend, an MCP server for course material, FastAPI, and Next.js to generate notes, flashcards, quizzes, podcasts, and streamed tutoring from uploaded course materials.",
       "result": "Synapse AI won the AgentShyft Hackathon in May 2026.",
       "category": "Applied AI & Agents",
       "highlight": "Hackathon winner",
@@ -376,7 +410,7 @@ export const projectRecords = [
         "Student study & analytics"
       ]
     },
-    "content": "## Highlights\n- Won a hackathon building an AI agent-led teaching platform supporting diagnostics, tutor streaming, classroom invites, and teacher analytics.\n- Built with FastAPI, Next.js, and the ElevenLabs API to transform uploaded learning materials into personalized study outputs such as notes, flashcards, quizzes, and podcasts.\n\n## My contribution\n\nI worked across the agent-oriented backend and product workflow, connecting diagnostics, tutoring, study-content generation, classroom invites, and teacher analytics.\n\n## Why the workflow mattered\n\nThe system was designed around teacher orchestration rather than a standalone chatbot. Generated learning material stays connected to source content, student needs, and teacher oversight.\n\n## Recognition\n\nWinner, AgentShyft Hackathon, May 2026."
+    "content": "## Highlights\n- Won the AgentShyft Hackathon with a multi-agent tutoring platform: agents call course-material tools through an MCP server and stream answers over SSE.\n- Built the teacher side in FastAPI and Supabase: classroom invites, material uploads, and class APIs.\n- The platform turns uploaded learning materials into personalized study outputs such as notes, flashcards, quizzes, and podcasts (Next.js, ElevenLabs API).\n\n## My contribution\n\nI built the teacher side of the backend in FastAPI and Supabase: classroom invites, material uploads, class APIs, and the database migration behind them. I also added the endpoint that picks a student's weakest topics and starts the diagnostic agent. My teammates built the agent runtime and the frontend.\n\n## Why the workflow mattered\n\nThe system was designed around teacher orchestration rather than a standalone chatbot. Generated learning material stays connected to source content, student needs, and teacher oversight.\n\n## Recognition\n\nWinner, AgentShyft Hackathon, May 2026."
   },
   {
     "frontmatter": {
@@ -404,10 +438,10 @@ export const projectRecords = [
         "Normalize & join",
         "DuckDB / Parquet marts",
         "Route & station quality checks",
-        "Streamlit views + ADK assistant"
+        "Streamlit views + AI assistant"
       ]
     },
-    "content": "## Highlights\n- Co-developed a Python ingestion and normalization pipeline joining TTC delay data with static GTFS and live service alerts.\n- Processed over 1 million delay events into DuckDB and Parquet data marts, with checks for unmatched route and station mappings and reproducible Streamlit views.\n- Integrated Google ADK for in-app AI bot support to dive deeper into analysis for better UX.\n\n## Data workflow\n\n- Processed 1,004,682 bus and subway delay events into query-ready DuckDB and Parquet marts.\n- Linked historical records to static GTFS routes and stations, with QA for unmatched and ambiguous mappings.\n- Added GTFS-RT service-alert ingestion and validation alongside the historical data.\n- Structured the pipeline as raw, bronze, silver, and gold layers for repeatable rebuilds.\n\n## Dashboard focus\n\n- Ranked recurring route and station hotspots using frequency, severity, regularity, and cause mix.\n- Built views for monthly trends, weekday-hour patterns, cause signatures, and entity drill-downs.\n- Compared captured live alerts with historical reliability signals and surfaced coverage limits.\n- Kept metric definitions, lineage, and data-quality caveats visible in the interface.\n\n## Deployment status\n\nThe source repository is public. No verified public Vercel deployment is currently available, so this portfolio links only to the confirmed repository."
+    "content": "## Highlights\n- Co-developed a Python ingestion and normalization pipeline joining TTC delay data with static GTFS and live service alerts.\n- Processed over 1 million delay events into DuckDB and Parquet data marts, with checks for unmatched route and station mappings and reproducible Streamlit views.\n- The dashboard includes an in-app AI chat assistant, grounded on the analytical marts, for follow-up questions.\n\n## Data workflow\n\n- Processed 1,004,682 bus and subway delay events into query-ready DuckDB and Parquet marts.\n- Linked historical records to static GTFS routes and stations, with QA for unmatched and ambiguous mappings.\n- Added GTFS-RT service-alert ingestion and validation alongside the historical data.\n- Structured the pipeline as raw, bronze, silver, and gold layers for repeatable rebuilds.\n\n## Dashboard focus\n\n- Ranked recurring route and station hotspots using frequency, severity, regularity, and cause mix.\n- Built views for monthly trends, weekday-hour patterns, cause signatures, and entity drill-downs.\n- Compared captured live alerts with historical reliability signals and surfaced coverage limits.\n- Kept metric definitions, lineage, and data-quality caveats visible in the interface.\n\n## Deployment status\n\nThe source repository is public. No verified public Vercel deployment is currently available, so this portfolio links only to the confirmed repository."
   }
 ] as const;
 

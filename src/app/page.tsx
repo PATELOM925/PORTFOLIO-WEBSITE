@@ -103,6 +103,7 @@ export default async function HomePage() {
                 <p>
                   <strong>GPA:</strong> {item.gpa}
                 </p>
+                {item.note ? <p>{item.note}</p> : null}
                 <p>
                   <strong>Relevant coursework:</strong> {item.relevantCoursework}
                 </p>
@@ -144,7 +145,7 @@ export default async function HomePage() {
 
         <Section id="projects" title="Featured Projects">
           <FeaturedCarousel
-            projects={featuredProjects.slice(0, 4).map((project) => project.frontmatter)}
+            projects={featuredProjects.slice(0, 5).map((project) => project.frontmatter)}
             totalCount={allProjects.length}
           />
         </Section>

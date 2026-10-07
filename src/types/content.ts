@@ -86,5 +86,6 @@ export interface EducationEntry {
   school: string;
   period: string;
   gpa: string;
+  note?: string;
   relevantCoursework: string;
 }

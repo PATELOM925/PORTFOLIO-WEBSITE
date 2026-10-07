@@ -1,26 +1,32 @@
 ---
-title: "LLMs for Optimization Problems"
+title: "LLMs for Job-Shop Scheduling"
 slug: "llms-for-optimization-problems"
 date: "2025-12-12"
-preview: "Research-driven project exploring LLM + graph representations for constrained optimization (JSSP and related tasks)."
-tags: ["Optimization", "LLM", "JSSP", "Graph ML"]
+preview: "Course research on fine-tuning Llama 3.1 8B with graph-augmented prompts for job-shop scheduling (JSSP)."
+tags: ["Optimization", "LLM", "QLoRA", "JSSP", "PyTorch Geometric"]
 status: "published"
 github: "https://github.com/PATELOM925/LLMs-for-Optimization-Problems"
 featured: false
 problem: "Classical optimization problems carry hard feasibility constraints that vanilla language models often violate."
-approach: "I modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts explicitly, and paired that representation with LoRA fine-tuning."
+approach: "Our team of three modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts into the prompt, and fine-tuned Llama 3.1 8B with 4-bit QLoRA."
 result: "The pipeline produced a much more structured optimization workflow and made training/runtime tradeoffs manageable for course-scale experimentation."
 category: "NLP & ML Research"
 highlight: "70h → 11.5h fine-tuning"
-pipeline: ["JSSP instance", "Disjunctive graph", "Serialized constraints", "4-bit LoRA fine-tune", "Schedule output"]
+pipeline: ["JSSP instance", "Disjunctive graph", "Serialized constraints", "4-bit QLoRA fine-tune", "Schedule output"]
 ---
+## Highlights
+- Fine-tuned Llama 3.1 8B with 4-bit QLoRA (Unsloth) on an NVIDIA RTX A6000, in a graph-augmented pipeline that converts each instance into a disjunctive graph (PyTorch Geometric) serialized into the prompt.
+- Pre-processed the noisy STARJOB dataset (~130k to 9,525 usable instances), cutting fine-tuning runtime from 70h to 11.5h.
+
+Course research project under Prof. Aijun An at York University, built in a team of three.
+
 ## What I built
 I treated scheduling as a structure-first problem instead of a pure prompting problem. The project converts job shop instances into graph-shaped representations so the model sees precedence and machine conflicts explicitly.
 
 ## Core decisions
 - Serialized machine and operation constraints instead of relying on free-form descriptions.
 - Used disjunctive graphs to preserve conflict structure.
-- Applied 4-bit LoRA fine-tuning to keep experimentation feasible.
+- Applied 4-bit QLoRA fine-tuning to keep experimentation feasible.
 - Focused on failure slices where outputs looked plausible but violated constraints.
 
 ## What mattered most
