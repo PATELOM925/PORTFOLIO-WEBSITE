@@ -305,7 +305,7 @@ export const projectRecords = [
       "title": "Toronto Traffic Anomaly Detection",
       "slug": "pmml-traffic-anomaly-detection",
       "date": "2025-12-05",
-      "preview": "Course paper comparing a Poisson GLM with a GRU on five years of hourly Toronto traffic counts, with KL-divergence anomaly scoring.",
+      "preview": "Cut hourly traffic forecast error by 54% with a GRU, then showed the simpler Poisson GLM is the better anomaly alarm (ROC-AUC 0.94 vs 0.71).",
       "tags": [
         "Anomaly Detection",
         "Time Series",
@@ -319,7 +319,7 @@ export const projectRecords = [
       "featuredOrder": 4,
       "problem": "Traffic counts carry strong daily and weekly patterns, noise, and event-driven spikes, so an anomaly detector can forecast well and still raise poor alerts.",
       "approach": "I trained a Poisson GLM and a GRU sequence model on 2020-2024 hourly counts, tested both on held-out 2025 data, and scored anomalies with KL divergence.",
-      "result": "The GRU cut forecast RMSE by 54%, but the interpretable GLM detected anomalies better (F1 0.49 vs 0.14).",
+      "result": "The GRU cut forecast RMSE by 54% (890 to 407) on an unseen year, but the interpretable GLM was the better alarm: ROC-AUC 0.94 vs 0.71 and F1 0.49 vs 0.14.",
       "category": "NLP & ML Research",
       "highlight": "54% lower RMSE",
       "pipeline": [
@@ -330,7 +330,7 @@ export const projectRecords = [
         "Held-out 2025 evaluation"
       ]
     },
-    "content": "## Highlights\n- Compared a Poisson GLM with a GRU (PyTorch) on 5 years of hourly Toronto traffic counts, training on 2020-2024 and testing on held-out 2025; the GRU cut RMSE by 54%.\n- Scored anomalies with KL divergence; the interpretable GLM detected them better (F1 0.49 vs 0.14).\n\nSolo course paper for Probabilistic Models & Machine Learning at York University.\n\n## Focus\nThis project was less about chasing one model score and more about understanding what different anomaly detectors assume.\n\n## What I compared\n- A Poisson GLM for interpretable modeling of traffic count behavior.\n- A GRU sequence model for temporal dependency capture.\n- KL-divergence anomaly scoring to inspect shifts between expected and observed behavior.\n\n## Main lesson\nThe better forecaster was not the better detector. If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals, so evaluation had to stay tied to practical alert usefulness, not just loss curves."
+    "content": "## Highlights\n- Cut hourly traffic forecast error by 54% (RMSE 890 to 407) with a GRU in PyTorch over a Poisson GLM baseline, tested on an unseen year (2025) of City of Toronto counts.\n- Showed the simpler GLM is the better alarm: with KL-divergence anomaly scoring it reached ROC-AUC 0.94 vs 0.71 for the GRU (F1 0.49 vs 0.14).\n- Built the dataset from 306k raw 15-minute count records across 3,800+ locations, aggregated to hourly, with 2025 held out so no future data reached training.\n\nSolo course paper for Probabilistic Models & Machine Learning at York University.\n\n## Focus\nThis project was less about chasing one model score and more about understanding what different anomaly detectors assume.\n\n## What I compared\n- A Poisson GLM for interpretable modeling of traffic count behavior.\n- A GRU sequence model for temporal dependency capture.\n- KL-divergence anomaly scoring to inspect shifts between expected and observed behavior.\n\n## Main lesson\nThe better forecaster was not the better detector. If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals, so evaluation had to stay tied to practical alert usefulness, not just loss curves."
   },
   {
     "frontmatter": {
