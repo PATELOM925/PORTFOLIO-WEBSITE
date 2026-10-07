@@ -11,6 +11,7 @@ function parseValue(raw) {
   if (value === 'false') return false;
   if (value.startsWith('[') && value.endsWith(']')) return JSON.parse(value);
   if (value.startsWith('"') && value.endsWith('"')) return JSON.parse(value);
+  if (/^-?\d+$/.test(value)) return Number(value);
   return value;
 }
 

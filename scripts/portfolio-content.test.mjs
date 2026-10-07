@@ -21,7 +21,7 @@ test("homepage presents the current Canada job-search profile", async () => {
   assert.match(text, /Winner, AgentShyft Hackathon/);
 });
 
-test("featured work prioritizes current applied-AI and hackathon projects", async () => {
+test("featured work shows the five projects closest to the target roles, in order", async () => {
   const { response, text } = await fetchText("/");
   assert.equal(response.status, 200);
 
@@ -30,20 +30,20 @@ test("featured work prioritizes current applied-AI and hackathon projects", asyn
   assert.ok(featuredStart >= 0 && featuredEnd > featuredStart, "featured projects section is rendered");
 
   const featured = text.slice(featuredStart, featuredEnd);
-  const interviewLensIndex = featured.indexOf("Interview Lens");
   const synapseIndex = featured.indexOf("Synapse AI");
-  const clawCompassIndex = featured.indexOf("ClawCompass");
-  const remoteCodexIndex = featured.indexOf("Remote Codex Control");
   const ttcIndex = featured.indexOf("TTC Interactive Dashboard");
-  assert.ok(interviewLensIndex >= 0, "Interview Lens is featured");
-  assert.ok(synapseIndex > interviewLensIndex, "Synapse AI follows Interview Lens");
-  assert.ok(clawCompassIndex > synapseIndex, "ClawCompass follows Synapse AI");
-  assert.ok(remoteCodexIndex > clawCompassIndex, "Remote Codex Control follows ClawCompass");
-  assert.ok(ttcIndex > remoteCodexIndex, "TTC follows Remote Codex Control");
+  const remoteCodexIndex = featured.indexOf("Remote Codex Control");
+  const trafficIndex = featured.indexOf("Toronto Traffic Anomaly Detection");
+  const jsspIndex = featured.indexOf("LLMs for Job-Shop Scheduling");
+  assert.ok(synapseIndex >= 0, "Synapse AI is featured first");
+  assert.ok(ttcIndex > synapseIndex, "TTC follows Synapse AI");
+  assert.ok(remoteCodexIndex > ttcIndex, "Remote Codex Control follows TTC");
+  assert.ok(trafficIndex > remoteCodexIndex, "Toronto Traffic Anomaly Detection follows Remote Codex Control");
+  assert.ok(jsspIndex > trafficIndex, "LLMs for Job-Shop Scheduling follows Toronto Traffic Anomaly Detection");
   assert.doesNotMatch(featured, /1Pour|BarLens/, "1Pour is experience, not a featured project");
   assert.doesNotMatch(
     featured,
-    /ChatPDF AI|Autograder|Legal Clarity|GreenArm|Traffic Anomaly|LLMs for Optimization/
+    /ChatPDF AI|Autograder|Legal Clarity|GreenArm|Interview Lens|ClawCompass/
   );
 });
 

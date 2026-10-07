@@ -1,25 +1,33 @@
 ---
-title: "PMML Project: Traffic Anomaly Detection in Toronto"
+title: "Toronto Traffic Anomaly Detection"
 slug: "pmml-traffic-anomaly-detection"
 date: "2025-12-05"
-preview: "Anomaly detection on urban traffic streams comparing probabilistic GLM and sequence-model (GRU) approaches."
-tags: ["Anomaly Detection", "PMML", "GLM", "GRU", "Time Series"]
+preview: "Course paper comparing a Poisson GLM with a GRU on five years of hourly Toronto traffic counts, with KL-divergence anomaly scoring."
+tags: ["Anomaly Detection", "Time Series", "PyTorch", "GRU", "Poisson GLM"]
 status: "published"
-github: "https://github.com/PATELOM925/PMML_Project"
-featured: false
-problem: "Traffic streams contain strong temporal patterns, noise, and event-driven spikes that make anomaly detection easy to overfit."
-approach: "I compared a probabilistic GLM baseline against a GRU sequence model, then analyzed how calibration and divergence-based scoring behaved under real traffic variation."
-result: "The work clarified when simpler probabilistic models remain competitive and where sequence models help once temporal context matters."
+github: "https://github.com/PATELOM925/Toronto-Urban-Traffic-Anomaly-Detection"
+featured: true
+featuredOrder: 4
+problem: "Traffic counts carry strong daily and weekly patterns, noise, and event-driven spikes, so an anomaly detector can forecast well and still raise poor alerts."
+approach: "I trained a Poisson GLM and a GRU sequence model on 2020-2024 hourly counts, tested both on held-out 2025 data, and scored anomalies with KL divergence."
+result: "The GRU cut forecast RMSE by 54%, but the interpretable GLM detected anomalies better (F1 0.49 vs 0.14)."
 category: "NLP & ML Research"
-pipeline: ["Traffic counts", "Poisson GLM baseline", "GRU sequence model", "Divergence anomaly scoring"]
+highlight: "54% lower RMSE"
+pipeline: ["Hourly traffic counts", "Poisson GLM baseline", "GRU sequence model", "KL-divergence anomaly scoring", "Held-out 2025 evaluation"]
 ---
+## Highlights
+- Compared a Poisson GLM with a GRU (PyTorch) on 5 years of hourly Toronto traffic counts, training on 2020-2024 and testing on held-out 2025; the GRU cut RMSE by 54%.
+- Scored anomalies with KL divergence; the interpretable GLM detected them better (F1 0.49 vs 0.14).
+
+Solo course paper for Probabilistic Models & Machine Learning at York University.
+
 ## Focus
 This project was less about chasing one model score and more about understanding what different anomaly detectors assume.
 
 ## What I compared
-- Poisson/GLM-style probabilistic modeling for interpretable traffic count behavior.
-- GRU-based sequence modeling for temporal dependency capture.
-- Divergence-oriented anomaly scoring to inspect shifts in learned behavior.
+- A Poisson GLM for interpretable modeling of traffic count behavior.
+- A GRU sequence model for temporal dependency capture.
+- KL-divergence anomaly scoring to inspect shifts between expected and observed behavior.
 
 ## Main lesson
-If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals. Evaluation had to stay tied to practical alert usefulness, not just loss curves.
+The better forecaster was not the better detector. If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals, so evaluation had to stay tied to practical alert usefulness, not just loss curves.

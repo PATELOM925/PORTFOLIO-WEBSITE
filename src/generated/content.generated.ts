@@ -81,7 +81,7 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/openclaw-hack-ttw26",
-      "featured": true,
+      "featured": false,
       "problem": "Agent builders lose time choosing, configuring, and trusting the growing mix of skills, plugins, MCP servers, and sub-agents.",
       "approach": "Our team built a broker that analyzes a task, redacts sensitive context, ranks capabilities, creates payment-gated transactions, and pauses high-risk actions for approval.",
       "result": "The local MVP delivers buyer and seller flows, x402 payment-state checks, capability execution, transaction history, and outcome reputation tracking.",
@@ -205,7 +205,7 @@ export const projectRecords = [
         "Security"
       ],
       "status": "published",
-      "featured": true,
+      "featured": false,
       "problem": "Interviewers can spend an hour reading an unfamiliar take-home project before they know which technical decisions to probe.",
       "approach": "We built an ARI module that ingests code or a public repository and returns a structured brief, architecture notes, file-grounded questions, answer rubrics, and a signal report.",
       "result": "The module supports live notes and scoring, role-based candidate pipelines, tenant isolation, and guarded handling of untrusted project content.",
@@ -264,7 +264,8 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/LLMs-for-Optimization-Problems",
-      "featured": false,
+      "featured": true,
+      "featuredOrder": 5,
       "problem": "Classical optimization problems carry hard feasibility constraints that vanilla language models often violate.",
       "approach": "Our team of three modeled JSSP instances as disjunctive graphs, serialized precedence and machine conflicts into the prompt, and fine-tuned Llama 3.1 8B with 4-bit QLoRA.",
       "result": "The pipeline produced a much more structured optimization workflow and made training/runtime tradeoffs manageable for course-scale experimentation.",
@@ -301,32 +302,35 @@ export const projectRecords = [
   },
   {
     "frontmatter": {
-      "title": "PMML Project: Traffic Anomaly Detection in Toronto",
+      "title": "Toronto Traffic Anomaly Detection",
       "slug": "pmml-traffic-anomaly-detection",
       "date": "2025-12-05",
-      "preview": "Anomaly detection on urban traffic streams comparing probabilistic GLM and sequence-model (GRU) approaches.",
+      "preview": "Course paper comparing a Poisson GLM with a GRU on five years of hourly Toronto traffic counts, with KL-divergence anomaly scoring.",
       "tags": [
         "Anomaly Detection",
-        "PMML",
-        "GLM",
+        "Time Series",
+        "PyTorch",
         "GRU",
-        "Time Series"
+        "Poisson GLM"
       ],
       "status": "published",
-      "github": "https://github.com/PATELOM925/PMML_Project",
-      "featured": false,
-      "problem": "Traffic streams contain strong temporal patterns, noise, and event-driven spikes that make anomaly detection easy to overfit.",
-      "approach": "I compared a probabilistic GLM baseline against a GRU sequence model, then analyzed how calibration and divergence-based scoring behaved under real traffic variation.",
-      "result": "The work clarified when simpler probabilistic models remain competitive and where sequence models help once temporal context matters.",
+      "github": "https://github.com/PATELOM925/Toronto-Urban-Traffic-Anomaly-Detection",
+      "featured": true,
+      "featuredOrder": 4,
+      "problem": "Traffic counts carry strong daily and weekly patterns, noise, and event-driven spikes, so an anomaly detector can forecast well and still raise poor alerts.",
+      "approach": "I trained a Poisson GLM and a GRU sequence model on 2020-2024 hourly counts, tested both on held-out 2025 data, and scored anomalies with KL divergence.",
+      "result": "The GRU cut forecast RMSE by 54%, but the interpretable GLM detected anomalies better (F1 0.49 vs 0.14).",
       "category": "NLP & ML Research",
+      "highlight": "54% lower RMSE",
       "pipeline": [
-        "Traffic counts",
+        "Hourly traffic counts",
         "Poisson GLM baseline",
         "GRU sequence model",
-        "Divergence anomaly scoring"
+        "KL-divergence anomaly scoring",
+        "Held-out 2025 evaluation"
       ]
     },
-    "content": "## Focus\nThis project was less about chasing one model score and more about understanding what different anomaly detectors assume.\n\n## What I compared\n- Poisson/GLM-style probabilistic modeling for interpretable traffic count behavior.\n- GRU-based sequence modeling for temporal dependency capture.\n- Divergence-oriented anomaly scoring to inspect shifts in learned behavior.\n\n## Main lesson\nIf the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals. Evaluation had to stay tied to practical alert usefulness, not just loss curves."
+    "content": "## Highlights\n- Compared a Poisson GLM with a GRU (PyTorch) on 5 years of hourly Toronto traffic counts, training on 2020-2024 and testing on held-out 2025; the GRU cut RMSE by 54%.\n- Scored anomalies with KL divergence; the interpretable GLM detected them better (F1 0.49 vs 0.14).\n\nSolo course paper for Probabilistic Models & Machine Learning at York University.\n\n## Focus\nThis project was less about chasing one model score and more about understanding what different anomaly detectors assume.\n\n## What I compared\n- A Poisson GLM for interpretable modeling of traffic count behavior.\n- A GRU sequence model for temporal dependency capture.\n- KL-divergence anomaly scoring to inspect shifts between expected and observed behavior.\n\n## Main lesson\nThe better forecaster was not the better detector. If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals, so evaluation had to stay tied to practical alert usefulness, not just loss curves."
   },
   {
     "frontmatter": {
@@ -344,6 +348,7 @@ export const projectRecords = [
       "status": "published",
       "github": "https://github.com/PATELOM925/Remote-Codex-Control-Public",
       "featured": true,
+      "featuredOrder": 3,
       "problem": "Autonomous coding agents run commands and edit files on your machine, but approvals are stuck at the desk. Stepping away means the agent either stalls or runs without review.",
       "approach": "I built a local-first supervision layer: the agent keeps running on the local machine, and each command, file change and permission request goes to a private Telegram chat where one trusted operator approves, steers or denies it.",
       "result": "A public alpha in 17k+ lines of TypeScript with SQLite state, a chat allowlist, stale-approval protection and a documented threat model.",
@@ -396,6 +401,7 @@ export const projectRecords = [
       "status": "published",
       "github": "https://github.com/PATELOM925/Synapse_AgentShfyt_Hackathon",
       "featured": true,
+      "featuredOrder": 1,
       "problem": "Students need personalized study support, but teachers also need visibility into diagnostics, progress, and the learning materials being generated.",
       "approach": "Our team of three combined a multi-agent backend, an MCP server for course material, FastAPI, and Next.js to generate notes, flashcards, quizzes, podcasts, and streamed tutoring from uploaded course materials.",
       "result": "Synapse AI won the AgentShyft Hackathon in May 2026.",
@@ -428,6 +434,7 @@ export const projectRecords = [
       "status": "published",
       "github": "https://github.com/PATELOM925/TTC-PULSE",
       "featured": true,
+      "featuredOrder": 2,
       "problem": "TTC delay history, schedules, route metadata, and live alerts arrive in different formats, which makes reliable route and station analysis difficult.",
       "approach": "Our team built a reproducible DuckDB and Parquet pipeline, linked delay records to GTFS entities, and served the analytical marts through a multi-page Streamlit dashboard.",
       "result": "The platform turns 1,004,682 normalized delay events into route, station, time-pattern, cause, and live-alert views with explicit data-quality checks.",

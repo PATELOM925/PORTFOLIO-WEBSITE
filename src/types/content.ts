@@ -13,6 +13,7 @@ export interface ProjectFrontmatter {
   reportUrl?: string;
   publicationUrl?: string;
   featured: boolean;
+  featuredOrder?: number;
   isPrivateSource?: boolean;
   problem?: string;
   approach?: string;

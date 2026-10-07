@@ -25,7 +25,13 @@ export async function getProjectBySlug(slug: string): Promise<ContentRecord<Proj
 
 export async function getFeaturedProjects(): Promise<ContentRecord<ProjectFrontmatter>[]> {
   const allProjects = await getAllProjects();
-  return allProjects.filter((project) => project.frontmatter.featured);
+  return allProjects
+    .filter((project) => project.frontmatter.featured)
+    .sort(
+      (a, b) =>
+        (a.frontmatter.featuredOrder ?? Number.MAX_SAFE_INTEGER) -
+        (b.frontmatter.featuredOrder ?? Number.MAX_SAFE_INTEGER)
+    );
 }
 
 export async function getAllBlogPosts(includeDrafts = false): Promise<ContentRecord<BlogFrontmatter>[]> {
