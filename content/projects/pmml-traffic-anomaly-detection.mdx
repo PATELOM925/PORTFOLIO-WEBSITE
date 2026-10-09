@@ -32,3 +32,8 @@ This project was less about chasing one model score and more about understanding
 
 ## Main lesson
 The better forecaster was not the better detector. If the anomaly score is poorly calibrated, a more complex model can still produce noisy operational signals, so evaluation had to stay tied to practical alert usefulness, not just loss curves.
+
+## Limits
+- The two models do not see the same inputs: the GRU reads the previous 24 observed counts, while the GLM gets four calendar and event features and no history. Part of the forecast gap comes from that.
+- The anomaly labels are heuristics built from the 2025 data itself, so F1 and ROC-AUC depend on those rules.
+- The counts are short surveys at many locations, not one continuous series, and the saved run scales and windows the data across locations. A per-location rerun with train-only scaling is the next step.

@@ -70,6 +70,8 @@ const EXAMPLES: Array<{ label: string; form: DemoForm }> = [
   }
 ];
 
+const INITIAL_EXAMPLE = EXAMPLES[2].form;
+
 function runBroker(form: DemoForm, budgetUsd: number): BrokerResult {
   const analysis = analyzeTask({ task: form.task, context: form.context, budgetUsd, maxRisk: form.maxRisk });
   const secureContext = sanitizeContext(analysis.originalTask, form.context);
@@ -98,9 +100,10 @@ function formatPrice(capability: CapabilityListing): string {
 }
 
 export function ClawCompassDemo() {
-  const [form, setForm] = useState<DemoForm>({ task: "", context: "", budget: "0.10", maxRisk: "low" });
+  // Start with the risky example already run, so a visitor sees a full result before typing anything.
+  const [form, setForm] = useState<DemoForm>(INITIAL_EXAMPLE);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<BrokerResult | null>(null);
+  const [result, setResult] = useState<BrokerResult | null>(() => runBroker(INITIAL_EXAMPLE, Number(INITIAL_EXAMPLE.budget)));
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -125,7 +128,7 @@ export function ClawCompassDemo() {
   function loadExample(example: DemoForm) {
     setForm(example);
     setError("");
-    setResult(null);
+    setResult(runBroker(example, Number(example.budget)));
   }
 
   return (
