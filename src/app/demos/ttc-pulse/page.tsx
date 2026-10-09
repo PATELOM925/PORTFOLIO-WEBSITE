@@ -4,6 +4,7 @@ import { TtcPulseDemo, type TtcPulseStats } from "@/components/demos/TtcPulseDem
 import { Layout } from "@/components/Layout";
 import routeFile from "@/demos/ttc-pulse/data/e1_routes.json";
 import stationFile from "@/demos/ttc-pulse/data/e2_stations.json";
+import weekdayHourFile from "@/demos/ttc-pulse/data/e3_weekday_hour.json";
 import yearFile from "@/demos/ttc-pulse/data/e4_yearly.json";
 
 export const metadata: Metadata = {
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
 // Built from the copied data files when the page is prerendered.
 const years = yearFile.rows.map((row) => row.year);
 const stats: TtcPulseStats = {
-  totalEvents: yearFile.rows.reduce((total, row) => total + row.events, 0),
+  // The weekday-by-hour table holds every delay event. The route and yearly tables leave out subway events with no line.
+  totalEvents: weekdayHourFile.rows.reduce((total, row) => total + row.frequency, 0),
   firstYear: Math.min(...years),
   lastYear: Math.max(...years),
   routeCount: routeFile.rows.length,
@@ -44,8 +46,8 @@ export default function TtcPulseDemoPage() {
             tables. The data records delay events only.
           </p>
           <p>
-            Subway totals differ between the source tables. The hourly and cause counts add up to more events than the route and
-            yearly counts, so each section uses its own file.
+            The route tables and the yearly chart count 9,171 fewer subway events than the total above, because subway events
+            with no line recorded are not assigned to a route.
           </p>
         </section>
 
