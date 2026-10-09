@@ -435,6 +435,7 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/TTC-PULSE",
+      "demoUrl": "/demos/ttc-pulse",
       "featured": true,
       "featuredOrder": 2,
       "problem": "TTC delay history, schedules, route metadata, and live alerts arrive in different formats, which makes reliable route and station analysis difficult.",

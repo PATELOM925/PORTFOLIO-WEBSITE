@@ -190,7 +190,7 @@ test("ChatPDF matches the resume", async () => {
   assert.match(text, /80% accuracy on a manual test set/);
 });
 
-test("TTC project exposes the verified repository without an unverified demo", async () => {
+test("TTC project exposes the verified repository and the delay explorer demo", async () => {
   const { response, text } = await fetchText("/projects/ttc-interactive-dashboard");
 
   assert.equal(response.status, 200);
@@ -199,7 +199,18 @@ test("TTC project exposes the verified repository without an unverified demo", a
   assert.doesNotMatch(text, /1,004,682/);
   assert.match(text, /route|station/i);
   assert.match(text, /\/go\/project\/ttc-interactive-dashboard\/github/);
-  assert.doesNotMatch(text, /\/go\/project\/ttc-interactive-dashboard\/demo/);
+  assert.match(text, /\/go\/project\/ttc-interactive-dashboard\/demo/);
+});
+
+test("TTC Pulse delay explorer is prerendered and the project's demo link redirects to it", async () => {
+  const demo = await fetchText("/demos/ttc-pulse");
+  assert.equal(demo.response.status, 200);
+  assert.match(demo.text, /delay explorer/);
+  assert.match(demo.text, /When delays happen/);
+
+  const redirect = await fetch(`${baseUrl}/go/project/ttc-interactive-dashboard/demo`, { redirect: "manual" });
+  assert.equal(redirect.status, 302);
+  assert.equal(new URL(redirect.headers.get("location"), baseUrl).pathname, "/demos/ttc-pulse");
 });
 
 test("resume route serves the current PDF asset", async () => {

@@ -35,6 +35,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6
+    },
+    {
+      url: `${siteConfig.siteUrl}/demos/ttc-pulse`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6
     }
   ];
 
