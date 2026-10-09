@@ -1,0 +1,38 @@
+[
+  {
+    "operator": "/status",
+    "rcc": "RCC Status\nDaemon: alive\nCodex Transport: connected\nApp Server Compatibility: compatible\nThread List Health: ok\nThread List Last Success: <time>\nLast Event: <time>\nEvent Age: <age>\nFreshness Threshold: 90s\nRecent Event Healthy: yes\nFreshness State: healthy_quiet\nActive Threads: 0\nRemote Mode: focused_thread_stream + background_alerts\nRemote Approval Mode: app_server_then_manual_desktop\nDesktop Approval Fallback: disabled (desktop-only approvals must be handled on the Mac)\nTelegram Commands: installed\nSleep Prevention: not_expected\nCodex prevent_idle_sleep: unknown\nSleep Prevention Mismatch: no"
+  },
+  {
+    "operator": "/projects",
+    "rcc": "Projects (1)\n1. demo-app | ~/demo-app"
+  },
+  {
+    "operator": "/new 1 Demo thread",
+    "rcc": "Running\nProject: demo-app\nThread: Demo thread\nTurn: <id-1>\nThread created\nProject: demo-app\nCodex ID: <id-2>\nPath: ~/demo-app\nTurn started: <id-1>\nUse /say <change> while running."
+  },
+  {
+    "operator": "/approval_demo",
+    "rcc": "Demo approval triggered for Demo thread\nApproval ID: <id-3>\nApproval needed\nCategory: unknown\nRisk: unknown\nWhy Codex wants this: RCC could not classify this approval with high confidence.\nWhat will happen: Demo approval card: confirm remote approval path.\nProject: demo-app\nThread: Demo thread\nTurn: <id-1>\ncwd: <tmp>/demo-app\nSource: demo\nApproval ID: <id-3>\nAge: just now\nDecision hint: Deny or inspect details unless you recognize the action.\n\nActions: /approve <id-3> | /deny <id-3> | /approval <id-3>"
+  },
+  {
+    "operator": "/approvals",
+    "rcc": "Approvals\nPending actionable: 1\n\ndemo-app / Demo thread\n1. <id-3>\n   turn: <id-1> | action: other | risk: unknown\n   age: <age> | expiry n/a\n   Demo approval card: confirm remote approval path.\n   actions: /approve <id-3> | /deny <id-3> | /interrupt <id-2>\n\nSuperseded/expired approvals are hidden here and rejected if tapped from old cards."
+  },
+  {
+    "operator": "/approve <id-3>",
+    "rcc": "Approval resolved\nProject: demo-app\nThread: Demo thread\nDecision: approved\nSource: app-server\nAfter approval\nProject: demo-app\nThread: Demo thread\nDecision: approved\nStatus: running\nAction: Demo approval card: confirm remote approval path.\nTip: /last for full context.\nApproved request <id-3>"
+  },
+  {
+    "operator": "/approve <id-3>",
+    "rcc": "Callback already processed: approve:<id-3>"
+  },
+  {
+    "operator": "/deny <id-3>",
+    "rcc": "Request <id-3> already approved"
+  },
+  {
+    "operator": "/approve does-not-exist",
+    "rcc": "Command failed: Unknown approval does-not-exist"
+  }
+]

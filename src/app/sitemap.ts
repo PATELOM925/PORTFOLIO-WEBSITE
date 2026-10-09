@@ -29,6 +29,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6
+    },
+    {
+      url: `${siteConfig.siteUrl}/demos/remote-codex-control`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6
     }
   ];
 

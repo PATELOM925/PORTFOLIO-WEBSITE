@@ -1000,6 +1000,28 @@ button:disabled { opacity: 0.7; cursor: progress; }
 .demo-decision-approval { color: var(--gold-soft); }
 .demo-reasons { display: grid; gap: 0.35rem; font-size: 0.95rem; }
 .demo-reason-code { font-size: 0.8rem; color: var(--ink-muted); overflow-wrap: anywhere; }
+.demo-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.demo-status { margin: 0 0 0 auto; font-size: 0.9rem; color: var(--ink-muted); }
+.demo-chat-panel { display: grid; align-content: start; gap: 1.2rem; min-width: 0; }
+.demo-chat-panel-scroll { max-height: min(38rem, 70vh); overflow-y: auto; overscroll-behavior: contain; }
+.demo-chat-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2rem; min-width: 0; }
+.demo-step { display: grid; gap: 0.5rem; min-width: 0; }
+.demo-step-caption { margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--ink-muted); overflow-wrap: anywhere; }
+.demo-bubbles { display: grid; gap: 0.4rem; min-width: 0; }
+.demo-bubble { margin: 0; padding: 0.6rem 0.85rem; max-width: min(36rem, 85%); min-width: 0; color: inherit; overflow-wrap: anywhere; border-radius: var(--radius-sm); }
+.demo-bubble-operator { justify-self: end; color: var(--bg); background: var(--gold-soft); }
+.demo-bubble-rcc {
+  justify-self: start;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.demo-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (max-width: 640px) {
   .demo-form { padding: 1.2rem 1.1rem; }
@@ -1007,4 +1029,7 @@ button:disabled { opacity: 0.7; cursor: progress; }
   .demo-section { padding: 1.1rem 1rem; }
   .demo-facts { grid-template-columns: 1fr; gap: 0.1rem; }
   .demo-facts dd { margin-bottom: 0.45rem; }
+  .demo-chat-panel { padding: 0.9rem; }
+  .demo-bubble { max-width: 92%; }
+  .demo-status { margin-left: 0; width: 100%; }
 }

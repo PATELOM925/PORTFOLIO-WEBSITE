@@ -86,6 +86,17 @@ test("ClawCompass live demo runs in the browser and the project page links to it
   assert.equal(new URL(redirect.headers.get("location"), baseUrl).pathname, "/demos/clawcompass");
 });
 
+test("Remote Codex Control approval replay is prerendered and the project links to it", async () => {
+  const demo = await fetchText("/demos/remote-codex-control");
+  assert.equal(demo.response.status, 200);
+  assert.match(demo.text, /approval replay/);
+  assert.match(demo.text, /Callback already processed/);
+
+  const redirect = await fetch(`${baseUrl}/go/project/remote-codex-control/demo`, { redirect: "manual" });
+  assert.equal(redirect.status, 302);
+  assert.equal(new URL(redirect.headers.get("location"), baseUrl).pathname, "/demos/remote-codex-control");
+});
+
 test("BarLens is shown as experience only, with the resume bullets", async () => {
   const homepage = await fetchText("/");
   const projects = await fetchText("/projects");

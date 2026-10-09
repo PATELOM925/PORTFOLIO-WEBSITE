@@ -348,6 +348,7 @@ export const projectRecords = [
       ],
       "status": "published",
       "github": "https://github.com/PATELOM925/Remote-Codex-Control-Public",
+      "demoUrl": "/demos/remote-codex-control",
       "featured": true,
       "featuredOrder": 3,
       "problem": "Autonomous coding agents run commands and edit files on your machine, but approvals are stuck at the desk. Stepping away means the agent either stalls or runs without review.",
