@@ -80,7 +80,8 @@ export const projectRecords = [
         "Marketplace"
       ],
       "status": "published",
-      "github": "https://github.com/PATELOM925/openclaw-hack-ttw26",
+      "github": "https://github.com/PATELOM925/ClawCompass",
+      "demoUrl": "/demos/clawcompass",
       "featured": false,
       "problem": "Agent builders lose time choosing, configuring, and trusting the growing mix of skills, plugins, MCP servers, and sub-agents.",
       "approach": "Our team built a broker that analyzes a task, redacts sensitive context, ranks capabilities, creates payment-gated transactions, and pauses high-risk actions for approval.",

@@ -23,6 +23,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8
+    },
+    {
+      url: `${siteConfig.siteUrl}/demos/clawcompass`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6
     }
   ];
 

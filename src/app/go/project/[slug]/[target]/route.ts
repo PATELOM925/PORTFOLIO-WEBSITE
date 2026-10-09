@@ -10,7 +10,7 @@ const targetMap = {
 } as const;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string; target: string }> }
 ) {
   const { slug, target } = await params;
@@ -23,5 +23,6 @@ export async function GET(
   const url = project.frontmatter[key];
   if (!url) return NextResponse.json({ error: "Link not available" }, { status: 404 });
 
-  return NextResponse.redirect(url, 302);
+  // Relative links (for example /demos/clawcompass) need the request origin to become absolute.
+  return NextResponse.redirect(new URL(url, request.url), 302);
 }
