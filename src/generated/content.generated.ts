@@ -401,7 +401,7 @@ export const projectRecords = [
         "HITL"
       ],
       "status": "published",
-      "github": "https://github.com/PATELOM925/Synapse_AgentShfyt_Hackathon",
+      "github": "https://github.com/PATELOM925/Synapse-AI",
       "featured": true,
       "featuredOrder": 1,
       "problem": "Students need personalized study support, but teachers also need visibility into diagnostics, progress, and the learning materials being generated.",
