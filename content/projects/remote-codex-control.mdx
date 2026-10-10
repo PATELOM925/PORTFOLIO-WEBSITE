@@ -20,6 +20,12 @@ pipeline: ["Agent requests an action", "Policy checks", "Approval sent to Telegr
 - Built a human-approval layer for autonomous coding agents: an operator approves, steers or denies each tool action from a private Telegram chat while execution stays on the local machine.
 - Directed AI coding agents to produce 17k+ lines of TypeScript with SQLite state, a chat allowlist, stale-approval protection and a documented threat model.
 
+## Try it
+
+- [Approval replay](/demos/remote-codex-control): step through a real session between an operator and a coding agent.
+- [Web console demo](https://rcc-demo.iampatelom.workers.dev): the project's web console on a simulated Mac. It uses made-up data and makes no network calls.
+- One-line install on a Mac, with a guided setup for your own Telegram bot: see the [README](https://github.com/PATELOM925/Remote-Codex-Control-Public#quick-install).
+
 ## How it works
 
 - Connects to the coding agent's app server and streams turn and tool-call events to the operator.
@@ -35,4 +41,4 @@ pipeline: ["Agent requests an action", "Policy checks", "Approval sent to Telegr
 
 ## Status
 
-Public alpha for one machine and one trusted operator. The web console and hosted relay in the repository are experimental.
+Public alpha for one machine and one trusted operator. The web console and the relay in the repository are experimental; the relay is single-operator and is not offered as a shared service.
