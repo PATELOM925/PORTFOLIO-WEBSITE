@@ -71,21 +71,6 @@ test("hackathon work has dedicated project pages and only verified source links"
   assert.match(clawCompass.text, /\/go\/project\/clawcompass\/github/);
 });
 
-test("ClawCompass live demo runs in the browser and the project page links to it", async () => {
-  const demo = await fetchText("/demos/clawcompass");
-  assert.equal(demo.response.status, 200);
-  assert.match(demo.text, /ClawCompass/);
-  assert.match(demo.text, /deterministic analyzer/);
-
-  const project = await fetchText("/projects/clawcompass");
-  assert.equal(project.response.status, 200);
-  assert.match(project.text, /\/go\/project\/clawcompass\/demo/);
-
-  const redirect = await fetch(`${baseUrl}/go/project/clawcompass/demo`, { redirect: "manual" });
-  assert.equal(redirect.status, 302);
-  assert.equal(new URL(redirect.headers.get("location"), baseUrl).pathname, "/demos/clawcompass");
-});
-
 test("Remote Codex Control approval replay is prerendered and the project links to it", async () => {
   const demo = await fetchText("/demos/remote-codex-control");
   assert.equal(demo.response.status, 200);
