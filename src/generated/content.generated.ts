@@ -352,7 +352,7 @@ export const projectRecords = [
       "featuredOrder": 3,
       "problem": "Autonomous coding agents run commands and edit files on your machine, but approvals are stuck at the desk. Stepping away means the agent either stalls or runs without review.",
       "approach": "I built a local-first supervision layer: the agent keeps running on the local machine, and each command, file change and permission request goes to a private Telegram chat where one trusted operator approves, steers or denies it.",
-      "result": "A public alpha in 17k+ lines of TypeScript with SQLite state, a chat allowlist, stale-approval protection and a documented threat model.",
+      "result": "A public alpha in about 21,000 lines of TypeScript with 170 automated tests, CI, SQLite state, a chat allowlist, stale-approval protection and a documented threat model.",
       "category": "Applied AI & Agents",
       "highlight": "Human-in-the-loop",
       "pipeline": [
