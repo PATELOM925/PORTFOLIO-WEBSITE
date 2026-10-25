@@ -18,7 +18,8 @@
     "cf:deploy": "opennextjs-cloudflare deploy",
     "check:chat-corpus": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-ttc-chat-corpus.mjs --check",
     "test:chat": "tsx --test \"src/lib/chat/**/*.test.ts\"",
-    "eval:chat": "node scripts/ttc-chat-eval.mjs"
+    "eval:chat": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/ttc-chat-eval.mjs",
+    "report:chat": "node scripts/ttc-chat-report.mjs"
   },
   "dependencies": {
     "@next/env": "^16.1.6",
