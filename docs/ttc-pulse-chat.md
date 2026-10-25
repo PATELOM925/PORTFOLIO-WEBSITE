@@ -346,13 +346,14 @@ The client reads the stream with `fetch` and a stream reader. `AbortController` 
 | Control | How |
 |---|---|
 | Validation | 3 to 500 chars. Body under 8 KB. The mode is in the allowlist. History is at most 4 items of at most 600 chars. Reject when more than 40% of the chars are not letters, digits or spaces. |
-| Visitor key | The first 16 hex chars of `sha256(IP + "\|" + User-Agent + "\|" + CHAT_SALT + UTC date)`. Never store a raw IP. |
+| Visitor key | The first 16 hex chars of `sha256(IP + "\|" + CHAT_SALT + UTC date)`. No User-Agent, so a visitor cannot get a new key by changing it. Never store a raw IP. |
 | Per visitor | `CHAT_VISITOR_LIMIT`, 8 per 60 s |
 | Per colo | `CHAT_GLOBAL_LIMIT`, key `global`, 40 per 60 s |
 | Escalation | `CHAT_ESCALATE_LIMIT`, key `global` 2 per 60 s, and the visitor key 1 per 60 s |
 | Bots | Turnstile, verified on each question. Skip the check, and log it, when `TURNSTILE_SECRET` is not set. |
 | Hard stop | A monthly spend cap in each provider console |
-| Daily global counter | Not in v1. It needs a Durable Object. |
+| Daily global counter | `CHAT_BUDGET`, the `ChatBudget` Durable Object in the Worker `ompatel-chat-budget` (`workers/chat-budget`). 1,000 model answers and 10 Sol answers each UTC day. If the budget Worker fails, the question is allowed. |
+| Origin | A POST with an `Origin` header from another site gets 403. |
 
 ```toml
 [[ratelimits]]
@@ -496,7 +497,6 @@ Launch checklist:
 - Not built:
   - embeddings
   - a tool layer
-  - a global daily counter
   - free-text feedback
   - a second-model router
   - an answer cache shared across visitors
