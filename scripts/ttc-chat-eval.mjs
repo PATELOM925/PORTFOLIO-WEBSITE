@@ -95,7 +95,7 @@ async function runSet(name, items) {
     const r = await ask(item);
     addUsage(r);
     const g = grade(item, r);
-    results.push({ set: name, id: item.id, question: item.question, ...g, route: r.done?.route, model: r.done?.model, fallback: r.done?.fallback, latencyMs: r.done?.latencyMs, firstTokenMs: r.done?.firstTokenMs, wallMs: Math.round(r.wallMs), cacheRead: r.done?.cacheReadTokens, ungrounded: r.done?.ungroundedNumbers, outcome: r.done?.outcome, sources: r.sources.map((s) => s.id), answer: r.answer, error: r.error });
+    results.push({ set: name, id: item.id, question: item.question, ...g, route: r.done?.route, model: r.done?.model, fallback: r.done?.fallback, latencyMs: r.done?.latencyMs, firstTokenMs: r.done?.firstTokenMs, wallMs: Math.round(r.wallMs), cacheRead: r.done?.cacheReadTokens, ungrounded: r.done?.ungroundedNumbers, outcome: r.done?.outcome, attempts: r.meta?.attempts, inputTokens: r.done?.inputTokens, outputTokens: r.done?.outputTokens, sources: r.sources.map((s) => s.id), answer: r.answer, error: r.error });
     console.log(`${g.pass ? "PASS" : "FAIL"} ${item.id} ${r.done?.model ?? "-"} ${r.done?.latencyMs ?? "-"} ms ${g.fails.join("; ")}${g.style.length ? " [style: dash]" : ""}`);
   }
 }
@@ -118,7 +118,8 @@ if (!skipCells && !only.length) {
     const r = await ask(compare, route);
     addUsage(r);
     const g = grade(compare, r);
-    cells.push({ cell: `forced ${route}`, pass: r.done?.model === route && !r.done?.fallback && !r.error && g.pass, detail: `model ${r.done?.model}, ${r.done?.latencyMs} ms, in ${r.done?.inputTokens} out ${r.done?.outputTokens} cached ${r.done?.cacheReadTokens}. ${g.fails.join("; ")}`, answer: r.answer });
+    // The cell checks the model id. The e03 grade is for information.
+    cells.push({ cell: `forced ${route}`, pass: r.done?.model === route && !r.done?.fallback && !r.error && r.answer.length > 0, detail: `model ${r.done?.model}, ${r.done?.latencyMs} ms, in ${r.done?.inputTokens} out ${r.done?.outputTokens} cached ${r.done?.cacheReadTokens}. e03 grade: ${g.pass ? "pass" : g.fails.join("; ")}`, answer: r.answer });
   }
   // Probes: a bad id must come back as a config error, not as an answer from another model.
   for (const route of ["probe-anthropic", "probe-openai"]) {

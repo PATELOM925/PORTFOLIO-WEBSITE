@@ -52,6 +52,9 @@ export type AnswerDeps = {
 
 type Attempt = { key: ModelKey; retry: boolean; probe?: boolean };
 
+// Time to the first text token. Sol reasons before it writes, so it gets longer. The 25 s deadline still applies.
+const FIRST_TOKEN_MS: Record<ModelKey, number> = { haiku: 8000, luna: 8000, sol: 15000 };
+
 // Holds back a "[" until its "]" arrives, then keeps only the ids that were sent.
 export class CitationFilter {
   private held = "";
@@ -190,7 +193,7 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
     route = decideRoute({ empty: retrieval.empty, complexity: score, live: retrieval.facets.live, escalationAllowed: () => allowed });
     escalated = route === "sol";
   }
-  if (route === "sol") retrieval = retrieve(input.question, input.mode, resolution, { budget: MODELS.sol.contextBudget, live });
+  if (route === "sol") retrieval = retrieve(input.question, input.mode, resolution, { budget: MODELS.sol.contextBudget, live, extraEntities: true });
 
   const log: AnswerLog = {
     route,
@@ -288,7 +291,7 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
         apiKey,
         signal: controller.signal
       });
-      const firstMs = tryIndex === 0 ? (deps.firstTokenMs ?? 8000) : (deps.retryFirstTokenMs ?? 6000);
+      const firstMs = tryIndex === 0 ? (deps.firstTokenMs ?? FIRST_TOKEN_MS[key]) : (deps.retryFirstTokenMs ?? 6000);
       let first: IteratorResult<ProviderEvent>;
       try {
         first = await withTimeout(stream.next(), firstMs, stopAttempt);

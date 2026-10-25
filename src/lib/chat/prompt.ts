@@ -18,7 +18,8 @@ Rules:
 9. A "delay event" is one row in the TTC delay logs. The data has counts of delay events. It has no on-time trips, so it has no delay rates.
 10. Write in Simplified Technical English: short sentences, one idea in each sentence, active voice, simple words. Do not use em dashes or en dashes. Use 120 words or fewer. Write plain text: no headings, no bold, no tables. A list has 4 items or fewer, one item on each line, and each item starts with "- ".
 11. Citations: after each sentence that uses <data>, write the ids of the chunks you used in square brackets, for example [entity-bus-32] or [entity-bus-32, rank-bus-events-all]. Use only ids from <data>. Do not make up an id.
-12. Give the answer first, in the first sentence. Then give one or two facts that support it.`;
+12. Give the answer first, in the first sentence. Then give one or two facts that support it.
+13. To compare routes, stations or lines, give the same facts for each one: the delay events, the top cause with its count, and the adjusted score when <data> has it.`;
 
 const GLOSSARY = `Glossary of method terms:
 - score: 0.35 z(frequency) + 0.30 z(severity_p90) + 0.20 z(regularity_p90) + 0.15 cause_mix, over the 90 days to 31 January 2026.

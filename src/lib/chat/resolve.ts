@@ -2,7 +2,9 @@ import { loadCorpus, type DirectoryEntry, type Mode } from "./corpus";
 import { STOPWORDS, SYNONYMS, normalise } from "./text";
 
 export type Resolution = {
+  // At most 4 entities. A question routed to Sol can use the extra ones, up to 6 in total.
   entities: DirectoryEntry[];
+  extra?: DirectoryEntry[];
   explicitMode: Mode | null;
   fromPrevious: boolean;
 };
@@ -166,14 +168,14 @@ function resolveText(question: string, hint: Mode): { entities: DirectoryEntry[]
       entities.push(entry);
     }
   }
-  return { entities: entities.slice(0, 4), explicit };
+  return { entities: entities.slice(0, 6), explicit };
 }
 
 export function resolveEntities(question: string, modeHint: Mode, previousQuestion?: string): Resolution {
   const first = resolveText(question, modeHint);
-  if (first.entities.length || !previousQuestion) return { entities: first.entities, explicitMode: first.explicit, fromPrevious: false };
+  if (first.entities.length || !previousQuestion) return { entities: first.entities.slice(0, 4), extra: first.entities.slice(4), explicitMode: first.explicit, fromPrevious: false };
   const text = normalise(question);
   if (!(FOLLOW_UP.test(text) || question.trim().length < 40)) return { entities: [], explicitMode: first.explicit, fromPrevious: false };
   const previous = resolveText(previousQuestion, first.explicit ?? modeHint);
-  return { entities: previous.entities, explicitMode: first.explicit ?? previous.explicit, fromPrevious: previous.entities.length > 0 };
+  return { entities: previous.entities.slice(0, 4), extra: previous.entities.slice(4), explicitMode: first.explicit ?? previous.explicit, fromPrevious: previous.entities.length > 0 };
 }

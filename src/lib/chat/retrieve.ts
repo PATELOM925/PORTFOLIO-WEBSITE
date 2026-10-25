@@ -69,14 +69,14 @@ function bm25(queryTokens: string[]): Float64Array {
 }
 
 const GROUP: Record<Chunk["kind"], number> = { entity: 0, rank: 1, overview: 2, time: 2, causes: 2, quality: 2, method: 2, limits: 2, post: 3, live: 4 };
-const GROUP_MAX = [4, 3, 4, 2, 1];
+const GROUP_MAX = [6, 3, 4, 2, 1];
 
-export function retrieve(question: string, modeHint: Mode, resolution: Resolution, opts: { budget: number; live?: Chunk | null }): Retrieval {
+export function retrieve(question: string, modeHint: Mode, resolution: Resolution, opts: { budget: number; live?: Chunk | null; extraEntities?: boolean }): Retrieval {
   const started = Date.now();
   const corpus = loadCorpus();
   const tokens = tokenize(question);
   const facets = facetsOf(question, tokens);
-  const resolved = resolution.entities;
+  const resolved = opts.extraEntities ? [...resolution.entities, ...(resolution.extra ?? [])] : resolution.entities;
   const modes = new Set(resolved.map((e) => e.mode));
   const effectiveMode: Mode = resolution.explicitMode ?? (modes.size === 1 ? [...modes][0] : modeHint);
 

@@ -139,7 +139,7 @@ test("a hard question goes to Sol, and a Sol failure tries Haiku once, then Luna
   const ok = await ask(q, { openai: [says("Sol answer.")] });
   assert.equal(ok.done.route, "sol");
   assert.equal(ok.done.model, "sol");
-  assert.ok(ok.openai.calls[0].messages.at(-1)!.content.length > 0);
+  assert.match(ok.openai.calls[0].messages.at(-1)!.content, /<chunk id="entity-bus-54">/, "Sol gets the fifth route");
   const failing = await ask(q, { openai: [fails("retryable", 500), says("Luna answer.")], anthropic: [fails("retryable", 500)] });
   assert.equal(failing.anthropic.calls.length, 1);
   assert.equal(failing.done.model, "luna");
