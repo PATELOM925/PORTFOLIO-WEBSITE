@@ -193,11 +193,18 @@ test("TTC Pulse dashboard is prerendered and the project's demo link redirects t
   assert.match(demo.text, /TTC Pulse/);
   assert.match(demo.text, /Peak hours/);
   assert.match(demo.text, /723,518/);
-  assert.match(demo.text, /Awais Aziz built the AI chat page/);
+  assert.doesNotMatch(demo.text, /Awais Aziz|Muhammad Asad/);
 
   const redirect = await fetch(`${baseUrl}/go/project/ttc-interactive-dashboard/demo`, { redirect: "manual" });
   assert.equal(redirect.status, 302);
   assert.equal(new URL(redirect.headers.get("location"), baseUrl).pathname, "/demos/ttc-pulse");
+
+  // The live route depends on the TTC feeds, so it may fail. It must never return HTML or crash.
+  const live = await fetch(`${baseUrl}/api/ttc-pulse/live`);
+  assert.ok([200, 502].includes(live.status), `live route status ${live.status}`);
+  const snapshot = await live.json();
+  assert.ok(Array.isArray(snapshot.errors));
+  if (live.status === 200) assert.ok(snapshot.alerts || snapshot.vehicles, "live route returns alerts or vehicles");
 });
 
 test("resume route serves the current PDF asset", async () => {
