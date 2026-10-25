@@ -24,7 +24,7 @@ The system has two parts. The build part runs locally and makes the data. The re
 ```diagram
 {
   "title": "TTC Pulse architecture",
-  "description": "At build time, three sources (TTC delay logs, the GTFS schedule and GTFS-Realtime alert snapshots) go through Python ingestion into DuckDB bronze tables, then into silver and gold Parquet tables. An export script reads the gold marts and writes 9 JSON files. The JSON files are bundled into the Next.js page at build time. At request time, a Cloudflare Worker serves the page to the browser. A live route on the same Worker fetches the TTC live alert API and the GTFS-Realtime vehicle positions feed, caches the result for 60 seconds, and sends it to the browser.",
+  "description": "At build time, three sources (TTC delay logs, the GTFS schedule and GTFS-Realtime alert snapshots) go through Python ingestion into DuckDB bronze tables, then into silver and gold Parquet tables. An export script reads the gold marts and writes 9 JSON files that are bundled into the Next.js page, plus 308 small files, one per route, station or line, that the drill-down loads on demand. At request time, a Cloudflare Worker serves the page to the browser. A live route on the same Worker fetches the TTC live alert API and the GTFS-Realtime vehicle positions feed, caches the result for 60 seconds, and sends it to the browser.",
   "caption": "TTC Pulse architecture. The top band runs locally. The bottom band runs on each request, with no database.",
   "legend": [["source", "Source data"], ["code", "Python code"], ["store", "Stored data"], ["web", "Runs on Cloudflare"], ["live", "Live TTC feed"], ["default", "Browser"]],
   "bands": [
@@ -41,7 +41,7 @@ The system has two parts. The build part runs locally and makes the data. The re
     {"id": "silver", "label": "Silver", "lines": ["Parquet facts", "and dimensions"], "tone": "store", "wide": [3, 1], "tall": [0, 3, 2]},
     {"id": "gold", "label": "Gold", "lines": ["8 Parquet marts", "22.0 MB"], "tone": "store", "wide": [4, 1], "tall": [0, 4, 2]},
     {"id": "export", "label": "Export script", "lines": ["Python, DuckDB", "reads gold only"], "tone": "code", "wide": [5, 1], "tall": [0, 5, 2]},
-    {"id": "json", "label": "9 JSON files", "lines": ["87,712 bytes", "ship with the site"], "tone": "store", "wide": [6, 1], "tall": [0, 6, 2]},
+    {"id": "json", "label": "JSON files", "lines": ["9 bundled, 130 KB", "308 loaded on demand"], "tone": "store", "wide": [6, 1], "tall": [0, 6, 2]},
     {"id": "alerts", "label": "TTC live alerts", "lines": ["`alerts.ttc.ca`"], "tone": "live", "wide": [0, 3]},
     {"id": "vehicles", "label": "TTC vehicles", "lines": ["GTFS-RT positions", "`bustime.ttc.ca`"], "tone": "live", "wide": [0, 4]},
     {"id": "feeds", "label": "TTC live feeds", "lines": ["Alerts API", "GTFS-RT vehicles"], "tone": "live", "tall": [1, 7]},
@@ -72,7 +72,7 @@ The system has two parts. The build part runs locally and makes the data. The re
 ```
 
 - **Build time.** Python code ingests the three sources and writes a registry with a SHA-256 checksum for each file. DuckDB loads the rows into bronze tables. Then the pipeline writes the silver and gold layers as Parquet files with ZSTD compression.
-- **Export.** The script `scripts/export_site_data.py` reads only the gold marts. It writes 9 small JSON files (87,712 bytes in total). The files ship with the site.
+- **Export.** The script `scripts/export_site_data.py` reads only the gold marts. It writes 9 JSON files (129,777 bytes in total) that ship with the site. It also writes one file for each of 308 routes, stations and lines (2.6 MB in total, at most about 13 KB each). The drill-down loads one of these only when a visitor opens that route.
 - **Request time.** A Cloudflare Worker serves the Next.js page. The historical views read the bundled JSON, so the site needs no Streamlit server and no database server. A second route on the same Worker serves the live data. The live layer section below describes it.
 
 ## Data flow: bronze, silver, gold
@@ -82,7 +82,7 @@ Each layer has one job. Bronze keeps the source rows. Silver cleans them and lin
 ```diagram
 {
   "title": "TTC Pulse data flow from bronze to gold",
-  "description": "Bronze has DuckDB tables for bus, subway and streetcar delays, GTFS routes, stops, trips and stop times, and GTFS-Realtime alerts. Silver has per-mode event tables (bus 723,518 rows, subway 235,397, streetcar 152,916), the fact table fact_delay_events_norm with 1,111,831 rows, the alert fact table with 5,984 rows, and seven dimension and bridge tables. Gold has 8 marts, 22.0 MB in total, the largest being gold_delay_events_core with 1,086,378 rows. The export script writes 9 JSON files for the site.",
+  "description": "Bronze has DuckDB tables for bus, subway and streetcar delays, GTFS routes, stops, trips and stop times, and GTFS-Realtime alerts. Silver has per-mode event tables (bus 723,518 rows, subway 235,397, streetcar 152,916), the fact table fact_delay_events_norm with 1,111,831 rows, the alert fact table with 5,984 rows, and seven dimension and bridge tables. Gold has 8 marts, 22.0 MB in total, the largest being gold_delay_events_core with 1,086,378 rows. The export script writes 9 bundled JSON files and 308 per-route files for the site.",
   "caption": "Tables and row counts in each layer, from the committed Parquet files. The bronze tables are in a DuckDB file that is not committed, so they have no counts here.",
   "nodes": [
     {"id": "bronze", "label": "Bronze: DuckDB", "lines": ["One row per source row"], "tone": "source", "rows": [["Delay logs"], ["bronze_bus", ""], ["bronze_subway", ""], ["bronze_streetcar", ""], ["Schedule and alerts"], ["bronze_gtfs_routes", ""], ["bronze_gtfs_stops", ""], ["bronze_gtfs_trips", ""], ["bronze_gtfs_stop_times", ""], ["bronze_gtfsrt_alerts", ""]], "wide": [0, 0, 1, 2], "tall": [0, 0]},
@@ -90,7 +90,7 @@ Each layer has one job. Bronze keeps the source rows. Silver cleans them and lin
     {"id": "dims", "label": "Silver: dimensions", "lines": ["Parquet, rows"], "tone": "store", "rows": [["dim_route_gtfs", "229"], ["dim_stop_gtfs", "9,417"], ["dim_service_gtfs", "8"], ["dim_route_alias", "865"], ["dim_station_alias", "13,860"], ["dim_incident_code", "267"], ["bridge_route_direction_stop", "17,824"]], "wide": [1, 1]},
     {"id": "silver", "label": "Silver: Parquet", "lines": ["Rows per table"], "tone": "store", "rows": [["Per mode"], ["silver_bus_events", "723,518"], ["silver_subway_events", "235,397"], ["silver_streetcar_events", "152,916"], ["Facts"], ["fact_delay_events_norm", "1,111,831"], ["fact_gtfsrt_alerts_norm", "5,984"], ["Dimensions"], ["dim_route_gtfs", "229"], ["dim_stop_gtfs", "9,417"], ["dim_service_gtfs", "8"], ["dim_route_alias", "865"], ["dim_station_alias", "13,860"], ["dim_incident_code", "267"], ["bridge_route_direction_stop", "17,824"]], "tall": [0, 1]},
     {"id": "gold", "label": "Gold: 8 marts, 22.0 MB", "lines": ["Parquet, rows"], "tone": "code", "rows": [["gold_delay_events_core", "1,086,378"], ["gold_route_time_metrics", "893,537"], ["gold_station_time_metrics", "223,480"], ["gold_alert_validation", "5,984"], ["gold_linkage_quality", "752"], ["gold_time_reliability", "504"], ["gold_top_offender_ranking", "283"], ["gold_spatial_hotspot", "71"]], "wide": [2, 0, 1, 2], "tall": [0, 2]},
-    {"id": "json", "label": "Site data: 9 JSON files", "lines": ["From export_site_data.py, bytes"], "tone": "web", "rows": [["entities.json", "44,871"], ["scores.json", "12,803"], ["sample.json", "12,641"], ["stations.json", "5,834"], ["overview.json", "3,904"], ["causes.json", "2,411"], ["time.json", "2,245"], ["alerts.json", "2,149"], ["quality.json", "854"]], "wide": [3, 0, 1, 2], "tall": [0, 3]}
+    {"id": "json", "label": "Site data: JSON files", "lines": ["From export_site_data.py, bytes"], "tone": "web", "rows": [["entities.json", "44,871"], ["drill-index.json", "44,214"], ["scores.json", "12,803"], ["sample.json", "12,641"], ["stations.json", "5,834"], ["overview.json", "3,904"], ["causes.json", "2,411"], ["time.json", "2,245"], ["quality.json", "854"], ["entity/*.json (308 files)", "2,600,020"]], "wide": [3, 0, 1, 2], "tall": [0, 3]}
   ],
   "edges": [
     {"from": "bronze", "to": "events"},
