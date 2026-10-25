@@ -70,13 +70,16 @@ export function words(text: string): string[] {
   return out;
 }
 
-// Index and query tokens. Synonyms become their canonical terms. Other words are stemmed. Stopwords are dropped.
+// Index and query tokens. A synonym gives its canonical terms and also its own stem, so "k" still matches "k".
+// Other words are stemmed. Stopwords are dropped.
 export function tokenize(text: string): string[] {
   const out: string[] = [];
   for (const word of words(text)) {
     const terms = WORD_TO_TERMS[word];
     if (terms) {
       for (const term of terms) out.push(term);
+      const own = stem(word);
+      if (!terms.includes(own) && !word.includes("-")) out.push(own);
       continue;
     }
     if (STOPWORDS.has(word) || word.includes("-")) continue;

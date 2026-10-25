@@ -181,7 +181,7 @@ const RUSH = "Monday to Friday, 06:00 to 09:59 and 15:00 to 18:59";
 const grand = sum(MODES.map((m) => overview.modes[m].total));
 for (const mode of MODES) {
   const m = overview.modes[mode];
-  const unit = mode === "subway" ? "stations" : "routes";
+  const unit = (mode === "subway" ? "station" : "route") + (m.top10Count === 1 ? "" : "s");
   const causeText = m.causes.map(([c, n]) => `${c} ${fmtInt(n)} (${share(n, m.total)})`).join("; ");
   const years = YEARS.map((y, i) => `${y} ${fmtInt(m.years[i])}`).join("; ");
   const low = YEARS[argmax(m.years.map((v) => -v))];
@@ -408,10 +408,12 @@ function aliasesFor(e) {
 const directory = entities.map((e) => ({ id: e.id, file: e.file, mode: e.mode, scope: e.scope, name: e.name, n: e.n, aliases: aliasesFor(e), chunk: entityChunk[e.file] }));
 
 // ---------- Inverted index ----------
+// Entity chunks are not in the index: they enter the context only through the entity resolver.
+// Without them, words such as "k" and "rank" keep a useful weight.
 const docLen = [];
 const postings = {};
 chunks.forEach((chunk, doc) => {
-  const tokens = tokenize(`${chunk.label} ${chunk.text}`);
+  const tokens = chunk.kind === "entity" ? [] : tokenize(`${chunk.label} ${chunk.text}`);
   docLen.push(tokens.length);
   const tf = {};
   for (const t of tokens) tf[t] = (tf[t] ?? 0) + 1;
@@ -419,7 +421,8 @@ chunks.forEach((chunk, doc) => {
 });
 const sortedPostings = {};
 for (const t of Object.keys(postings).sort()) sortedPostings[t] = postings[t];
-const avgLen = Math.round((sum(docLen) / docLen.length) * 100) / 100;
+const docCount = docLen.filter((n) => n > 0).length;
+const avgLen = Math.round((sum(docLen) / docCount) * 100) / 100;
 
 const inputHash = crypto
   .createHash("sha256")
@@ -430,7 +433,7 @@ const inputHash = crypto
 const corpus = {
   meta: { commit: `${overview.meta.commit}+${drill.meta.commit}`, built: inputHash, years: YEARS, chunkCount: chunks.length },
   chunks,
-  index: { avgLen, docLen, postings: sortedPostings },
+  index: { docCount, avgLen, docLen, postings: sortedPostings },
   directory
 };
 const output = `${JSON.stringify(corpus)}\n`;
