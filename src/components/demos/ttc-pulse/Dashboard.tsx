@@ -13,6 +13,7 @@ import stationsFile from "@/demos/ttc-pulse/data/stations.json";
 import timeFile from "@/demos/ttc-pulse/data/time.json";
 import { Bars, Columns, Heatmap, LineChart, Scatter, StationMap, TipLayer, formatCount, pad2, type ScatterPoint } from "./charts";
 import styles from "./TtcPulse.module.css";
+import { Kpis, Panel } from "./ui";
 
 type Mode = "bus" | "streetcar" | "subway";
 type View = "overview" | "hotspots" | "time" | "causes" | "drill" | "alerts" | "quality" | "rows" | "ai";
@@ -193,36 +194,6 @@ export function TtcPulseDashboard({ techPost }: { techPost: { href: string; titl
         </footer>
       </div>
     </TipLayer>
-  );
-}
-
-function Panel({ title, note, action, children, wide }: { title: string; note?: string; action?: () => void; children: React.ReactNode; wide?: boolean }) {
-  return (
-    <section className={`${styles.panel} ${wide ? styles.wide : ""}`}>
-      <div className={styles.panelHead}>
-        <h2>{title}</h2>
-        {note ? <span>{note}</span> : null}
-        {action ? (
-          <button type="button" className={styles.open} onClick={action} aria-label={`Open ${title}`}>
-            Open
-          </button>
-        ) : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Kpis({ items }: { items: [string, string][] }) {
-  return (
-    <div className={styles.kpis}>
-      {items.map(([value, label]) => (
-        <div key={label} className={styles.kpi}>
-          <b>{value}</b>
-          <span>{label}</span>
-        </div>
-      ))}
-    </div>
   );
 }
 
