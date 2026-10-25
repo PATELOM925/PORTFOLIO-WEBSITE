@@ -333,7 +333,7 @@ export function AskView({ mode }: { mode: Mode }) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             maxLength={500}
-            placeholder={mode === "subway" ? "For example: how late is Kennedy station?" : mode === "streetcar" ? "For example: how late is 504 King?" : "For example: how late is route 29?"}
+            placeholder={mode === "subway" ? "Try: how late is Kennedy?" : mode === "streetcar" ? "Try: how late is 504 King?" : "Try: how late is route 29?"}
             autoComplete="off"
           />
           {busy ? (
