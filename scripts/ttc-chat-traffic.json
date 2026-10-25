@@ -1,0 +1,805 @@
+{
+ "note": "200 realistic questions for the router traffic test. At most 2 may route to Sol.",
+ "items": [
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "Was 73 Royal York worse in 2014 than in 2025?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays at Wilson station?",
+   "mode": "subway"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "How reliable is 52?",
+   "mode": "bus"
+  },
+  {
+   "question": "Was 503 Kingston Rd worse in 2014 than in 2021?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays at Royal York station?",
+   "mode": "subway"
+  },
+  {
+   "question": "When is 504 most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare Queen station and Bathurst station.",
+   "mode": "subway"
+  },
+  {
+   "question": "What is the adjusted score for 509?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the worst streetcar route?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "Compare 89 and 505 Dundas.",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays at Lawrence station?",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "subway"
+  },
+  {
+   "question": "Why is Cedarvale station delayed so often?",
+   "mode": "subway"
+  },
+  {
+   "question": "What was the top cause in 2018?",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "bus"
+  },
+  {
+   "question": "When is 133 most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why is Lawrence station delayed so often?",
+   "mode": "subway"
+  },
+  {
+   "question": "When is 506 most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "Tell me about St Clair",
+   "mode": "subway"
+  },
+  {
+   "question": "What was the top cause in 2025?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "How does the score work?",
+   "mode": "bus"
+  },
+  {
+   "question": "What was the top cause in 2022?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which bus route had the most delays in 2021?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays does route 300 Bloor-Danforth have?",
+   "mode": "bus"
+  },
+  {
+   "question": "What does k mean?",
+   "mode": "bus"
+  },
+  {
+   "question": "How does the score work?",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the busiest hour at Sheppard-yonge station?",
+   "mode": "subway"
+  },
+  {
+   "question": "Tell me about Sheppard-yonge",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "bus"
+  },
+  {
+   "question": "Delays on 43 by year",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the adjusted score for 85?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the worst streetcar route?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "How many delays does route 53 Steeles East have?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why is York Mills station delayed so often?",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "Compare Woodbine station and Spadina station.",
+   "mode": "subway"
+  },
+  {
+   "question": "How many delays at Greenwood station?",
+   "mode": "subway"
+  },
+  {
+   "question": "How does the score work?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "hi",
+   "mode": "bus"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "How does the score work?",
+   "mode": "bus"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "Is Line 1 delayed right now?",
+   "mode": "subway"
+  },
+  {
+   "question": "What is the worst streetcar route?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "How much data is unmatched?",
+   "mode": "bus"
+  },
+  {
+   "question": "Delays on 504 by year",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the worst streetcar route?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "How reliable is 94 Wellesley?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the busiest hour at St Clair West station?",
+   "mode": "subway"
+  },
+  {
+   "question": "Why is Wilson station delayed so often?",
+   "mode": "subway"
+  },
+  {
+   "question": "What was the top cause in 2021?",
+   "mode": "subway"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the busiest hour at Wellesley station?",
+   "mode": "subway"
+  },
+  {
+   "question": "What causes delays on 505?",
+   "mode": "bus"
+  },
+  {
+   "question": "Was 131 worse in 2017 than in 2021?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "Is Line 1 delayed right now?",
+   "mode": "subway"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "When is 94 most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "What was the top cause in 2023?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "How reliable is 510?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the adjusted score for 504 King?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which subway station is the worst?",
+   "mode": "subway"
+  },
+  {
+   "question": "When is 36 Finch West most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "How much data is unmatched?",
+   "mode": "bus"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "bus"
+  },
+  {
+   "question": "What does k mean?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the adjusted score for 34?",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare 11 and 95 York Mills.",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 504?",
+   "mode": "bus"
+  },
+  {
+   "question": "When is 43 Kennedy most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays does route 32 have?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "How reliable is 505?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays at Victoria Park station?",
+   "mode": "subway"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare York Mills station and Eglinton station.",
+   "mode": "subway"
+  },
+  {
+   "question": "Why is Main Street station delayed so often?",
+   "mode": "subway"
+  },
+  {
+   "question": "How much data is unmatched?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "When is 168 most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 85?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "subway"
+  },
+  {
+   "question": "Tell me about Union",
+   "mode": "subway"
+  },
+  {
+   "question": "Tell me about Coxwell",
+   "mode": "subway"
+  },
+  {
+   "question": "What causes delays on 68 Warden?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "What was the top cause in 2022?",
+   "mode": "subway"
+  },
+  {
+   "question": "Which subway station is the worst?",
+   "mode": "subway"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "Delays on 508 Lake Shore by year",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "How reliable is 54 Lawrence East?",
+   "mode": "bus"
+  },
+  {
+   "question": "How reliable is 501 Queen?",
+   "mode": "bus"
+  },
+  {
+   "question": "Tell me about Finch",
+   "mode": "subway"
+  },
+  {
+   "question": "Is Line 1 delayed right now?",
+   "mode": "subway"
+  },
+  {
+   "question": "What causes delays on 36?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays at Vaughan Metropolitan Centre station?",
+   "mode": "subway"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the worst streetcar route?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "What is the adjusted score for 68?",
+   "mode": "bus"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "subway"
+  },
+  {
+   "question": "When is 32 most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which subway station is the worst?",
+   "mode": "subway"
+  },
+  {
+   "question": "Which subway station is the worst?",
+   "mode": "subway"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "How much data is unmatched?",
+   "mode": "bus"
+  },
+  {
+   "question": "When is 37 Islington most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which bus route had the most delays in 2023?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare Main Street station and Vaughan Metropolitan Centre station.",
+   "mode": "subway"
+  },
+  {
+   "question": "How reliable is 320 Yonge?",
+   "mode": "bus"
+  },
+  {
+   "question": "Is Line 1 delayed right now?",
+   "mode": "subway"
+  },
+  {
+   "question": "What was the top cause in 2016?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays does route 508 have?",
+   "mode": "bus"
+  },
+  {
+   "question": "How does the score work?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the worst streetcar route?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "Delays on 60 by year",
+   "mode": "bus"
+  },
+  {
+   "question": "Was 68 Warden worse in 2016 than in 2022?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "hi",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "streetcar"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "subway"
+  },
+  {
+   "question": "Why does route 28 rank first on the raw score?",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 44 Kipling South?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "bus"
+  },
+  {
+   "question": "hi",
+   "mode": "bus"
+  },
+  {
+   "question": "What are the limits of this data?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which bus route had the most delays in 2023?",
+   "mode": "bus"
+  },
+  {
+   "question": "How reliable is 86 Scarborough?",
+   "mode": "bus"
+  },
+  {
+   "question": "What is the adjusted score for 11 Bayview?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare 89 and 41.",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 512 St Clair?",
+   "mode": "bus"
+  },
+  {
+   "question": "Delays on 504 King by year",
+   "mode": "bus"
+  },
+  {
+   "question": "Which bus route had the most delays in 2019?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which subway station is the worst?",
+   "mode": "subway"
+  },
+  {
+   "question": "What share of delays happen in rush hour?",
+   "mode": "bus"
+  },
+  {
+   "question": "When is 34 Eglinton most delayed?",
+   "mode": "bus"
+  },
+  {
+   "question": "Which month has the most delays?",
+   "mode": "subway"
+  },
+  {
+   "question": "How reliable is 45?",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 36 Finch West?",
+   "mode": "bus"
+  },
+  {
+   "question": "Tell me about Jane",
+   "mode": "subway"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 53?",
+   "mode": "bus"
+  },
+  {
+   "question": "How many delays does route 72 have?",
+   "mode": "bus"
+  },
+  {
+   "question": "Is Line 1 delayed right now?",
+   "mode": "subway"
+  },
+  {
+   "question": "How reliable is 504?",
+   "mode": "bus"
+  },
+  {
+   "question": "What causes delays on 509?",
+   "mode": "bus"
+  },
+  {
+   "question": "Is Line 1 delayed right now?",
+   "mode": "subway"
+  },
+  {
+   "question": "Tell me about Wilson",
+   "mode": "subway"
+  },
+  {
+   "question": "Which bus route had the most delays in 2025?",
+   "mode": "bus"
+  },
+  {
+   "question": "Who built this dashboard?",
+   "mode": "bus"
+  },
+  {
+   "question": "Any bus alerts now?",
+   "mode": "bus"
+  },
+  {
+   "question": "How much data is unmatched?",
+   "mode": "bus"
+  },
+  {
+   "question": "What was the top cause in 2023?",
+   "mode": "subway"
+  },
+  {
+   "question": "Was 16 worse in 2018 than in 2025?",
+   "mode": "bus"
+  },
+  {
+   "question": "What about weekends?",
+   "mode": "bus"
+  },
+  {
+   "question": "Why is Eglinton station delayed so often?",
+   "mode": "subway"
+  },
+  {
+   "question": "Which subway station is the worst?",
+   "mode": "subway"
+  },
+  {
+   "question": "How many delay events are there in total?",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare routes 32, 52, 29 and 36 on delay events in 2023, and name the top cause for each route.",
+   "mode": "bus"
+  },
+  {
+   "question": "Compare Kennedy, Finch, Kipling and Union stations by delay events and peak hour. Which one changed the most from 2019 to 2024, and why?",
+   "mode": "subway"
+  },
+  {
+   "question": "Why are there gaps in July 2021?",
+   "mode": "bus"
+  }
+ ]
+}

@@ -207,6 +207,31 @@ test("TTC Pulse dashboard is prerendered and the project's demo link redirects t
   if (live.status === 200) assert.ok(snapshot.alerts || snapshot.vehicles, "live route returns alerts or vehicles");
 });
 
+test("TTC Pulse Ask tab and chat route reject bad input and answer off-topic text from the index", async () => {
+  const demo = await fetchText("/demos/ttc-pulse");
+  assert.match(demo.text, />Ask</);
+
+  const post = (body) => fetch(`${baseUrl}/api/ttc-pulse/chat`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const short = await post({ question: "hi", mode: "bus" });
+  assert.equal(short.status, 400);
+  assert.equal((await short.json()).error.code, "bad_length");
+  const badMode = await post({ question: "Which route is worst?", mode: "ferry" });
+  assert.equal(badMode.status, 400);
+
+  // Random letters match nothing in the corpus, so the answer comes from the index with no model call.
+  const none = await post({ question: "asdfgh qwerty zxcv", mode: "bus" });
+  assert.equal(none.status, 200);
+  assert.match(none.headers.get("content-type"), /text\/event-stream/);
+  const stream = await none.text();
+  assert.match(stream, /event: meta/);
+  assert.match(stream, /"route":"none"/);
+  assert.match(stream, /I do not have that in the TTC Pulse data/);
+  assert.match(stream, /event: done/);
+
+  const vote = await fetch(`${baseUrl}/api/ttc-pulse/chat/feedback`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ requestId: "x", vote: "up" }) });
+  assert.equal(vote.status, 400);
+});
+
 test("resume route serves the current PDF asset", async () => {
   const redirect = await fetch(`${baseUrl}/go/resume`, { redirect: "manual" });
   assert.equal(redirect.status, 302);

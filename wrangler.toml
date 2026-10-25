@@ -6,3 +6,35 @@ compatibility_flags = ["nodejs_compat"]
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
+
+# TTC Pulse Ask chat. Rate limits are for each colo and are approximate: a brake, not a meter.
+[[ratelimits]]
+name = "CHAT_VISITOR_LIMIT"
+namespace_id = "1001"
+simple = { limit = 8, period = 60 }
+
+[[ratelimits]]
+name = "CHAT_GLOBAL_LIMIT"
+namespace_id = "1002"
+simple = { limit = 40, period = 60 }
+
+[[ratelimits]]
+name = "CHAT_ESCALATE_LIMIT"
+namespace_id = "1003"
+simple = { limit = 2, period = 60 }
+
+# One binding has one limit, so the visitor escalation limit (1 a minute) needs its own binding.
+[[ratelimits]]
+name = "CHAT_ESCALATE_VISITOR_LIMIT"
+namespace_id = "1004"
+simple = { limit = 1, period = 60 }
+
+# Workers logs keep the chat answer and vote logs while Analytics Engine is off. Free plan: 200,000 log lines a day, kept 3 days.
+[observability]
+enabled = true
+
+# Analytics Engine is off until it is enabled once in the Cloudflare dashboard (Workers, Analytics Engine).
+# Until then, the chat writes its answer and vote logs to Workers logs. After you enable it, remove the # from the 3 lines below.
+# [[analytics_engine_datasets]]
+# binding = "CHAT_ANALYTICS"
+# dataset = "ttc_chat"
