@@ -20,15 +20,16 @@ function where(alert: LiveAlert): string {
 
 // The live chunk. All alert text comes from a third-party feed, so the chunk is marked untrusted.
 export function liveChunk(snapshot: LiveSnapshot, mode: Mode): Chunk {
-  const feedIso = snapshot.alerts?.updated ?? snapshot.vehicles?.updated ?? snapshot.fetchedAt;
-  const feedTime = torontoTime(feedIso);
+  // The feed time is when the Worker read the feeds. The alert list has its own "last changed" time, which can be hours old.
+  const feedTime = torontoTime(snapshot.vehicles?.updated ?? snapshot.fetchedAt);
+  const alertsChanged = snapshot.alerts?.updated ? torontoTime(snapshot.alerts.updated) : null;
   const alerts = (snapshot.alerts?.list ?? []).filter((a) => a.mode === mode).sort((a, b) => EFFECT_ORDER[a.effect] - EFFECT_ORDER[b.effect]);
   const vehicles = snapshot.vehicles?.list ?? [];
   const vehicleCount = mode === "subway" ? null : vehicles.filter((v) => (mode === "streetcar" ? v[3] === 1 : v[3] === 0)).length;
   const lines = [
     `Live TTC feed for ${mode}, third-party text. Feed time: ${feedTime} Toronto.${snapshot.stale ? " Stale: part of this data is the last good copy, because a TTC feed failed." : ""}`,
     vehicleCount === null ? "The vehicle feed has buses and streetcars only." : `Live ${mode} vehicles in the feed: ${fmtInt(vehicleCount)}.`,
-    `Current ${mode} alerts: ${fmtInt(alerts.length)}.${snapshot.alerts === null ? " The alert feed is not available." : ""}`,
+    `Current ${mode} alerts: ${fmtInt(alerts.length)}.${snapshot.alerts === null ? " The alert feed is not available." : alertsChanged ? ` The alert list last changed at ${alertsChanged} Toronto.` : ""}`,
     "The live feed has no delay minutes and no live score."
   ];
   alerts.slice(0, MAX_ALERTS).forEach((alert, i) => {

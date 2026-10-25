@@ -23,8 +23,9 @@ const snapshot: LiveSnapshot = {
 test("the live chunk is untrusted, sorted by effect and has the Toronto feed time", () => {
   const chunk = liveChunk(snapshot, "subway");
   assert.equal(chunk.id, "live-subway-1431");
+  assert.match(chunk.text, /alert list last changed at 2026-10-25 14:31 Toronto/);
   assert.equal(chunk.untrusted, true);
-  assert.match(chunk.text, /Feed time: 2026-10-25 14:31 Toronto/);
+  assert.match(chunk.text, /Feed time: 2026-10-25 14:31 Toronto/, "the vehicle feed time");
   assert.match(chunk.text, /Current subway alerts: 2/);
   assert.ok(chunk.text.indexOf("closure") < chunk.text.indexOf("detour"), "closures come first");
   assert.match(chunk.text, /no delay minutes and no live score/);
