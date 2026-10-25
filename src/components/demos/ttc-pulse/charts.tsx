@@ -104,7 +104,9 @@ export function Heatmap({
   colEvery = 1,
   describe,
   cellHeight = 18,
-  labelWidth = "3.2em"
+  labelWidth = "3.2em",
+  selectedRow,
+  onSelect
 }: {
   grid: number[][];
   rows: string[];
@@ -113,6 +115,8 @@ export function Heatmap({
   describe: (row: number, col: number, value: number) => string;
   cellHeight?: number;
   labelWidth?: string;
+  selectedRow?: number;
+  onSelect?: (row: number) => void;
 }) {
   const flat = grid.flat();
   const low = Math.min(...flat);
@@ -127,13 +131,19 @@ export function Heatmap({
           </span>
         ))}
         {grid.map((row, r) => (
-          <HeatRow key={rows[r]} label={rows[r]}>
+          <HeatRow key={rows[r]} label={rows[r]} selected={selectedRow === r}>
             {row.map((value, c) => (
               <span
                 key={c}
                 className={`${styles.cell} ${value === high ? styles.cellPeak : ""}`}
-                style={{ background: heatColour(high > low ? (value - low) / (high - low) : 0), height: cellHeight }}
+                style={{
+                  background: heatColour(high > low ? (value - low) / (high - low) : 0),
+                  height: cellHeight,
+                  opacity: selectedRow === undefined || selectedRow === r ? undefined : 0.4,
+                  cursor: onSelect ? "pointer" : undefined
+                }}
                 data-tip={describe(r, c, value)}
+                onClick={onSelect ? () => onSelect(r) : undefined}
               />
             ))}
           </HeatRow>
@@ -148,10 +158,12 @@ export function Heatmap({
   );
 }
 
-function HeatRow({ label, children }: { label: string; children: ReactNode }) {
+function HeatRow({ label, selected, children }: { label: string; selected?: boolean; children: ReactNode }) {
   return (
     <>
-      <span className={styles.heatLabel}>{label}</span>
+      <span className={styles.heatLabel} style={selected ? { color: "var(--gold)", fontWeight: 700 } : undefined}>
+        {label}
+      </span>
       {children}
     </>
   );
@@ -213,7 +225,9 @@ export function Columns({
   height = 96,
   unit = "delay events",
   mark,
-  width: fallbackWidth = 360
+  width: fallbackWidth = 360,
+  onSelect,
+  tips
 }: {
   values: number[];
   labels: string[];
@@ -222,6 +236,8 @@ export function Columns({
   unit?: string;
   mark?: number;
   width?: number;
+  onSelect?: (index: number) => void;
+  tips?: string[];
 }) {
   const [box, width] = useWidth(fallbackWidth);
   const gap = 2;
@@ -233,6 +249,7 @@ export function Columns({
     <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} height={height} role="img" aria-label={`${unit} by ${labels[0]} to ${labels[labels.length - 1]}`}>
       {values.map((v, i) => {
         const h = Math.max(1, (plot * v) / top);
+        const tip = tips?.[i] ?? `${labels[i]}: ${formatCount(v)} ${unit}`;
         return (
           <g key={i}>
             <rect
@@ -242,9 +259,32 @@ export function Columns({
               height={h}
               rx={2}
               className={i === mark ? styles.colMark : styles.col}
-              data-tip={`${labels[i]}: ${formatCount(v)} ${unit}`}
-              tabIndex={0}
+              data-tip={onSelect ? undefined : tip}
+              tabIndex={onSelect ? undefined : 0}
             />
+            {onSelect ? (
+              // A full-height target, so a short bar is easy to select.
+              <rect
+                x={i * (barWidth + gap)}
+                y={0}
+                width={barWidth}
+                height={plot}
+                className={styles.hit}
+                style={{ cursor: "pointer" }}
+                data-tip={tip}
+                tabIndex={0}
+                role="button"
+                aria-label={tip}
+                aria-pressed={i === mark}
+                onClick={() => onSelect(i)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelect(i);
+                  }
+                }}
+              />
+            ) : null}
             {i % labelEvery === 0 ? (
               <text className={styles.axis} x={i * (barWidth + gap) + barWidth / 2} y={height - 3} textAnchor="middle">
                 {labels[i]}
