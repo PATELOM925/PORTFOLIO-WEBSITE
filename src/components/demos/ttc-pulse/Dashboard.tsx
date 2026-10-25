@@ -497,7 +497,7 @@ function DrillDown({ mode, entityId, onPick }: { mode: Mode; entityId: string | 
   return (
     <>
       <div className={styles.pick}>
-        <label htmlFor="ttc-entity">{mode === "subway" ? "Station" : "Route"}</label>
+        <label htmlFor="ttc-entity">{mode === "subway" ? "Station" : "Route"}, top {list.length} by events</label>
         <select id="ttc-entity" value={entity.id} onChange={(event) => onPick(event.target.value)}>
           {list.map((e) => (
             <option key={e.id} value={e.id}>
@@ -588,7 +588,7 @@ function Quality() {
         items={[
           [formatCount(QUALITY.events), "Delay events in silver"],
           [`${((QUALITY.lineage / QUALITY.events) * 100).toFixed(0)}%`, "Rows with file, row ID and hash"],
-          [`${((QUALITY.matchMethod[0][1] / methodTotal) * 100).toFixed(1)}%`, "Exact name match"],
+          [`${((QUALITY.matchMethod[0][1] / methodTotal) * 100).toFixed(1)}%`, "Exact route number match"],
           [`${QUALITY.marts.length}`, "Gold marts"]
         ]}
       />
@@ -686,7 +686,7 @@ function AiChat() {
     <Panel title="Ask TTC Pulse" note="not live on this site" wide>
       <p className={styles.body}>
         The Streamlit app has an AI chat page that answers questions from the gold marts. Awais Aziz built it. It calls a paid model API, so it is off on
-        this public page. It comes back with a limit for each visitor and a monthly spend cap.
+        this public page.
       </p>
       <p className={styles.body}>Total in the data now: {formatCount(ALL_EVENTS)} delay events.</p>
     </Panel>
