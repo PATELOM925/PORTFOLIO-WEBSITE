@@ -322,7 +322,7 @@ function stripMarkdown(md) {
   return md
     .replace(/```[\s\S]*?```/g, " ")
     .split("\n")
-    .filter((line) => !line.trim().startsWith("|"))
+    .filter((line) => !line.trim().startsWith("|") && !line.trim().startsWith(":::"))
     .join("\n")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/\*\*|__|`/g, "")
