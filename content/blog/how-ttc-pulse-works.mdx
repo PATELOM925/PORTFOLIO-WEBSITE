@@ -215,6 +215,12 @@ The Live view on the dashboard calls a server route on the Cloudflare Worker at 
 
 The route caches the result for 60 seconds. The TTC feeds give no delay value for each trip. So the Live view does not compute a live score. It shows the current alerts (significant delays, detours and closures) and the live vehicles. Then it joins each route to its historical rank from the gold marts.
 
+Three details keep the route small and safe:
+
+- **A small decoder.** The vehicle feed is protobuf. The route reads only the route ID and the position of each vehicle. It does not load a full GTFS-Realtime library. On one feed of 1,166 vehicles, its output matches the official bindings exactly, and it decodes in about 1 to 4 ms.
+- **A last good copy.** The route keeps a second copy for one day. If a TTC feed fails, the page shows that copy with its feed time and a "Feed unavailable" label. The panel is never empty.
+- **One map for all views.** The maps draw the TTC network from the GTFS route shapes, simplified to 42 KB. Vehicles and stations sit on the same projection.
+
 The historical data does not change between exports, so it ships as static JSON. Only the live data needs a server route. We first built the dashboard in Streamlit. For a public link, I compared two options:
 
 | | Streamlit server | Static JSON and one live route |

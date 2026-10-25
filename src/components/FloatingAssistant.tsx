@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 export function FloatingAssistant() {
   const pathname = usePathname();
   const onFitCheck = pathname === "/";
-  // Dashboards fill the screen, and the button would cover chart data.
-  if (pathname.startsWith("/demos/")) return null;
 
   return (
     <div className="floating-assistant">
