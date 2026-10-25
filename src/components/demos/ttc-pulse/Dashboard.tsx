@@ -13,11 +13,12 @@ import timeFile from "@/demos/ttc-pulse/data/time.json";
 import { Bars, Columns, Heatmap, LineChart, NetworkMap, Scatter, SizeLegend, Swatch, TipLayer, formatCount, pad2, type ScatterPoint } from "./charts";
 import styles from "./TtcPulse.module.css";
 import { DrillDown, drillEntity, readCascade, writeCascade, type Cascade } from "./Drill";
+import { AskView } from "./Ask";
 import { LiveView } from "./Live";
 import { Kpis, Panel } from "./ui";
 
 type Mode = "bus" | "streetcar" | "subway";
-type View = "overview" | "hotspots" | "time" | "causes" | "drill" | "live" | "quality";
+type View = "overview" | "hotspots" | "time" | "causes" | "drill" | "live" | "quality" | "ask";
 type Pair = [string, number];
 type ModeOverview = {
   total: number;
@@ -63,9 +64,10 @@ const TABS: { id: View; label: string }[] = [
   { id: "time", label: "Time" },
   { id: "causes", label: "Causes" },
   { id: "live", label: "Live" },
-  { id: "quality", label: "Quality" }
+  { id: "quality", label: "Quality" },
+  { id: "ask", label: "Ask" }
 ];
-const VIEW_IDS: View[] = ["overview", "hotspots", "time", "causes", "drill", "live", "quality"];
+const VIEW_IDS: View[] = ["overview", "hotspots", "time", "causes", "drill", "live", "quality", "ask"];
 // Old links from the first version of this page.
 const OLD_VIEWS: Record<string, View> = { alerts: "live", rows: "quality", ai: "overview" };
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -205,6 +207,7 @@ export function TtcPulseDashboard({ techPost }: { techPost: { href: string; titl
         ) : null}
         {view === "live" ? <LiveView mode={mode} openEntity={openEntity} /> : null}
         {view === "quality" ? <Quality mode={mode} /> : null}
+        {view === "ask" ? <AskView mode={mode} /> : null}
 
         <footer className={styles.foot}>
           <p>Data: City of Toronto Open Data, TTC GTFS and TTC live feeds. Export {overviewFile.meta.commit}.</p>
