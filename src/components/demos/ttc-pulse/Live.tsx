@@ -29,7 +29,7 @@ export function useLiveSnapshot(): { data: LiveSnapshot | null; failed: boolean 
     const load = async () => {
       if (document.visibilityState === "hidden") return;
       try {
-        const response = await fetch("/api/ttc-pulse/live");
+        const response = await fetch("/api/ttc-pulse/live", { cache: "no-store" });
         if (!response.ok) throw new Error(String(response.status));
         const next = (await response.json()) as LiveSnapshot;
         if (!stop) {
@@ -120,6 +120,8 @@ export function LiveView({ mode, openEntity }: { mode: Mode; openEntity: (id: st
     );
   }
 
+  const noVehicles = !data.vehicles;
+  const vehicleCount = (n: number) => (noVehicles ? "n/a" : formatCount(n));
   const feedTime = clock(data.vehicles?.updated ?? data.alerts?.updated ?? data.fetchedAt);
   const unit = mode === "subway" ? "Stations" : "Routes";
   return (
@@ -132,14 +134,14 @@ export function LiveView({ mode, openEntity }: { mode: Mode; openEntity: (id: st
         items={
           mode === "subway"
             ? [
-                [formatCount(view.total), "Buses and streetcars out"],
+                [vehicleCount(view.total), "Buses and streetcars out"],
                 [formatCount(view.modeAlerts.length), "Subway alerts"],
                 [formatCount(view.modeAlerts.filter((a) => a.effect === "closure" || a.effect === "reduced").length), "Closures"],
                 [formatCount(view.modeAlerts.filter((a) => a.effect === "delay").length), "Slow zones"]
               ]
             : [
-                [formatCount(view.modeVehicles), mode === "bus" ? "Buses out now" : "Streetcars out now"],
-                [formatCount(view.onWorst), "On the 10 worst routes"],
+                [vehicleCount(view.modeVehicles), mode === "bus" ? "Buses out now" : "Streetcars out now"],
+                [vehicleCount(view.onWorst), "On the 10 worst routes"],
                 [formatCount(view.modeAlerts.length), `${mode === "bus" ? "Bus" : "Streetcar"} alerts`],
                 [formatCount(view.modeAlerts.filter((a) => a.effect === "detour").length), "Detours"]
               ]

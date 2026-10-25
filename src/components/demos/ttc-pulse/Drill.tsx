@@ -425,7 +425,8 @@ function Levels({ mode, data, yi, mi, di, set }: { mode: Mode; data: EntityFile;
       <Panel title={`Months, ${scopeWord}`} note={year === undefined ? "select a year first" : mi === undefined ? "select a month" : `${MONTHS[mi]} selected`}>
         <Columns
           values={months}
-          labels={MONTHS.map((m) => m[0])}
+          labels={MONTHS}
+          labelEvery={2}
           tips={months.map((v, i) => `${MONTHS[i]}, ${scopeWord}: ${formatCount(v)} delay events${gaps.includes(i + 1) ? ". Gap in source data" : ""}`)}
           mark={mi}
           onSelect={year === undefined ? undefined : (i) => set(i === mi ? { y: year } : { y: year, m: i + 1 })}

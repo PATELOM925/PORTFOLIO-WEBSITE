@@ -930,14 +930,11 @@ button.barTrack:focus-visible .barFill,
   }
 
   .tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    max-width: 100%;
-    scrollbar-width: none;
+    flex-wrap: wrap;
   }
 
   .tabs button {
-    flex: none;
+    padding: 6px 8px;
   }
 
   .controls {

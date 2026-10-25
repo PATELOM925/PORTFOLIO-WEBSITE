@@ -41,7 +41,7 @@ export async function GET(request: Request) {
   const complete = snapshot.alerts !== null && snapshot.vehicles !== null;
   if (complete) {
     const response = json(snapshot, FRESH_SECONDS);
-    if (cache) await later(Promise.all([cache.put(fresh, response.clone()), cache.put(last, json(snapshot, LAST_GOOD_SECONDS))]));
+    if (cache) await later(Promise.all([cache.put(fresh, response.clone()), cache.put(last, json(snapshot, LAST_GOOD_SECONDS))]).catch(() => undefined));
     return response;
   }
 
