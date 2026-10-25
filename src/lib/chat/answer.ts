@@ -188,10 +188,12 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
   let escalated = false;
   let route: Route;
   const forced = input.forceRoute;
+  // Take the daily answer unit first, so a capped day does not also spend a Sol unit. The index answer needs no unit.
+  const capped = forced !== "none" && !retrieval.empty && deps.dailyAllowed ? !(await deps.dailyAllowed()) : false;
   if (forced === "none") route = "none";
   else if (forced) route = forced === "sol" ? "sol" : "haiku";
   else {
-    const hard = !retrieval.empty && score >= 4 && !retrieval.facets.live;
+    const hard = !capped && !retrieval.empty && score >= 4 && !retrieval.facets.live;
     const allowed = hard ? await deps.escalationAllowed() : false;
     route = decideRoute({ empty: retrieval.empty, complexity: score, live: retrieval.facets.live, escalationAllowed: () => allowed });
     escalated = route === "sol";
@@ -257,7 +259,7 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
     return;
   }
 
-  if (deps.dailyAllowed && !(await deps.dailyAllowed())) {
+  if (capped) {
     log.outcome = "unavailable";
     log.errorCode = "daily_limit";
     send("meta", { requestId: input.requestId, route, model: "", modelName: "", fallback: false, retrievalMs: retrieval.ms, chunks: retrieval.chunks.length, attempts: [] });
