@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
   const salt = secret("CHAT_SALT");
   if (!salt) noteOnce("salt=missing");
-  const visitor = await visitorKey(ip, request.headers.get("user-agent") ?? "", salt ?? "dev-salt");
+  const visitor = await visitorKey(ip, salt ?? "dev-salt");
   const isEval = isEvalRequest(request.headers.get("x-chat-eval"), secret("CHAT_EVAL_KEY"));
 
   const limits = await checkLimits(env, visitor, { skipVisitor: isEval });

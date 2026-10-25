@@ -40,10 +40,11 @@ export function validateBody(raw: string): { ok: true; body: ChatBody } | GuardF
   return { ok: true, body: { question: q, mode: mode as Mode, history: items, turnstile: turnstile as string | undefined } };
 }
 
-// The first 16 hex chars of sha256(IP | User-Agent | salt + UTC date). The raw IP is never stored.
-export async function visitorKey(ip: string, userAgent: string, salt: string, now = new Date()): Promise<string> {
+// The first 16 hex chars of sha256(IP | salt + UTC date). The raw IP is never stored.
+// The User-Agent is not part of the key: a client could change it to reset its limit.
+export async function visitorKey(ip: string, salt: string, now = new Date()): Promise<string> {
   const day = now.toISOString().slice(0, 10);
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${ip}|${userAgent}|${salt}${day}`));
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${ip}|${salt}${day}`));
   return [...new Uint8Array(digest)]
     .slice(0, 8)
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -100,7 +101,7 @@ function limiters(env: ChatEnv) {
 export async function checkLimits(env: ChatEnv, visitor: string, options: { skipVisitor: boolean }): Promise<{ ok: true } | GuardFailure> {
   const l = limiters(env);
   if (!options.skipVisitor && !(await l.visitor.limit({ key: visitor })).success) return fail(429, "rate_visitor", "Eight questions a minute. Wait a moment.");
-  if (!(await l.global.limit({ key: "global" })).success) return fail(429, "rate_global", "Eight questions a minute. Wait a moment.");
+  if (!(await l.global.limit({ key: "global" })).success) return fail(429, "rate_global", "The assistant is busy. Wait a moment.");
   return { ok: true };
 }
 

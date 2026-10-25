@@ -233,6 +233,8 @@ export function AskView({ mode }: { mode: Mode }) {
             }));
         }
       }
+      // The stream ended with no done or error event, for example when the Worker stopped.
+      update(key, (t) => (t.status === "done" || t.status === "error" ? t : { ...t, status: "error", error: ERRORS.cut }));
     } catch {
       update(key, (t) => (t.status === "done" ? t : { ...t, status: "error", error: controller.signal.aborted ? "Stopped." : ERRORS.unavailable }));
     } finally {

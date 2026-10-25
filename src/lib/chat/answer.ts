@@ -140,7 +140,7 @@ export function answerStream(input: AnswerInput, deps: AnswerDeps): ReadableStre
   const send = (event: string, data: unknown) => write(sseEvent(event, data));
   const keepAlive = setInterval(() => write(SSE_KEEP), deps.keepAliveMs ?? 10_000);
 
-  run(input, deps, send)
+  run(input, deps, send, () => closed)
     .catch((error) => {
       console.log(JSON.stringify({ chat: "crash", requestId: input.requestId, error: error instanceof Error ? error.message : String(error) }));
       send("error", { code: "unavailable", message: MESSAGES.unavailable });
@@ -161,7 +161,7 @@ function attemptsFor(route: Route, forced: ForcedRoute | undefined): Attempt[][]
   return [[{ key: "haiku", retry: true }], [{ key: "luna", retry: true }]];
 }
 
-async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, data: unknown) => void) {
+async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, data: unknown) => void, isClosed: () => boolean = () => false) {
   const now = deps.now ?? Date.now;
   const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
   const random = deps.random ?? Math.random;
@@ -349,6 +349,12 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
         let event: IteratorResult<ProviderEvent> = first;
         for (;;) {
           if (event.done) throw new ProviderError("retryable", "stream_ended", null, "stream ended");
+          // The visitor closed the page: stop the model, so it does not run to its limit.
+          if (isClosed()) {
+            controller.abort();
+            stop = "cut";
+            break;
+          }
           const value = event.value;
           if (value.type === "text") {
             if (emit(value.text)) {

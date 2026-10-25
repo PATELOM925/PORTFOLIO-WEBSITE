@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (typeof requestId !== "string" || !/^[0-9a-f-]{36}$/.test(requestId)) return reply(400);
   if (vote !== "up" && vote !== "down") return reply(400);
   const ip = request.headers.get("cf-connecting-ip") ?? "";
-  const visitor = await visitorKey(ip, request.headers.get("user-agent") ?? "", secret("CHAT_SALT") ?? "dev-salt");
+  const visitor = await visitorKey(ip, secret("CHAT_SALT") ?? "dev-salt");
   if (!(await limiter.limit({ key: visitor })).success) return reply(429);
   writeFeedback(chatEnv(), { requestId, vote, visitor });
   return reply(204);

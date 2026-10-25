@@ -33,9 +33,9 @@ test("validateBody rejects bad input with 400", () => {
 });
 
 test("visitorKey is 16 hex chars and changes with the day", async () => {
-  const a = await visitorKey("1.2.3.4", "UA", "salt", new Date("2026-10-25T10:00:00Z"));
-  const b = await visitorKey("1.2.3.4", "UA", "salt", new Date("2026-10-25T23:00:00Z"));
-  const c = await visitorKey("1.2.3.4", "UA", "salt", new Date("2026-10-26T01:00:00Z"));
+  const a = await visitorKey("1.2.3.4", "salt", new Date("2026-10-25T10:00:00Z"));
+  const b = await visitorKey("1.2.3.4", "salt", new Date("2026-10-25T23:00:00Z"));
+  const c = await visitorKey("1.2.3.4", "salt", new Date("2026-10-26T01:00:00Z"));
   assert.match(a, /^[0-9a-f]{16}$/);
   assert.equal(a, b);
   assert.notEqual(a, c);
