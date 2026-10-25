@@ -7,8 +7,7 @@ import { TagBadge } from "@/components/TagBadge";
 import { formatDate } from "@/lib/date";
 import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/content";
 
-export const dynamicParams = false;
-
+// Drafts return 404. Do not set dynamicParams = false: on Cloudflare (OpenNext, no incremental cache) it makes every post 404.
 async function getPublishedPost(slug: string) {
   const post = await getBlogPostBySlug(slug);
   return post?.frontmatter.status === "published" ? post : null;
