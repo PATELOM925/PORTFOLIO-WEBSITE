@@ -1,8 +1,8 @@
 ---
-title: "TTC Interactive Dashboard"
+title: "TTC Pulse"
 slug: "ttc-interactive-dashboard"
 date: "2026-04-30"
-preview: "End-to-end TTC reliability platform covering 1 million+ delay events across bus, subway, GTFS, and live-alert data."
+preview: "1.1 million TTC delay events, ranked by route and station, served as a static dashboard with a live TTC view."
 tags: ["Data Engineering", "Streamlit", "DuckDB", "Parquet", "GTFS-RT"]
 status: "published"
 github: "https://github.com/PATELOM925/TTC-PULSE"
@@ -14,12 +14,11 @@ approach: "Our team built a reproducible DuckDB and Parquet pipeline, linked del
 result: "The platform turns 1 million+ normalized delay events into route, station, time-pattern, cause, and live-alert views with explicit data-quality checks."
 category: "Data Engineering & Analytics"
 highlight: "1M+ delay events"
-pipeline: ["TTC delay data + GTFS + live alerts", "Normalize & join", "DuckDB / Parquet marts", "Route & station quality checks", "Streamlit views + AI assistant"]
+pipeline: ["TTC delay data + GTFS + live alerts", "Normalize & join", "DuckDB / Parquet marts", "Route & station quality checks", "Static dashboard on this site"]
 ---
 ## Highlights
 - Co-developed a Python ingestion and normalization pipeline joining TTC delay data with static GTFS and live service alerts.
 - Processed over 1 million delay events into DuckDB and Parquet data marts, with checks for unmatched route and station mappings and reproducible Streamlit views.
-- The dashboard includes an in-app AI chat assistant, grounded on the analytical marts, for follow-up questions.
 
 ## Data workflow
 

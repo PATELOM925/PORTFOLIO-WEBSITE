@@ -18,7 +18,7 @@ export default async function TtcPulseDemoPage() {
   const techPost = post?.frontmatter.status === "published" ? { href: `/blog/${TECH_POST_SLUG}`, title: post.frontmatter.title } : null;
 
   return (
-    <Layout>
+    <Layout showAssistant={false}>
       <main className="container page-spacing demo-page">
         <TtcPulseDashboard techPost={techPost} />
       </main>
