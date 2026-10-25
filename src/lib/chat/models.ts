@@ -1,5 +1,6 @@
 // The only file that holds model ids. A unit test enforces this and the allowlist.
 // Prices are USD per million tokens, from the provider pricing pages (checked 25 October 2026).
+// Haiku maxTokens is 2500, not 1500: adaptive thinking counts toward it, and the eval saw one answer use all 1500 on thinking.
 
 export type ModelKey = "haiku" | "luna" | "sol";
 export type Provider = "anthropic" | "openai";
@@ -15,7 +16,7 @@ export type ModelSpec = {
 };
 
 export const MODELS = {
-  haiku: { provider: "anthropic", id: "claude-haiku-5-5", display: "Claude Haiku 5.5", effort: "medium", maxTokens: 1500, contextBudget: 3000, pricePerM: { in: 0.1, cachedIn: 0.01, out: 0.5 } },
+  haiku: { provider: "anthropic", id: "claude-haiku-5-5", display: "Claude Haiku 5.5", effort: "medium", maxTokens: 2500, contextBudget: 3000, pricePerM: { in: 0.1, cachedIn: 0.01, out: 0.5 } },
   luna: { provider: "openai", id: "gpt-6-luna", display: "GPT 6 Luna", effort: "medium", maxTokens: 2000, contextBudget: 3000, pricePerM: { in: 0.1, cachedIn: 0.01, out: 0.5 } },
   sol: { provider: "openai", id: "gpt-6.1-sol", display: "GPT 6.1 Sol", effort: "medium", maxTokens: 2000, contextBudget: 4500, pricePerM: { in: 2, cachedIn: 0.1, out: 10 } }
 } as const satisfies Record<ModelKey, ModelSpec>;

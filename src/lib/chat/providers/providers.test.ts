@@ -59,7 +59,7 @@ async function collect(gen: AsyncGenerator<ProviderEvent>) {
 test("the Anthropic body has one cache breakpoint, effort medium and no sampling fields", () => {
   const body = anthropicBody(request("haiku", fakeFetch(200, "")));
   assert.equal(body.model, MODELS.haiku.id);
-  assert.equal(body.max_tokens, 1500);
+  assert.equal(body.max_tokens, MODELS.haiku.maxTokens);
   assert.deepEqual(body.output_config, { effort: "medium" });
   assert.deepEqual(body.system[0].cache_control, { type: "ephemeral" });
   const json = JSON.stringify(body);
