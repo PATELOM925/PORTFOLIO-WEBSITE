@@ -29,6 +29,8 @@ name = "CHAT_ESCALATE_VISITOR_LIMIT"
 namespace_id = "1004"
 simple = { limit = 1, period = 60 }
 
-[[analytics_engine_datasets]]
-binding = "CHAT_ANALYTICS"
-dataset = "ttc_chat"
+# Analytics Engine is off until it is enabled once in the Cloudflare dashboard (Workers, Analytics Engine).
+# Until then, the chat writes its answer and vote logs to Workers logs. After you enable it, remove the # from the 3 lines below.
+# [[analytics_engine_datasets]]
+# binding = "CHAT_ANALYTICS"
+# dataset = "ttc_chat"
