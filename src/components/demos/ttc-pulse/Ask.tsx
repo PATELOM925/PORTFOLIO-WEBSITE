@@ -207,9 +207,10 @@ export function AskView({ mode }: { mode: Mode }) {
         signal: controller.signal
       });
       if (!response.ok || !response.body) {
-        const code = response.status === 429 ? "rate" : response.status === 403 ? "turnstile" : "unavailable";
-        const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
-        update(key, (t) => ({ ...t, status: "error", error: response.status === 400 ? (body?.error?.message ?? ERRORS.unavailable) : ERRORS[code] }));
+        const body = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+        const code = response.status === 429 ? "rate" : response.status === 403 && body?.error?.code !== "origin" ? "turnstile" : "unavailable";
+        const own = response.status === 400 || body?.error?.code === "origin";
+        update(key, (t) => ({ ...t, status: "error", error: own ? (body?.error?.message ?? ERRORS.unavailable) : ERRORS[code] }));
         return;
       }
       const reader = response.body.getReader();

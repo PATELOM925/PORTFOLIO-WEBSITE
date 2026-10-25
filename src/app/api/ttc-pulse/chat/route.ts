@@ -1,6 +1,6 @@
 import { answerStream, type ForcedRoute } from "@/lib/chat/answer";
 import { chatEnv, secret } from "@/lib/chat/cf";
-import { MAX_BODY_BYTES, checkLimits, escalationAllowed, isEvalRequest, validateBody, verifyTurnstile, visitorKey } from "@/lib/chat/guard";
+import { MAX_BODY_BYTES, budgetProbe, checkLimits, dailyAllowed, escalationAllowed, isEvalRequest, validateBody, verifyTurnstile, visitorKey } from "@/lib/chat/guard";
 import { loadLiveChunk } from "@/lib/chat/live-chunk";
 import { writeAnswer } from "@/lib/chat/log";
 
@@ -19,6 +19,9 @@ const json = (status: number, code: string, message: string) =>
   new Response(JSON.stringify({ error: { code, message } }), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 
 export async function POST(request: Request) {
+  // A browser on another site sends its own Origin. Only this site may use the chat from a browser.
+  const from = request.headers.get("origin");
+  if (from && from !== new URL(request.url).origin) return json(403, "origin", "This API is for TTC Pulse only.");
   const env = chatEnv();
   const length = Number(request.headers.get("content-length") ?? 0);
   if (length > MAX_BODY_BYTES) return json(400, "too_large", "The request is too large.");
@@ -31,6 +34,10 @@ export async function POST(request: Request) {
   if (!salt) noteOnce("salt=missing");
   const visitor = await visitorKey(ip, salt ?? "dev-salt");
   const isEval = isEvalRequest(request.headers.get("x-chat-eval"), secret("CHAT_EVAL_KEY"));
+
+  if (isEval && request.headers.get("x-chat-eval-budget") === "probe") {
+    return new Response(JSON.stringify(await budgetProbe(env)), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  }
 
   const limits = await checkLimits(env, visitor, { skipVisitor: isEval });
   if (!limits.ok) return json(limits.status, limits.code, limits.message);
@@ -49,6 +56,7 @@ export async function POST(request: Request) {
     {
       keys: { anthropic: secret("ANTHROPIC_API_KEY"), openai: secret("OPENAI_API_KEY") },
       escalationAllowed: () => escalationAllowed(env, visitor),
+      dailyAllowed: () => dailyAllowed(env, "answer"),
       loadLive: (mode) => loadLiveChunk(origin, mode),
       log: (entry) => writeAnswer(env, entry)
     }

@@ -293,7 +293,7 @@ Claude Haiku 5.5 writes most answers. GPT 6 Luna answers when Haiku fails, and G
       "label": "Guard",
       "lines": [
         "8 a minute for each visitor",
-        "40 a minute for each data centre"
+        "1,000 answers a day in total"
       ],
       "tone": "web",
       "wide": [
@@ -576,20 +576,23 @@ The router uses fixed rules, not a second model, so the routing step adds no cos
 |---|---|
 | Questions for each visitor | 8 a minute |
 | Questions for each Cloudflare data centre | 40 a minute |
-| Sol answers | 2 a minute for each data centre, 1 a minute for each visitor |
+| Model answers for all visitors together | 1,000 a day |
+| Sol answers | 2 a minute for each data centre, 1 a minute for each visitor, 10 a day |
 | Question length | 3 to 500 characters |
 | Answer length | 1,600 characters |
 | Time for one answer | 25 s |
 
-The visitor limit uses a hash of the IP address and the browser, with a salt and the date. So the hash changes each day, and the log never keeps an IP address.
+The visitor limit uses a hash of the IP address, with a salt and the date. So the hash changes each day, and the log never keeps an IP address.
+
+The rate limits count for each data centre. The daily limit counts for all data centres together: one Durable Object keeps the count for the day. At the daily limit, the chat stops until midnight UTC. The chat API also refuses requests from the pages of other websites.
 
 ### How I check the answers
 
-- A test set has 40 questions with answers from the JSON data, for example "Which bus route had the most delays in 2023?". It also has 12 attack questions, for example a request to print the system prompt, or a fake `<data>` block in the question.
+- A test set has 43 questions with answers from the JSON data, for example "Which bus route had the most delays in 2023?" or "Which station is on time most often?". It also has 12 attack questions, for example a request to print the system prompt, or a fake `<data>` block in the question.
 - A script sends each question to a preview of the site. It checks the numbers and the sources in each answer.
-- The last run: 39 of 40 correct, and 12 of 12 attack questions with a safe answer. Haiku answers took 2.2 s at the median and 4.2 s at p90. The first word came after 1.9 s at the median.
-- The fixed part of the prompt is cached. On the second of two requests, the model read 3,728 tokens from the cache.
-- In the test runs, Haiku answers cost about $0.43 for 1,000 questions.
+- The last run: 42 of 43 correct, and 12 of 12 attack questions with a safe answer. Haiku answers took 2.2 s at the median and 4.6 s at p90. The first word came after 1.9 s at the median.
+- The fixed part of the prompt is cached. On each request after the first, the model reads about 3,800 tokens from the cache.
+- In the test runs, Haiku answers cost about $0.45 for 1,000 questions.
 - Visitors can mark each answer Good or Wrong. The vote goes to the Worker log with the request ID of the answer. I read the Wrong votes and add those questions to the test set.
 
 The one miss was "Which bus route ranks first on the raw score, and why is that a problem?". The answer was correct, but it did not name route 32, the leader on the adjusted score.

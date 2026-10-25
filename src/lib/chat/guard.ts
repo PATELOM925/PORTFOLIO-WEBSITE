@@ -109,7 +109,42 @@ export async function checkLimits(env: ChatEnv, visitor: string, options: { skip
 export async function escalationAllowed(env: ChatEnv, visitor: string): Promise<boolean> {
   const l = limiters(env);
   if (!(await l.escalate.limit({ key: "global" })).success) return false;
-  return (await l.escalateVisitor.limit({ key: visitor })).success;
+  if (!(await l.escalateVisitor.limit({ key: visitor })).success) return false;
+  return dailyAllowed(env, "sol");
+}
+
+// Hard daily caps for all visitors together, counted in the ChatBudget Durable Object (UTC day).
+// At about $0.43 for 1,000 Haiku answers, the answer cap holds normal spend under $1 a day.
+export const DAILY_LIMITS = { answer: 1000, sol: 10 } as const;
+let budgetWarned = false;
+
+// When the budget Worker is missing or fails, allow the question: the rate limits and the provider caps still apply.
+export async function dailyAllowed(env: ChatEnv, kind: keyof typeof DAILY_LIMITS): Promise<boolean> {
+  const namespace = env.CHAT_BUDGET;
+  try {
+    if (!namespace?.idFromName) throw new Error("no binding");
+    const result = await namespace.get(namespace.idFromName("global")).take(kind, DAILY_LIMITS[kind]);
+    if (!result.ok) console.log(JSON.stringify({ chat: "daily_limit", kind, used: result.used }));
+    return result.ok;
+  } catch (error) {
+    if (!budgetWarned) {
+      budgetWarned = true;
+      console.log(JSON.stringify({ chat: "budget", error: error instanceof Error ? error.message : String(error) }));
+    }
+    return true;
+  }
+}
+
+// Health check for the eval: reads today's counts from the budget Worker. No model call.
+export async function budgetProbe(env: ChatEnv): Promise<{ ok: boolean; today?: Record<string, number>; limits?: typeof DAILY_LIMITS; error?: string }> {
+  try {
+    const namespace = env.CHAT_BUDGET;
+    if (!namespace?.idFromName) return { ok: false, error: "no binding" };
+    const today = await namespace.get(namespace.idFromName("global")).peek();
+    return { ok: true, today, limits: DAILY_LIMITS };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
 }
 
 export const TURNSTILE_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";

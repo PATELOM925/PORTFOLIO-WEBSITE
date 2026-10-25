@@ -29,12 +29,20 @@ name = "CHAT_ESCALATE_VISITOR_LIMIT"
 namespace_id = "1004"
 simple = { limit = 1, period = 60 }
 
-# Workers logs keep the chat answer and vote logs while Analytics Engine is off. Free plan: 200,000 log lines a day, kept 3 days.
+# The daily answer cap for the chat. The class lives in the Worker "ompatel-chat-budget" (workers/chat-budget).
+# Deploy that Worker first. This Worker needs no Durable Object migration.
+[[durable_objects.bindings]]
+name = "CHAT_BUDGET"
+class_name = "ChatBudget"
+script_name = "ompatel-chat-budget"
+
+# Workers logs also keep the chat answer and vote logs. Free plan: 200,000 log lines a day, kept 3 days.
 [observability]
 enabled = true
 
-# Analytics Engine is off until it is enabled once in the Cloudflare dashboard (Workers, Analytics Engine).
-# Until then, the chat writes its answer and vote logs to Workers logs. After you enable it, remove the # from the 3 lines below.
+# Chat answer and vote logs. Free plan: 100,000 data points a day.
+# Analytics Engine must be enabled once in the dashboard (Workers, Analytics Engine) before these lines work.
+# Until then, the logs go to Workers logs. After you enable it, remove the # from the 3 lines below.
 # [[analytics_engine_datasets]]
 # binding = "CHAT_ANALYTICS"
 # dataset = "ttc_chat"

@@ -1,0 +1,15 @@
+# Holds the ChatBudget Durable Object for the site Worker "ompatel". No public URL.
+# Deploy: npx wrangler deploy -c workers/chat-budget/wrangler.toml
+name = "ompatel-chat-budget"
+main = "index.js"
+compatibility_date = "2026-03-04"
+workers_dev = false
+preview_urls = false
+
+[[durable_objects.bindings]]
+name = "CHAT_BUDGET"
+class_name = "ChatBudget"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatBudget"]

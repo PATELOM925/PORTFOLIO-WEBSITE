@@ -137,7 +137,10 @@ for (const mode of MODES) {
   const fewest = [...list]
     .sort((a, b) => a.n - b.n)
     .slice(0, 5)
-    .map((e) => `${entityLabel(e)} ${fmtInt(e.n)}`)
+    .map((e) => {
+      const first = e.data.years.findIndex((v) => v > 0);
+      return `${entityLabel(e)} ${fmtInt(e.n)}${first > 0 ? ` (first delay event in ${YEARS[first]})` : ""}`;
+    })
     .join("; ");
   add({
     id: `rank-${mode}-events-all`,
@@ -145,7 +148,7 @@ for (const mode of MODES) {
     mode,
     label: `Top ${mode} overall`,
     href: hotspotsHref(mode),
-    text: `${MODE_TITLE[mode]} ${MODE_NOUN[mode].split(" ")[1]} with the most delay events, January 2014 to January 2026, top 10 of ${list.length}: ${rankList(list, all)}.${mode === "subway" ? ` ${lineNote(all)}` : ""} Fewest delay events (20 or more): ${fewest}.`
+    text: `${MODE_TITLE[mode]} ${MODE_NOUN[mode].split(" ")[1]} with the most delay events, January 2014 to January 2026, top 10 of ${list.length}: ${rankList(list, all)}.${mode === "subway" ? ` ${lineNote(all)}` : ""} Fewest delay events (20 or more): ${fewest}. A low count can mean less traffic or fewer years of service, not only fewer problems.`
   });
 }
 
@@ -156,6 +159,12 @@ for (const mode of MODES) {
     rows
       .slice(0, 10)
       .map((row, i) => `${i + 1}. ${scoreLabel(mode, row)}, ${fmtInt(row[2])} events, ${key === 3 ? "raw" : "adjusted"} ${fmtScore(row[key])}${key === 4 ? ` (raw rank ${r.byId[row[0]].raw})` : ` (adjusted rank ${r.byId[row[0]].adj})`}`)
+      .join("; ");
+  const low = (rows) =>
+    rows
+      .slice(-5)
+      .reverse()
+      .map((row) => `${scoreLabel(mode, row)}, ${fmtInt(row[2])} events, adjusted ${fmtScore(row[4])} (adjusted rank ${r.byId[row[0]].adj} of ${r.count})`)
       .join("; ");
   const leader = r.adj[0];
   add({
@@ -172,7 +181,7 @@ for (const mode of MODES) {
     mode,
     label: `Adjusted score ${mode}`,
     href: hotspotsHref(mode),
-    text: `${MODE_TITLE[mode]} ${MODE_NOUN[mode].split(" ")[1]} by adjusted reliability score, ${WINDOW}, top 10 of ${r.count}. Adjusted score = raw score × n / (n + ${r.k}), k = ${r.k}: ${top(r.adj, 4)}.`
+    text: `${MODE_TITLE[mode]} ${MODE_NOUN[mode].split(" ")[1]} by adjusted reliability score, ${WINDOW}, top 10 of ${r.count}. Adjusted score = raw score × n / (n + ${r.k}), k = ${r.k}: ${top(r.adj, 4)}. Most reliable, lowest adjusted score: ${low(r.adj)}.`
   });
 }
 

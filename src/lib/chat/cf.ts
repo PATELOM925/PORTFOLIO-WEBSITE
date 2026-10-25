@@ -1,6 +1,8 @@
 // Access to the Cloudflare request context under OpenNext, with no import from the adapter.
 
 export type RateLimiter = { limit(options: { key: string }): Promise<{ success: boolean }> };
+export type BudgetStub = { take(kind: string, limit: number): Promise<{ ok: boolean; used: number }>; peek(): Promise<Record<string, number>> };
+export type BudgetNamespace = { idFromName(name: string): unknown; get(id: unknown): BudgetStub };
 export type AnalyticsDataset = { writeDataPoint(point: { blobs?: string[]; doubles?: number[]; indexes?: string[] }): void };
 
 export type ChatEnv = {
@@ -9,6 +11,7 @@ export type ChatEnv = {
   CHAT_ESCALATE_LIMIT?: RateLimiter;
   CHAT_ESCALATE_VISITOR_LIMIT?: RateLimiter;
   CHAT_ANALYTICS?: AnalyticsDataset;
+  CHAT_BUDGET?: BudgetNamespace;
   [name: string]: unknown;
 };
 

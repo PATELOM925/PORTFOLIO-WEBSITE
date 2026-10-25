@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { MemoryLimiter, checkLimits, escalationAllowed, isEvalRequest, validateBody, verifyTurnstile, visitorKey } from "./guard";
+import { DAILY_LIMITS, MemoryLimiter, checkLimits, dailyAllowed, escalationAllowed, isEvalRequest, validateBody, verifyTurnstile, visitorKey } from "./guard";
 import { ungroundedNumbers } from "./log";
 import { chunkById } from "./corpus";
 import { redact } from "./text";
@@ -85,4 +85,43 @@ test("ungroundedNumbers counts numbers that are in no sent chunk", () => {
   const chunk = chunkById("entity-bus-32")!;
   assert.equal(ungroundedNumbers("Route 32 has 20,691 delay events [entity-bus-32].", [chunk]), 0);
   assert.equal(ungroundedNumbers("Route 32 has 21,000 delay events.", [chunk]), 1);
+});
+
+function fakeBudget() {
+  const counts = new Map<string, number>();
+  return {
+    counts,
+    namespace: {
+      idFromName: (name: string) => name,
+      get: () => ({
+        take: async (kind: string, limit: number) => {
+          const used = counts.get(kind) ?? 0;
+          if (used >= limit) return { ok: false, used };
+          counts.set(kind, used + 1);
+          return { ok: true, used: used + 1 };
+        },
+        peek: async () => Object.fromEntries(counts)
+      })
+    }
+  };
+}
+
+test("dailyAllowed stops at the daily answer cap", async () => {
+  const budget = fakeBudget();
+  budget.counts.set("answer", DAILY_LIMITS.answer - 1);
+  assert.equal(await dailyAllowed({ CHAT_BUDGET: budget.namespace }, "answer"), true);
+  assert.equal(await dailyAllowed({ CHAT_BUDGET: budget.namespace }, "answer"), false);
+});
+
+test("dailyAllowed allows the question when the budget Worker is missing or fails", async () => {
+  assert.equal(await dailyAllowed({}, "answer"), true);
+  const broken = { idFromName: () => "x", get: () => ({ take: async () => { throw new Error("down"); }, peek: async () => ({}) }) };
+  assert.equal(await dailyAllowed({ CHAT_BUDGET: broken }, "answer"), true);
+});
+
+test("escalation also needs the daily Sol cap", async () => {
+  const budget = fakeBudget();
+  budget.counts.set("sol", DAILY_LIMITS.sol);
+  const env = { CHAT_ESCALATE_LIMIT: new MemoryLimiter(5, 60_000), CHAT_ESCALATE_VISITOR_LIMIT: new MemoryLimiter(5, 60_000), CHAT_BUDGET: budget.namespace };
+  assert.equal(await escalationAllowed(env, "v"), false);
 });

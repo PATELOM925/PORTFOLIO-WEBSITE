@@ -18,7 +18,8 @@ export const REFUSAL_TEXT = "I cannot answer that one.";
 export const MESSAGES = {
   unavailable: "The assistant is not available now. Try again in a minute.",
   cut: "The answer stopped early. Ask again.",
-  config_error: "The assistant has a configuration error."
+  config_error: "The assistant has a configuration error.",
+  daily_limit: "The assistant reached its limit for today. Try again tomorrow."
 };
 
 // "probe" is for the eval only: it sends an id that is not a model and expects a config error.
@@ -37,6 +38,8 @@ export type AnswerInput = {
 export type AnswerDeps = {
   keys: { anthropic?: string; openai?: string };
   escalationAllowed: () => Promise<boolean>;
+  // The daily cap for model answers. Not set in unit tests.
+  dailyAllowed?: () => Promise<boolean>;
   loadLive: (mode: Mode) => Promise<Chunk | null>;
   log: (entry: AnswerLog) => void;
   streams?: { anthropic: ProviderStream; openai: ProviderStream };
@@ -185,10 +188,12 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
   let escalated = false;
   let route: Route;
   const forced = input.forceRoute;
+  // Take the daily answer unit first, so a capped day does not also spend a Sol unit. The index answer needs no unit.
+  const capped = forced !== "none" && !retrieval.empty && deps.dailyAllowed ? !(await deps.dailyAllowed()) : false;
   if (forced === "none") route = "none";
   else if (forced) route = forced === "sol" ? "sol" : "haiku";
   else {
-    const hard = !retrieval.empty && score >= 4 && !retrieval.facets.live;
+    const hard = !capped && !retrieval.empty && score >= 4 && !retrieval.facets.live;
     const allowed = hard ? await deps.escalationAllowed() : false;
     route = decideRoute({ empty: retrieval.empty, complexity: score, live: retrieval.facets.live, escalationAllowed: () => allowed });
     escalated = route === "sol";
@@ -251,6 +256,15 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
     send("delta", { text: NONE_TEXT });
     send("sources", []);
     done({ model: "index", modelName: "From the index", truncated: false, usage: NO_USAGE });
+    return;
+  }
+
+  if (capped) {
+    log.outcome = "unavailable";
+    log.errorCode = "daily_limit";
+    send("meta", { requestId: input.requestId, route, model: "", modelName: "", fallback: false, retrievalMs: retrieval.ms, chunks: retrieval.chunks.length, attempts: [] });
+    send("error", { code: "daily_limit", message: MESSAGES.daily_limit, attempts: [] });
+    done({ model: "", modelName: "", truncated: false, usage: NO_USAGE });
     return;
   }
 
