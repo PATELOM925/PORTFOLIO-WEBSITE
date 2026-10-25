@@ -31,7 +31,7 @@ test("featured work shows the five projects closest to the target roles, in orde
 
   const featured = text.slice(featuredStart, featuredEnd);
   const synapseIndex = featured.indexOf("Synapse AI");
-  const ttcIndex = featured.indexOf("TTC Interactive Dashboard");
+  const ttcIndex = featured.indexOf("TTC Pulse");
   const remoteCodexIndex = featured.indexOf("Remote Codex Control");
   const trafficIndex = featured.indexOf("Toronto Traffic Anomaly Detection");
   const jsspIndex = featured.indexOf("LLMs for Job-Shop Scheduling");
@@ -179,7 +179,7 @@ test("TTC project exposes the verified repository and the dashboard demo", async
   const { response, text } = await fetchText("/projects/ttc-interactive-dashboard");
 
   assert.equal(response.status, 200);
-  assert.match(text, /TTC Interactive Dashboard/);
+  assert.match(text, />TTC Pulse</);
   assert.match(text, /1 million\+/);
   assert.doesNotMatch(text, /1,004,682/);
   assert.match(text, /route|station/i);
