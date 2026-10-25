@@ -289,7 +289,6 @@ async function run(input: AnswerInput, deps: AnswerDeps, send: (event: string, d
         signal: controller.signal
       });
       const firstMs = tryIndex === 0 ? (deps.firstTokenMs ?? 8000) : (deps.retryFirstTokenMs ?? 6000);
-      const attemptStart = now();
       let first: IteratorResult<ProviderEvent>;
       try {
         first = await withTimeout(stream.next(), firstMs, stopAttempt);
