@@ -13,6 +13,7 @@ import stationsFile from "@/demos/ttc-pulse/data/stations.json";
 import timeFile from "@/demos/ttc-pulse/data/time.json";
 import { Bars, Columns, Heatmap, LineChart, Scatter, StationMap, TipLayer, formatCount, pad2, type ScatterPoint } from "./charts";
 import styles from "./TtcPulse.module.css";
+import { DrillDown, readCascade, writeCascade, type Cascade } from "./Drill";
 import { Kpis, Panel } from "./ui";
 
 type Mode = "bus" | "streetcar" | "subway";
@@ -94,17 +95,18 @@ const causeTip = (cause: string, n: number, total?: number) =>
 const entityWord = (mode: Mode) => (mode === "subway" ? "stations" : "routes");
 const peakIndex = (values: number[]) => values.indexOf(Math.max(...values));
 
-function readHash(): { view: View; mode: Mode; id: string | null } {
+function readHash(): { view: View; mode: Mode; id: string | null; drill: Cascade } {
   const params = new URLSearchParams(typeof window === "undefined" ? "" : window.location.hash.slice(1));
   const view = VIEWS.some((v) => v.id === params.get("view")) ? (params.get("view") as View) : "overview";
   const mode = MODES.some((m) => m.id === params.get("mode")) ? (params.get("mode") as Mode) : "bus";
-  return { view, mode, id: params.get("id") };
+  return { view, mode, id: params.get("id"), drill: readCascade(params) };
 }
 
 export function TtcPulseDashboard({ techPost }: { techPost: { href: string; title: string } | null }) {
   const [view, setView] = useState<View>("overview");
   const [mode, setMode] = useState<Mode>("bus");
   const [entityId, setEntityId] = useState<string | null>(null);
+  const [drill, setDrill] = useState<Cascade>({});
 
   useEffect(() => {
     const apply = () => {
@@ -112,22 +114,26 @@ export function TtcPulseDashboard({ techPost }: { techPost: { href: string; titl
       setView(state.view);
       setMode(state.mode);
       setEntityId(state.id);
+      setDrill(state.drill);
     };
     apply();
     window.addEventListener("hashchange", apply);
     return () => window.removeEventListener("hashchange", apply);
   }, []);
 
-  function go(next: Partial<{ view: View; mode: Mode; id: string | null }>) {
-    const state = { view, mode, id: entityId, ...next };
+  function go(next: Partial<{ view: View; mode: Mode; id: string | null; drill: Cascade }>) {
+    const state = { view, mode, id: entityId, drill, ...next };
     if (next.mode && next.mode !== mode && next.id === undefined) state.id = null;
+    if (next.drill === undefined && (state.id !== entityId || state.mode !== mode)) state.drill = { k: drill.k };
     setView(state.view);
     setMode(state.mode);
     setEntityId(state.id);
+    setDrill(state.drill);
     const params = new URLSearchParams();
     if (state.view !== "overview") params.set("view", state.view);
     if (state.mode !== "bus") params.set("mode", state.mode);
     if (state.id) params.set("id", state.id);
+    if (state.view === "drill") writeCascade(params, state.drill);
     const hash = params.toString();
     window.history.replaceState(null, "", hash ? `#${hash}` : window.location.pathname);
   }
@@ -175,7 +181,16 @@ export function TtcPulseDashboard({ techPost }: { techPost: { href: string; titl
         {view === "hotspots" ? <Hotspots mode={mode} openEntity={openEntity} /> : null}
         {view === "time" ? <TimePatterns mode={mode} /> : null}
         {view === "causes" ? <Causes mode={mode} /> : null}
-        {view === "drill" ? <DrillDown mode={mode} entityId={entityId} onPick={(id) => go({ id })} /> : null}
+        {view === "drill" ? (
+          <DrillDown
+            mode={mode}
+            entityId={entityId}
+            onPick={(id) => go({ id })}
+            cascade={drill}
+            onCascade={(next) => go({ drill: next })}
+            onExit={() => go({ view: "overview" })}
+          />
+        ) : null}
         {view === "alerts" ? <Alerts /> : null}
         {view === "quality" ? <Quality /> : null}
         {view === "rows" ? <Rows mode={mode} /> : null}
@@ -456,53 +471,6 @@ function Causes({ mode }: { mode: Mode }) {
         <p className={styles.caption}>From 2025, the source files give a code such as EFO in place of a cause name. The codes have no description yet.</p>
       </Panel>
     </div>
-  );
-}
-
-function DrillDown({ mode, entityId, onPick }: { mode: Mode; entityId: string | null; onPick: (id: string) => void }) {
-  const list = ENTITIES[mode];
-  const entity = list.find((e) => e.id === entityId) ?? list[0];
-  const label = mode === "subway" ? entity.name : `${entity.id} ${entity.name}`;
-  const peakHour = peakIndex(entity.hours);
-  const peakDay = peakIndex(entity.days);
-  return (
-    <>
-      <div className={styles.pick}>
-        <label htmlFor="ttc-entity">{mode === "subway" ? "Station" : "Route"}, top {list.length} by events</label>
-        <select id="ttc-entity" value={entity.id} onChange={(event) => onPick(event.target.value)}>
-          {list.map((e) => (
-            <option key={e.id} value={e.id}>
-              {mode === "subway" ? e.name : `${e.id} ${e.name || "(not in GTFS)"}`} ({formatCount(e.events)})
-            </option>
-          ))}
-        </select>
-      </div>
-      <Kpis
-        items={[
-          [formatCount(entity.events), `Delay events, ${label}`],
-          [`${((entity.events / OVERVIEW[mode].total) * 100).toFixed(1)}%`, `Of all ${mode} events`],
-          [`${pad2(peakHour)}:00`, "Peak hour"],
-          [DAYS[peakDay], "Peak weekday"]
-        ]}
-      />
-      <div className={styles.grid}>
-        <Panel title="By hour">
-          <Columns values={entity.hours} labels={HOURS} labelEvery={6} mark={peakHour} />
-        </Panel>
-        <Panel title="By weekday">
-          <Columns values={entity.days} labels={DAYS} mark={peakDay} />
-        </Panel>
-        <Panel title="By month">
-          <Columns values={entity.months} labels={MONTHS} labelEvery={2} mark={peakIndex(entity.months)} />
-        </Panel>
-        <Panel title="By year" wide>
-          <LineChart values={entity.years} labels={YEARS} width={720} height={170} />
-        </Panel>
-        <Panel title="Top causes">
-          <Bars items={entity.causes.map(([cause, n]) => ({ key: cause, label: short(cause), value: n, tip: causeTip(cause, n, entity.events) }))} />
-        </Panel>
-      </div>
-    </>
   );
 }
 
