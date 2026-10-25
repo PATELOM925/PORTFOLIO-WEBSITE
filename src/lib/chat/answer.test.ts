@@ -195,3 +195,18 @@ test("lastSentenceEnd counts a citation after the full stop", () => {
   assert.equal(lastSentenceEnd("One. [a-1] Two", 100), 10);
   assert.equal(lastSentenceEnd("One. Two three", 3), -1);
 });
+
+test("at the daily cap, the answer is the daily limit error and no model is called", async () => {
+  const r = await ask("How many delay events does 501 Queen have?", { anthropic: [says("Never sent.")], deps: { dailyAllowed: async () => false } });
+  assert.equal(r.error.code, "daily_limit");
+  assert.equal(r.anthropic.calls.length, 0);
+  assert.equal(r.openai.calls.length, 0);
+  assert.equal(r.logs[0].errorCode, "daily_limit");
+});
+
+test("the index answer does not use the daily cap", async () => {
+  let asked = 0;
+  const r = await ask("asdfgh qwerty zxcv", { deps: { dailyAllowed: async () => (asked++, false) } });
+  assert.equal(asked, 0);
+  assert.equal(r.error, undefined);
+});
