@@ -7,9 +7,11 @@ import { navigation, siteConfig, socialLinks } from "@/config/site";
 
 interface LayoutProps {
   children: ReactNode;
+  /** Show the floating Role Fit Check button. Set it to false on pages where the button covers long text. */
+  showAssistant?: boolean;
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, showAssistant = true }: LayoutProps) {
   return (
     <div className="app-shell">
       <header className="site-header">
@@ -23,7 +25,7 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       <main>{children}</main>
-      <FloatingAssistant />
+      {showAssistant ? <FloatingAssistant /> : null}
 
       <footer className="site-footer">
         <div className="container footer-grid">

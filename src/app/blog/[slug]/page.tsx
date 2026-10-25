@@ -7,14 +7,21 @@ import { TagBadge } from "@/components/TagBadge";
 import { formatDate } from "@/lib/date";
 import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/content";
 
+export const dynamicParams = false;
+
+async function getPublishedPost(slug: string) {
+  const post = await getBlogPostBySlug(slug);
+  return post?.frontmatter.status === "published" ? post : null;
+}
+
 export async function generateStaticParams() {
-  const posts = await getAllBlogPosts(true);
+  const posts = await getAllBlogPosts();
   return posts.map((post) => ({ slug: post.frontmatter.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post = await getPublishedPost(slug);
   if (!post) return {};
 
   return {
@@ -26,11 +33,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post = await getPublishedPost(slug);
   if (!post) notFound();
 
   return (
-    <Layout>
+    <Layout showAssistant={false}>
       <main className="container page-spacing detail-page">
         <p className="eyebrow">{formatDate(post.frontmatter.date)}</p>
         <h1>{post.frontmatter.title}</h1>
