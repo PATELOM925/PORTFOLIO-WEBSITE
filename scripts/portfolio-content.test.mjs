@@ -175,7 +175,7 @@ test("ChatPDF matches the resume", async () => {
   assert.match(text, /80% accuracy on a manual test set/);
 });
 
-test("TTC project exposes the verified repository and the delay explorer demo", async () => {
+test("TTC project exposes the verified repository and the dashboard demo", async () => {
   const { response, text } = await fetchText("/projects/ttc-interactive-dashboard");
 
   assert.equal(response.status, 200);
@@ -187,11 +187,13 @@ test("TTC project exposes the verified repository and the delay explorer demo", 
   assert.match(text, /\/go\/project\/ttc-interactive-dashboard\/demo/);
 });
 
-test("TTC Pulse delay explorer is prerendered and the project's demo link redirects to it", async () => {
+test("TTC Pulse dashboard is prerendered and the project's demo link redirects to it", async () => {
   const demo = await fetchText("/demos/ttc-pulse");
   assert.equal(demo.response.status, 200);
-  assert.match(demo.text, /delay explorer/);
-  assert.match(demo.text, /When delays happen/);
+  assert.match(demo.text, /TTC Pulse/);
+  assert.match(demo.text, /Peak hours/);
+  assert.match(demo.text, /723,518/);
+  assert.match(demo.text, /Awais Aziz built the AI chat page/);
 
   const redirect = await fetch(`${baseUrl}/go/project/ttc-interactive-dashboard/demo`, { redirect: "manual" });
   assert.equal(redirect.status, 302);
