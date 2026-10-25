@@ -1,12 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import styles from "./TtcPulse.module.css";
 
 export const formatCount = (value: number) => value.toLocaleString("en-US");
 export const formatShort = (value: number) =>
   value >= 1e6 ? `${(value / 1e6).toFixed(2)}M` : value >= 1e4 ? `${Math.round(value / 1e3)}k` : value >= 1e3 ? `${(value / 1e3).toFixed(1)}k` : String(value);
 export const pad2 = (value: number) => String(value).padStart(2, "0");
+
+// Draw each chart at the width of its panel, so text keeps its size on a phone.
+function useWidth(fallback: number): [RefObject<HTMLDivElement | null>, number] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(fallback);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const next = Math.round(entry.contentRect.width);
+      if (next > 0) setWidth(Math.max(240, next));
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, width];
+}
 
 // One tooltip for the whole dashboard. Any element with data-tip shows it on hover or focus.
 export function TipLayer({ children }: { children: ReactNode }) {
@@ -146,7 +163,7 @@ export function LineChart({
   height = 150,
   unit = "delay events",
   mark,
-  width = 360
+  width: fallbackWidth = 360
 }: {
   values: number[];
   labels: (string | number)[];
@@ -155,12 +172,14 @@ export function LineChart({
   mark?: number;
   width?: number;
 }) {
+  const [box, width] = useWidth(fallbackWidth);
   const pad = { l: 34, r: 10, t: 10, b: 18 };
   const top = Math.max(...values, 1) * 1.12;
   const x = (i: number) => pad.l + (i * (width - pad.l - pad.r)) / Math.max(values.length - 1, 1);
   const y = (v: number) => pad.t + (height - pad.t - pad.b) * (1 - v / top);
   const ticks = [0, top / 2.24, top / 1.12];
   return (
+    <div ref={box}>
     <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} height={height} role="img" aria-label={`${unit} by ${labels[0]} to ${labels[labels.length - 1]}`}>
       {ticks.map((tick) => (
         <g key={tick}>
@@ -183,6 +202,7 @@ export function LineChart({
         </text>
       ))}
     </svg>
+    </div>
   );
 }
 
@@ -193,7 +213,7 @@ export function Columns({
   height = 96,
   unit = "delay events",
   mark,
-  width = 360
+  width: fallbackWidth = 360
 }: {
   values: number[];
   labels: string[];
@@ -203,11 +223,13 @@ export function Columns({
   mark?: number;
   width?: number;
 }) {
+  const [box, width] = useWidth(fallbackWidth);
   const gap = 2;
   const barWidth = (width - gap * (values.length - 1)) / values.length;
   const top = Math.max(...values, 1);
   const plot = height - 16;
   return (
+    <div ref={box}>
     <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} height={height} role="img" aria-label={`${unit} by ${labels[0]} to ${labels[labels.length - 1]}`}>
       {values.map((v, i) => {
         const h = Math.max(1, (plot * v) / top);
@@ -232,12 +254,14 @@ export function Columns({
         );
       })}
     </svg>
+    </div>
   );
 }
 
 export type ScatterPoint = { key: string; n: number; score: number; tip: string; state: "top" | "small" | "base" };
 
-export function Scatter({ points, height = 150, width = 360 }: { points: ScatterPoint[]; height?: number; width?: number }) {
+export function Scatter({ points, height = 150, width: fallbackWidth = 360 }: { points: ScatterPoint[]; height?: number; width?: number }) {
+  const [box, width] = useWidth(fallbackWidth);
   const pad = { l: 30, r: 10, t: 14, b: 20 };
   const nMax = Math.max(...points.map((p) => p.n), 10) * 1.25;
   const lo = Math.min(...points.map((p) => p.score), 0);
@@ -246,6 +270,7 @@ export function Scatter({ points, height = 150, width = 360 }: { points: Scatter
   const y = (v: number) => pad.t + (height - pad.t - pad.b) * (1 - (v - lo) / (hi - lo));
   const order = { base: 0, small: 1, top: 2 };
   return (
+    <div ref={box}>
     <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} height={height} role="img" aria-label="Reliability score against delay events, log scale">
       <line className={styles.gridLine} x1={pad.l} x2={width - pad.r} y1={y(0)} y2={y(0)} />
       <text className={styles.axis} x={pad.l - 5} y={y(0) + 3} textAnchor="end">
@@ -273,13 +298,15 @@ export function Scatter({ points, height = 150, width = 360 }: { points: Scatter
         />
       ))}
     </svg>
+    </div>
   );
 }
 
 export type MapStation = { station: string; lat: number; lon: number; events: number; tip: string };
 
 // Station points on longitude and latitude, scaled for Toronto. Dot area follows the event count.
-export function StationMap({ stations, height = 260, width = 360 }: { stations: MapStation[]; height?: number; width?: number }) {
+export function StationMap({ stations, height = 260, width: fallbackWidth = 360 }: { stations: MapStation[]; height?: number; width?: number }) {
+  const [box, width] = useWidth(fallbackWidth);
   const lats = stations.map((s) => s.lat);
   const lons = stations.map((s) => s.lon);
   const [la0, la1, lo0, lo1] = [Math.min(...lats), Math.max(...lats), Math.min(...lons), Math.max(...lons)];
@@ -291,6 +318,7 @@ export function StationMap({ stations, height = 260, width = 360 }: { stations: 
   const offY = (height - spanY * scale) / 2;
   const top = Math.max(...stations.map((s) => s.events));
   return (
+    <div ref={box}>
     <svg className={styles.svg} viewBox={`0 0 ${width} ${height}`} height={height} role="img" aria-label="Map of subway stations sized by delay events">
       {[...stations].sort((a, b) => b.events - a.events).map((s) => (
         <circle
@@ -303,5 +331,6 @@ export function StationMap({ stations, height = 260, width = 360 }: { stations: 
         />
       ))}
     </svg>
+    </div>
   );
 }
