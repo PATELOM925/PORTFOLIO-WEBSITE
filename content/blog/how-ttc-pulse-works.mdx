@@ -71,7 +71,7 @@ The score has a small-sample fault. In `gold_top_offender_ranking` for bus route
 {"title": "Delay events in the 90-day window, raw top 10 bus routes", "unit": "events", "data": [{"label": "1. 28 Bayview South", "value": 10}, {"label": "2. 162 Lawrence-Donway", "value": 34}, {"label": "3. 87 Cosburn", "value": 26}, {"label": "4. 55 Warren Park", "value": 33}, {"label": "5. 127 Davenport", "value": 53}, {"label": "6. 115 Silver Hills", "value": 9}, {"label": "7. 33 Forest Hill", "value": 21}, {"label": "8. 184 Ancaster Park", "value": 2}, {"label": "9. 32 Eglinton West", "value": 447}, {"label": "10. 52 Lawrence West", "value": 388}], "caption": "Source: gold/gold_top_offender_ranking.parquet, bus routes, ranking date 31 January 2026."}
 ```
 
-8 of the top 10 have fewer than 60 delay events. Their `severity_p90` is 287 to 471 minutes. With few delay events, one long delay sets the 90th percentile. The pipeline drops bus delays of 999 minutes or more (`_gold_utils.py:214`), but values below 999 stay.
+8 of the top 10 have fewer than 60 delay events. Their `severity_p90` is 287 to 471 minutes. With few delay events, one long delay sets the 90th percentile. The pipeline sets bus delays of 999 minutes or more to null (`_gold_utils.py:214`), but values below 999 stay.
 
 On the site I added an adjusted score as a prototype method:
 
@@ -141,7 +141,7 @@ The team built the first dashboard in Streamlit (`app/pages/`). For a public lin
 - The raw files and the DuckDB database are not committed. The full pipeline does not run from a clone. The committed Parquet layers can be queried from a clone.
 - 60 of 234 snapshot files do not match their recorded checksum.
 - The repo has no tests and no CI. I would add `check_readme_numbers.py` to CI first, because it already exits 0 on a correct build.
-- The `aws/` kit (S3, Glue, Athena) has never been run.
+- I have not run the `aws/` kit (S3, Glue, Athena) yet.
 - Newer cause rows use raw codes, for example `MFWEA`, that have no description in `dim_incident_code`.
 - Yonge Station has 2,343 of its 8,229 delay events at 22:00, with the top cause "Miscellaneous Other". This needs a check before anyone uses the station ranking.
 - To turn counts into rates, I would join the GTFS trip counts per route and hour.
