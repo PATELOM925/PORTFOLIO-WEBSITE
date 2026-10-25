@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "generate:content": "node scripts/generate-content.mjs",
-    "predev": "npm run generate:content",
-    "prebuild": "npm run generate:content",
+    "build:chat-corpus": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-ttc-chat-corpus.mjs",
+    "predev": "npm run generate:content && npm run build:chat-corpus",
+    "prebuild": "npm run generate:content && npm run build:chat-corpus",
     "dev": "next dev",
     "build": "next build",
     "test:portfolio": "node --test scripts/portfolio-content.test.mjs",
@@ -14,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare deploy"
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "check:chat-corpus": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-ttc-chat-corpus.mjs --check",
+    "test:chat": "tsx --test \"src/lib/chat/**/*.test.ts\"",
+    "eval:chat": "node scripts/ttc-chat-eval.mjs"
   },
   "dependencies": {
     "@next/env": "^16.1.6",
@@ -38,6 +42,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "wrangler": "^4.0.0"
   }
