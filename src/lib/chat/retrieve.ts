@@ -12,6 +12,7 @@ export type Facets = {
   live: boolean;
   method: boolean;
   quality: boolean;
+  reliable: boolean;
 };
 
 export type Retrieval = {
@@ -33,22 +34,26 @@ const B = 0.75;
 
 const CAUSE_WORDS = /\b(mechanical|operator|garage|investigation|diversion|emergency|security|collision|disorderly|injured|ill|alarm|passenger|speed|overspeeding|weather|fire|medical)\b/;
 const TIME_WORDS = /\b(hour|hours|time|times|day|days|weekday|weekdays|weekend|weekends|month|months|monthly|morning|evening|night|nights|rush|season|winter|summer|spring|fall|autumn|monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|april|may|june|july|august|september|october|november|december|year over year|trend|by year)\b/;
+// "On time", "reliable" and "best" have no direct measure. The answer uses the fewest delay events and the lowest adjusted score.
+const RELIABLE_WORDS = /\b(on time|on-time|ontime|punctual|reliable|reliability|dependable|fewest|least|lowest|best|smoothest)\b/;
 const METRIC_WORDS = /\b(minute|minutes|median|p90|percentile|severity|long|longest|share|percent|percentage|how many|count|total|number|average|rate)\b/;
 
 export function facetsOf(question: string, tokens = tokenize(question)): Facets {
   const text = normalise(question);
   const years = [...new Set([...text.matchAll(/\b(201[4-9]|202[0-6])\b/g)].map((m) => Number(m[1])))].slice(0, 2);
   const has = (term: string) => tokens.includes(term);
+  const timeText = text.replace(/\bon[ -]?time\b/g, " ");
   return {
     years,
     rank: has("rank"),
     cause: has("cause") || CAUSE_WORDS.test(text),
-    time: has("peak") || TIME_WORDS.test(text),
+    time: has("peak") || TIME_WORDS.test(timeText),
     metric: METRIC_WORDS.test(text),
     compare: has("compare"),
     live: has("live"),
     method: has("method"),
-    quality: has("quality")
+    quality: has("quality"),
+    reliable: RELIABLE_WORDS.test(text)
   };
 }
 
@@ -82,7 +87,9 @@ export function retrieve(question: string, modeHint: Mode, resolution: Resolutio
 
   // The resolver already found the entities. Their numbers and names would only add noise to BM25.
   const entityTokens = new Set(resolved.flatMap((e) => tokenize(`${e.id} ${e.name}`)));
-  const raw = bm25(tokens.filter((t) => !entityTokens.has(t)));
+  // In "on time", the word "time" is not about the hour or the day, so it must not pull in the time chunk.
+  const onTime = /\bon[ -]?time\b/i.test(question);
+  const raw = bm25(tokens.filter((t) => !entityTokens.has(t) && !(onTime && t === "tim")));
   let topScore = 0;
   let topIndex = -1;
   raw.forEach((s, i) => {
@@ -106,9 +113,13 @@ export function retrieve(question: string, modeHint: Mode, resolution: Resolutio
     if (i !== undefined) forced.add(i);
   };
   const rankModes = new Set<Mode>([effectiveMode, ...modes]);
-  if (facets.rank && !resolved.length) {
+  if ((facets.rank || facets.reliable) && !resolved.length) {
     for (const mode of rankModes) {
-      if (facets.method) {
+      if (facets.reliable && !facets.years.length) {
+        // Both chunks list the top and the bottom, so the model can answer "most" and "least" reliable.
+        force(`rank-${mode}-events-all`);
+        force(`rank-${mode}-score-adjusted`);
+      } else if (facets.method) {
         force(`rank-${mode}-score-raw`);
         force(`rank-${mode}-score-adjusted`);
       } else if (facets.years.length) for (const year of facets.years) force(`rank-${mode}-events-${year}`);

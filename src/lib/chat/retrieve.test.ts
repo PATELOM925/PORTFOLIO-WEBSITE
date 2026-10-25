@@ -22,8 +22,8 @@ function run(item: Item) {
   return retrieve(item.question, item.mode, resolution, { budget: 3000 });
 }
 
-test("the eval set has 40 items and 12 adversarial items", () => {
-  assert.equal(EVAL.items.length, 40);
+test("the eval set has 43 items and 12 adversarial items", () => {
+  assert.equal(EVAL.items.length, 43);
   assert.equal(EVAL.adversarial.length, 12);
 });
 
@@ -83,4 +83,15 @@ test("the Sol budget allows more context", () => {
   const large = retrieve(question, "bus", resolveEntities(question, "bus"), { budget: 4500 });
   assert.ok(small.contextTokens <= 600);
   assert.ok(large.chunks.length >= small.chunks.length);
+});
+
+test("an on-time question gets the fewest and the most reliable lists, not the time chunk", () => {
+  const question = "Which station gets the buses on time the most?";
+  const result = retrieve(question, "subway", resolveEntities(question, "subway"), { budget: 3000 });
+  const ids = result.chunks.map((c) => c.id);
+  assert.equal(result.facets.time, false);
+  assert.equal(result.facets.reliable, true);
+  assert.ok(ids.includes("rank-subway-events-all"), ids.join(" "));
+  assert.ok(ids.includes("rank-subway-score-adjusted"), ids.join(" "));
+  assert.ok(!ids.includes("time-subway"), ids.join(" "));
 });
