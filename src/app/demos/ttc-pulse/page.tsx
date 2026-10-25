@@ -1,64 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { TtcPulseDemo, type TtcPulseStats } from "@/components/demos/TtcPulseDemo";
+import { TtcPulseDashboard } from "@/components/demos/ttc-pulse/Dashboard";
 import { Layout } from "@/components/Layout";
-import routeFile from "@/demos/ttc-pulse/data/e1_routes.json";
-import stationFile from "@/demos/ttc-pulse/data/e2_stations.json";
-import weekdayHourFile from "@/demos/ttc-pulse/data/e3_weekday_hour.json";
-import yearFile from "@/demos/ttc-pulse/data/e4_yearly.json";
+import { getBlogPostBySlug } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "TTC Pulse: delay explorer",
-  description: "An interactive explorer of TTC bus, subway and streetcar delay events, built from aggregates of the TTC Pulse data pipeline.",
+  title: "TTC Pulse: TTC delay dashboard",
+  description:
+    "A dashboard of 1.1 million TTC bus, subway and streetcar delay events: worst routes, peak hours, causes, a reliability score check and data quality.",
   alternates: { canonical: "/demos/ttc-pulse" }
 };
 
-// Built from the copied data files when the page is prerendered.
-const years = yearFile.rows.map((row) => row.year);
-const stats: TtcPulseStats = {
-  // The weekday-by-hour table holds every delay event. The route and yearly tables leave out subway events with no line.
-  totalEvents: weekdayHourFile.rows.reduce((total, row) => total + row.frequency, 0),
-  firstYear: Math.min(...years),
-  lastYear: Math.max(...years),
-  routeCount: routeFile.rows.length,
-  subwayLineCount: routeFile.rows.filter((row) => row.mode === "subway").length,
-  stationCount: stationFile.rows.length
-};
+const TECH_POST_SLUG = "how-ttc-pulse-works";
 
-export default function TtcPulseDemoPage() {
+export default async function TtcPulseDemoPage() {
+  // The "How it works" button shows only after the post is published.
+  const post = await getBlogPostBySlug(TECH_POST_SLUG);
+  const techPost = post?.frontmatter.status === "published" ? { href: `/blog/${TECH_POST_SLUG}`, title: post.frontmatter.title } : null;
+
   return (
     <Layout>
       <main className="container page-spacing demo-page">
-        <p className="eyebrow">Data explorer</p>
-        <h1>TTC Pulse: delay explorer</h1>
-        <p className="lead">
-          TTC Pulse is a data pipeline that joins TTC delay logs, the GTFS schedule and live service alerts into bronze, silver
-          and gold tables in DuckDB and Parquet. This page reads small aggregates exported from those gold tables.
-        </p>
-
-        <TtcPulseDemo stats={stats} />
-
-        <section className="card demo-section" aria-labelledby="ttc-build">
-          <h2 id="ttc-build">How this was built</h2>
-          <p>
-            The pipeline is written in Python. It uses DuckDB and Parquet, with bronze, silver and gold layers and a star schema.
-            The full dashboard is a Streamlit app in the repository. This page uses five aggregate files exported from the gold
-            tables. The data records delay events only.
-          </p>
-          <p>
-            The route tables and the yearly chart count 9,171 fewer subway events than the total above, because subway events
-            with no line recorded are not assigned to a route.
-          </p>
-        </section>
-
-        <div className="project-links">
-          <Link href="/projects/ttc-interactive-dashboard" className="text-link">
-            Project page
-          </Link>
-          <a href="https://github.com/PATELOM925/TTC-PULSE" target="_blank" rel="noreferrer">
-            GitHub repository
-          </a>
-        </div>
+        <TtcPulseDashboard techPost={techPost} />
       </main>
     </Layout>
   );
