@@ -528,7 +528,7 @@ function YearTable({ data, yi, onYear }: { data: EntityFile; yi?: number; onYear
                 <td className={styles.num}>{formatCount(data.years[i])}</td>
                 <td className={styles.num}>{data.delay[i]?.[0] ?? ""}</td>
                 <td className={styles.num}>{data.delay[i]?.[1] ?? ""}</td>
-                <td>{top ? causeLabel(data.causes.names[top[0]]) : ""}</td>
+                <td className={css.cause}>{top ? causeLabel(data.causes.names[top[0]]) : ""}</td>
               </tr>
             );
           })}

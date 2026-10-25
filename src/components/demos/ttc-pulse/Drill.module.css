@@ -261,6 +261,13 @@
   white-space: nowrap;
 }
 
+.cause {
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .hint {
   font-size: 0.72rem;
   color: var(--ttc-muted);
