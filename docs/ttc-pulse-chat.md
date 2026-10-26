@@ -373,7 +373,7 @@ simple = { limit = 2, period = 60 }
 
 [[analytics_engine_datasets]]
 binding = "CHAT_ANALYTICS"
-dataset = "ttc_chat"
+dataset = "TTCAnalytics"
 ```
 
 When a binding is not set (for example in `next dev`), use a token bucket in memory and log `limiter=memory`.
@@ -470,7 +470,7 @@ The blended cost is about $0.91 for 1,000 questions and about $9.10 for 10,000. 
 14. `log.ts`.
 15. `answer.ts`: the orchestration, plus extractCitations.
 16. `src/app/api/ttc-pulse/chat/route.ts` and `chat/feedback/route.ts`.
-17. The `wrangler.toml` bindings and the secrets `CHAT_SALT`, `CHAT_EVAL_KEY` and `TURNSTILE_SECRET` (optional). Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
+17. The `wrangler.toml` bindings and the secrets `CHAT_SALT`, `CHAT_EVAL_KEY` and `TURNSTILE_SECRET` (optional). Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `.env.production` (the key is public).
 18. `Ask.tsx`, plus the Ask tab in Dashboard.tsx.
 19. The route test in `scripts/portfolio-content.test.mjs`.
 20. The eval and traffic files, `ttc-chat-eval.mjs` and `ttc-chat-report.mjs`. The scripts are `test:chat` (with tsx) and `eval:chat`.

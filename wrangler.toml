@@ -41,8 +41,7 @@ script_name = "ompatel-chat-budget"
 enabled = true
 
 # Chat answer and vote logs. Free plan: 100,000 data points a day.
-# Analytics Engine must be enabled once in the dashboard (Workers, Analytics Engine) before these lines work.
-# Until then, the logs go to Workers logs. After you enable it, remove the # from the 3 lines below.
-# [[analytics_engine_datasets]]
-# binding = "CHAT_ANALYTICS"
-# dataset = "ttc_chat"
+# Chat answer and vote logs. Analytics Engine is enabled for the account.
+[[analytics_engine_datasets]]
+binding = "CHAT_ANALYTICS"
+dataset = "TTCAnalytics"

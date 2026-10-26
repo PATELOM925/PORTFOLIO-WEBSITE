@@ -24,12 +24,12 @@ async function sql(query) {
 const answers = await sql(`
   SELECT blob4 AS requestId, blob1 AS route, blob2 AS outcome, blob10 AS model, blob6 AS mode, blob7 AS topChunk, blob9 AS question,
          double1 AS latencyMs, double5 AS inputTokens, double6 AS outputTokens, double7 AS cacheReadTokens, double10 AS ungrounded, double11 AS fallback
-  FROM ttc_chat
+  FROM TTCAnalytics
   WHERE index1 != 'feedback' AND timestamp > NOW() - INTERVAL '${days}' DAY
   LIMIT 10000`);
 const votes = await sql(`
   SELECT blob4 AS requestId, blob2 AS vote
-  FROM ttc_chat
+  FROM TTCAnalytics
   WHERE index1 = 'feedback' AND timestamp > NOW() - INTERVAL '${days}' DAY
   LIMIT 10000`);
 
