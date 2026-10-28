@@ -2,12 +2,9 @@ import Link from "next/link";
 import { BlogCard } from "@/components/BlogCard";
 import { Layout } from "@/components/Layout";
 import { getAllBlogPosts } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Blog",
-  description: "Research notes, implementation notes, and project breakdowns.",
-  alternates: { canonical: "/blog" }
-};
+export const metadata = pageMetadata({ title: "Blog", description: "Research notes, implementation notes, and project breakdowns.", path: "/blog" });
 
 export default async function BlogIndexPage() {
   const posts = await getAllBlogPosts();
