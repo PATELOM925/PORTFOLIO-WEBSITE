@@ -6,6 +6,7 @@ import { RichContent } from "@/components/RichContent";
 import { TagBadge } from "@/components/TagBadge";
 import { formatDate } from "@/lib/date";
 import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/content";
+import { articleJsonLd, jsonLdHtml, pageMetadata } from "@/lib/seo";
 
 // Drafts return 404. Do not set dynamicParams = false: on Cloudflare (OpenNext, no incremental cache) it makes every post 404.
 async function getPublishedPost(slug: string) {
@@ -23,11 +24,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPublishedPost(slug);
   if (!post) return {};
 
-  return {
+  return pageMetadata({
     title: post.frontmatter.title,
     description: post.frontmatter.excerpt,
-    alternates: { canonical: `/blog/${post.frontmatter.slug}` }
-  };
+    path: `/blog/${post.frontmatter.slug}`,
+    type: "article",
+    publishedTime: post.frontmatter.date
+  });
 }
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -38,6 +41,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
   return (
     <Layout showAssistant={false}>
       <main className="container page-spacing detail-page">
+        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdHtml(articleJsonLd(post.frontmatter))} />
         <p className="eyebrow">{formatDate(post.frontmatter.date)}</p>
         <h1>{post.frontmatter.title}</h1>
         <p className="lead">{post.frontmatter.excerpt}</p>

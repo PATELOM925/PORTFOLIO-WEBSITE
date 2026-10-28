@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     type: "website",
     url: siteConfig.siteUrl,
+    siteName: siteConfig.name,
     images: [{ url: "/assets/profile-photo.jpg", width: 1254, height: 1254 }]
   },
   twitter: {
@@ -33,7 +34,8 @@ export const metadata: Metadata = {
     apple: "/assets/om-monogram.svg"
   },
   alternates: {
-    canonical: "/"
+    canonical: "/",
+    types: { "application/rss+xml": [{ url: "/rss.xml", title: `${siteConfig.name}: blog` }] }
   }
 };
 

@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { RccReplayDemo } from "@/components/demos/RccReplayDemo";
 import { Layout } from "@/components/Layout";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Remote Codex Control: approval replay",
   description: "A step-by-step replay of a recorded Remote Codex Control session, from the project's demo script.",
-  alternates: { canonical: "/demos/remote-codex-control" }
-};
+  path: "/demos/remote-codex-control"
+});
 
 export default function RemoteCodexControlDemoPage() {
   return (

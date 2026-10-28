@@ -218,8 +218,23 @@ test("TTC Pulse Ask tab and chat route reject bad input and answer off-topic tex
   const badMode = await post({ question: "Which route is worst?", mode: "ferry" });
   assert.equal(badMode.status, 400);
 
+  const vote = await fetch(`${baseUrl}/api/ttc-pulse/chat/feedback`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ requestId: "x", vote: "up" }) });
+  assert.equal(vote.status, 400);
+
+  // The Turnstile check blocks a request with no token. The eval key skips it, so the index answer is checked only when CHAT_EVAL_KEY is set.
+  const blocked = await post({ question: "asdfgh qwerty zxcv", mode: "bus" });
+  if (!process.env.CHAT_EVAL_KEY) {
+    assert.ok([200, 403].includes(blocked.status), `chat returned ${blocked.status}`);
+    if (blocked.status === 403) assert.equal((await blocked.json()).error.code, "turnstile");
+    return;
+  }
+
   // Random letters match nothing in the corpus, so the answer comes from the index with no model call.
-  const none = await post({ question: "asdfgh qwerty zxcv", mode: "bus" });
+  const none = await fetch(`${baseUrl}/api/ttc-pulse/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-chat-eval": process.env.CHAT_EVAL_KEY },
+    body: JSON.stringify({ question: "asdfgh qwerty zxcv", mode: "bus" })
+  });
   assert.equal(none.status, 200);
   assert.match(none.headers.get("content-type"), /text\/event-stream/);
   const stream = await none.text();
@@ -228,8 +243,6 @@ test("TTC Pulse Ask tab and chat route reject bad input and answer off-topic tex
   assert.match(stream, /I do not have that in the TTC Pulse data/);
   assert.match(stream, /event: done/);
 
-  const vote = await fetch(`${baseUrl}/api/ttc-pulse/chat/feedback`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ requestId: "x", vote: "up" }) });
-  assert.equal(vote.status, 400);
 });
 
 test("resume route serves the current PDF asset", async () => {

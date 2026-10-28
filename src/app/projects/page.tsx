@@ -2,12 +2,9 @@ import Link from "next/link";
 import { Layout } from "@/components/Layout";
 import { ProjectExplorer } from "@/components/ProjectExplorer";
 import { getAllProjects } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Projects",
-  description: "Project case studies and implementation details.",
-  alternates: { canonical: "/projects" }
-};
+export const metadata = pageMetadata({ title: "Projects", description: "Project case studies and implementation details.", path: "/projects" });
 
 export default async function ProjectsPage() {
   const projects = await getAllProjects();

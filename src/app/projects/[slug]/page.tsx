@@ -7,6 +7,7 @@ import { RichContent } from "@/components/RichContent";
 import { TagBadge } from "@/components/TagBadge";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { getAllProjects, getProjectBySlug } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const projects = await getAllProjects(true);
@@ -18,11 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const project = await getProjectBySlug(slug);
   if (!project) return {};
 
-  return {
-    title: project.frontmatter.title,
-    description: project.frontmatter.preview,
-    alternates: { canonical: `/projects/${project.frontmatter.slug}` }
-  };
+  return pageMetadata({ title: project.frontmatter.title, description: project.frontmatter.preview, path: `/projects/${project.frontmatter.slug}` });
 }
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {

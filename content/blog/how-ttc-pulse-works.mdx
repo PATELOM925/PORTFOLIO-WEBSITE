@@ -584,7 +584,7 @@ The router uses fixed rules, not a second model, so the routing step adds no cos
 
 The visitor limit uses a hash of the IP address, with a salt and the date. So the hash changes each day, and the log never keeps an IP address.
 
-The rate limits count for each data centre. The daily limit counts for all data centres together: one Durable Object keeps the count for the day. At the daily limit, the chat stops until midnight UTC. The chat API also refuses requests from the pages of other websites.
+The rate limits count for each data centre. The daily limit counts for all data centres together: one Durable Object keeps the count for the day. At the daily limit, the chat stops until midnight UTC. The chat API also refuses requests from the pages of other websites. Each question also needs a valid Cloudflare Turnstile check. Turnstile is a free bot check that most visitors never see. Without a valid check, the server returns HTTP 403.
 
 ### How I check the answers
 

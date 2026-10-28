@@ -18,6 +18,7 @@ import {
   socialLinks
 } from "@/config/site";
 import { getAllProjects, getFeaturedProjects, getLatestBlogPosts } from "@/lib/content";
+import { jsonLdHtml, personJsonLd } from "@/lib/seo";
 
 export default async function HomePage() {
   const [featuredProjects, allProjects, latestPosts] = await Promise.all([
@@ -28,6 +29,7 @@ export default async function HomePage() {
 
   return (
     <Layout>
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdHtml(personJsonLd())} />
       <div className="container">
         <section className="hero animate-rise" id="about">
           <div className="hero-copy">
