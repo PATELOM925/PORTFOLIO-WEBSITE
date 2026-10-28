@@ -10,7 +10,7 @@ export function TtcPulseAbout({ techPost, formspreeId }: { techPost: { href: str
         <h2>About TTC Pulse</h2>
         <p>
           TTC Pulse shows how reliable TTC buses, subways and streetcars have been, by route, station, hour and cause. It uses 1,111,831 delay events from
-          January 2014 to January 2026, joined to the TTC schedule (GTFS) and to live TTC alerts.
+          January 2014 to January 2026, joined to the TTC schedule (GTFS) and to TTC alert snapshots. The Live view adds current alerts and vehicles.
         </p>
         <ul>
           <li>
@@ -27,6 +27,7 @@ export function TtcPulseAbout({ techPost, formspreeId }: { techPost: { href: str
           </li>
         </ul>
         <p>The logs hold delays only, not on-time trips. So the dashboard shows counts, not rates.</p>
+        <p>TTC Pulse started as a team project at York University. I built this dashboard, the score fix and the chat.</p>
         <p className={styles.links}>
           {techPost ? <Link href={techPost.href}>How it works</Link> : null}
           <a href="https://github.com/PATELOM925/TTC-PULSE">Code on GitHub</a>

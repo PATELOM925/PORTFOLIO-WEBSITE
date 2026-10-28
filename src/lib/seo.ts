@@ -20,7 +20,7 @@ export function pageMetadata(opts: { title: string; description: string; path: s
   return {
     title: opts.title,
     description: opts.description,
-    alternates: { canonical: opts.path },
+    alternates: { canonical: opts.path, types: { "application/rss+xml": [{ url: "/rss.xml", title: `${siteConfig.name}: blog` }] } },
     openGraph: {
       title: fullTitle,
       description: opts.description,
@@ -100,7 +100,8 @@ export function ttcPulseJsonLd() {
       url,
       sameAs: "https://github.com/PATELOM925/TTC-PULSE",
       keywords: ["TTC", "Toronto Transit Commission", "transit delays", "bus delays", "subway delays", "streetcar delays", "reliability", "GTFS", "Toronto"],
-      creator: author,
+      // The pipeline was a team project, so the team is a creator too.
+      creator: [{ "@type": "Organization", name: "TTC Pulse team, York University" }, author],
       isAccessibleForFree: true,
       temporalCoverage: "2014-01-01/2026-01-31",
       spatialCoverage: { "@type": "Place", name: "Toronto, Ontario, Canada" },
@@ -108,8 +109,7 @@ export function ttcPulseJsonLd() {
         "https://open.toronto.ca/dataset/ttc-bus-delay-data/",
         "https://open.toronto.ca/dataset/ttc-subway-delay-data/",
         "https://open.toronto.ca/dataset/ttc-streetcar-delay-data/"
-      ],
-      license: "https://open.toronto.ca/open-data-licence/"
+      ]
     }
   ];
 }
