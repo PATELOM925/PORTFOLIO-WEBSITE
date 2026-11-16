@@ -76,7 +76,7 @@ export default async function HomePage() {
         </section>
 
         <section className="cta-strip animate-rise">
-          <p>{siteConfig.description} Available for full-time applied AI, AI/ML, NLP, and data engineering roles in Canada.</p>
+          <p>{siteConfig.description} Open to full-time roles in Canada as an AI engineer, machine learning engineer, data scientist, LLM engineer or data engineer.</p>
         </section>
 
         <Section id="experience" title="Industry Experience">

@@ -116,3 +116,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+.faq {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.faq details {
+  border-top: 1px solid var(--ttc-line);
+  padding: 10px 0;
+}
+
+.faq summary {
+  cursor: pointer;
+  color: var(--ttc-ink);
+  font-weight: 600;
+}
+
+.faq details p {
+  margin: 8px 0 0;
+}

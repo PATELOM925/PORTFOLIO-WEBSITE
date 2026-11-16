@@ -10,10 +10,10 @@ import {
 export const siteConfig = {
   name: "Om M. Patel",
   shortName: "Om Patel",
-  title: "Om M. Patel | AI Engineer",
-  description: "AI Engineer building production AI integrations, data pipelines, and backend systems to help teams make better operational decisions efficiently. Vector AI Scholar with about 2 years across AI, data and research roles.",
+  title: "Om M. Patel | AI Engineer: LLM Systems, ML and Data",
+  description: "AI Engineer who builds LLM systems, machine learning models and the data pipelines under them, from raw data to production. Vector AI Scholar with about 2 years across AI, data science, data engineering and research roles.",
   role: "AI Engineer",
-  focus: "AI Integration • Data Engineering • NLP",
+  focus: "LLM Systems • Machine Learning & Data Science • Data Engineering",
   location: "Toronto, Ontario, Canada",
   email: "iampatelom@gmail.com",
   phone: "+1 437-212-3702",

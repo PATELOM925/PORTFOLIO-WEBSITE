@@ -106,7 +106,7 @@ test("homepage shows the current MSc GPA and full-time availability", async () =
   assert.equal(response.status, 200);
   assert.match(text, /3\.77\/4/);
   assert.doesNotMatch(text, /3\.63\/4/);
-  assert.match(text, /Available for full-time/);
+  assert.match(text, /Open to full-time roles/);
 });
 
 test("homepage sections follow the recruiter-first order", async () => {

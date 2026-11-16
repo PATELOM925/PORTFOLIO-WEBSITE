@@ -4,35 +4,41 @@ import { getAllBlogPosts, getAllProjects } from "@/lib/content";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [projects, posts] = await Promise.all([getAllProjects(), getAllBlogPosts()]);
+  // Use real dates, not the request time, so search engines can trust lastmod.
+  const newest = (dates: string[]) => new Date(Math.max(...dates.map((d) => new Date(d).getTime())));
+  const latestPost = newest(posts.map((p) => p.frontmatter.date));
+  const latestProject = newest(projects.map((p) => p.frontmatter.date));
+  // Change this date when the home page or the TTC Pulse page changes.
+  const pagesUpdated = new Date("2026-11-02");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: siteConfig.siteUrl,
-      lastModified: new Date(),
+      lastModified: pagesUpdated,
       changeFrequency: "weekly",
       priority: 1
     },
     {
       url: `${siteConfig.siteUrl}/projects`,
-      lastModified: new Date(),
+      lastModified: latestProject,
       changeFrequency: "weekly",
       priority: 0.9
     },
     {
       url: `${siteConfig.siteUrl}/blog`,
-      lastModified: new Date(),
+      lastModified: latestPost,
       changeFrequency: "weekly",
       priority: 0.8
     },
     {
       url: `${siteConfig.siteUrl}/demos/remote-codex-control`,
-      lastModified: new Date(),
+      lastModified: latestProject,
       changeFrequency: "monthly",
       priority: 0.6
     },
     {
       url: `${siteConfig.siteUrl}/demos/ttc-pulse`,
-      lastModified: new Date(),
+      lastModified: pagesUpdated,
       changeFrequency: "monthly",
       priority: 0.6
     }

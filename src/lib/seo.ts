@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { siteConfig, socialLinks } from "@/config/site";
+import { education, siteConfig, socialLinks } from "@/config/site";
 
 export type ShareImage = { url: string; width: number; height: number; alt: string };
 
@@ -52,6 +52,9 @@ export function personJsonLd() {
     jobTitle: siteConfig.role,
     description: siteConfig.description,
     address: { "@type": "PostalAddress", addressLocality: "Toronto", addressRegion: "ON", addressCountry: "CA" },
+    knowsAbout: ["Large language models", "LLM systems", "Retrieval-augmented generation", "AI agents", "Machine learning", "Data science", "Natural language processing", "Data engineering", "ETL pipelines", "Python", "SQL", "TypeScript"],
+    alumniOf: education.map((e) => ({ "@type": "CollegeOrUniversity", name: e.school.split(",")[0] })),
+    award: "Vector Scholarship in Artificial Intelligence, Vector Institute",
     sameAs: socialLinks.filter((l) => l.href.startsWith("https://")).map((l) => l.href)
   };
 }
